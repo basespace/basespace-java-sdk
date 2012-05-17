@@ -1,17 +1,24 @@
+/**
+* Copyright 2012 Illumina
+* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*    http://www.apache.org/licenses/LICENSE-2.0
+* 
+ *  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+*/
+
 package com.illumina.basespace;
 
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
@@ -22,7 +29,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.representation.Form;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -59,9 +65,7 @@ public class AuthenticationPipeline implements AuthCodeListener
     private void requestAuthorization()
     {
         ClientConfig config = new DefaultClientConfig();
-        addSSLProperties(config);
         Client client = Client.create(config);
-        
         MultivaluedMap<String, String> params = new MultivaluedMapImpl();
         params.add("client_id",getConfig().getClientId());
         params.add("redirect_uri",localServer);
@@ -99,51 +103,7 @@ public class AuthenticationPipeline implements AuthCodeListener
             throw new RuntimeException(t.getMessage());
         }
     }
-    
-    private void addSSLProperties(ClientConfig config)
-    {
-        try
-        {
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            TrustManager trustManager = new X509TrustManager()
-            {
-                @Override
-                public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
-                {
-                    
-                }
-    
-                @Override
-                public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException
-                {
-                }
-    
-                @Override
-                public X509Certificate[] getAcceptedIssuers()
-                {
-                    return null;
-                }
-                
-            };
-            HostnameVerifier verifier = new HostnameVerifier()
-            {
-                @Override
-                public boolean verify(String arg0, SSLSession arg1)
-                {
-                    return true;
-                }
-            };
-            sslContext.init(null, new TrustManager[]{trustManager},new SecureRandom());
-            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES,
-                    new HTTPSProperties(verifier,sslContext));
-        }
-        catch(Throwable t)
-        {
-            
-            
-        }
-    }
-    
+
     void addAuthTokenListener(AuthTokenListener listener)
     {
         if (!authTokenListeners.contains(listener))authTokenListeners.add(listener);

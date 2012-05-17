@@ -106,6 +106,9 @@
         
 
 	</pluginRepositories>
+	
+
+	
 	<build>
 		<directory>target</directory>
 		<outputDirectory>target/classes</outputDirectory>
@@ -224,6 +227,6 @@
 		</plugins>
 	</build>
 	<reporting>
-		<outputDirectory>target/site</outputDirectory>
+		<outputDirectory>/javadoc</outputDirectory>
 	</reporting>
 </project>
