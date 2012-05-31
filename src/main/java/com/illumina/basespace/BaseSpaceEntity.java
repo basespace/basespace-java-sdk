@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  *
  */
 @JsonIgnoreProperties({ "ResponseStatus", "Notifications" })
-abstract class BaseSpaceEntity implements Serializable
+public abstract class BaseSpaceEntity implements Serializable
 {
     protected Logger logger = Logger.getLogger(BaseSpaceEntity.class.getPackage().getName());
 

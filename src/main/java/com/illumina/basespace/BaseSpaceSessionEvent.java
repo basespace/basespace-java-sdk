@@ -15,33 +15,37 @@
 
 package com.illumina.basespace;
 
-import java.util.EventObject;
 
 /**
- * 
+ *
  * @author bking
  *
  */
-public class BaseSpaceSessionEvent extends EventObject
+public class BaseSpaceSessionEvent extends SessionEvent
 {
     private BaseSpaceSession session;
-    private String sessionId;
     
     public BaseSpaceSessionEvent(Object src,String sessionId,BaseSpaceSession session)
     {
-        super(src);
+        super(src,sessionId);
         this.session = session;
-        this.sessionId = sessionId;
+    }
+    
+    public BaseSpaceSessionEvent(Object source, String sessionId, Throwable throwable)
+    {
+        super(source, sessionId, throwable);
     }
 
+    /**
+     * Get the session associated with this event
+     * @return the BaseSpaceSession associated with this event, or null if a session was not 
+     * successfully established
+     */
     public BaseSpaceSession getSession()
     {
         return session;
     }
 
-    public String getSessionId()
-    {
-        return sessionId;
-    }
+  
     
 }

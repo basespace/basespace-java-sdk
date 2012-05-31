@@ -38,12 +38,6 @@ class BrowserLaunch
             "midori", "kazehakase", "mozilla" };
     static final String errMsg = "Error attempting to launch web browser";
 
-    public static void main(String args[])
-    {
-        BrowserLaunch
-                .openURL("https://cloud-endor.illumina.com/oauth/authorize?response_type=code&redirect_uri=https://www.yahoo.com&client_id=ccc1ed73493048f084149843364f902b");
-    }
-
     /**
      * Opens the specified web page in the user's default browser
      * 

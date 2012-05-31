@@ -50,4 +50,11 @@ public abstract class TestBaseSpaceConfiguration implements BaseSpaceConfigurati
         return 7777;
     }
 
+    @Override
+    public int getAuthCodeListenerTimeout()
+    {
+        return 30;
+    }
+    
+
 }

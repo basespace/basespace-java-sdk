@@ -21,8 +21,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,10 +42,12 @@ class HttpServer implements Runnable
     
     private boolean running = true;
     private int port = 7777;
+    private int timeoutSeconds = 30;
     
-    HttpServer(int listenerPort)
+    HttpServer(int listenerPort,int timeoutSeconds)
     {
         this.port = listenerPort;
+        this.timeoutSeconds = timeoutSeconds;
     }
     
     public void run()
@@ -51,18 +55,23 @@ class HttpServer implements Runnable
         Socket socket = null;
         BufferedWriter writer = null;
         BufferedReader reader = null;
-
+        
         try
         {
             ServerSocket serverSocket = new ServerSocket(port);
-            printServerSocketInfo(serverSocket);
+            serverSocket.setSoTimeout(500);
+            
+            logger.info("SDK internal server listening for Auth Code request at " 
+                    +  serverSocket.getInetAddress().toString() + ":" + serverSocket.getLocalPort());
+
             String authCode = null;
+            long timeout = System.currentTimeMillis() + (timeoutSeconds*1000);
+            boolean timedOut = false;
             while (running)
             {
                 try
                 {
                     socket = serverSocket.accept();
-                    printSocketInfo(socket);
                     writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
                     reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String m = reader.readLine();
@@ -96,6 +105,15 @@ class HttpServer implements Runnable
                     if (authCode != null)
                     {
                         running = false;
+                    }
+                }
+                catch(SocketTimeoutException timeoutEx)
+                {
+                    timedOut = System.currentTimeMillis() > timeout;
+                    if (timedOut)
+                    {
+                        running = false;
+                        fireTimedOutEvent();
                     }
                 }
                 catch(Throwable t)
@@ -188,21 +206,12 @@ class HttpServer implements Runnable
             listener.authCodeReceived(evt);
         }
     }
-
-    private static void printSocketInfo(Socket s)
+    protected void fireTimedOutEvent()
     {
-        logger.info("Server socket class: " + s.getClass());
-        logger.info("\tRemote address = " + s.getInetAddress().toString());
-        logger.info("\tRemote port = " + s.getPort());
-        logger.info("\tLocal socket address = " + s.getLocalSocketAddress().toString());
-        logger.info("\tLocal address = " + s.getLocalAddress().toString());
-        logger.info("\tLocal port = " + s.getLocalPort());
-    }
-
-    private static void printServerSocketInfo(ServerSocket s)
-    {
-        logger.info("Server socket class: " + s.getClass());
-        logger.info("\tSocket address = " + s.getInetAddress().toString());
-        logger.info("\tSocket port = " + s.getLocalPort());
+        EventObject obj = new EventObject(this);
+        for(AuthCodeListener listener:authListeners)
+        {
+            listener.timedOut(obj);
+        }
     }
 }

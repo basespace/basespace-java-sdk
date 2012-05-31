@@ -60,8 +60,15 @@ public interface BaseSpaceConfiguration
     public String getAuthorizationUri();
     
     /**
-     * Port for the internal Https server that will receive auth code
-     * @return the por
+     * Port for the internal Http server that will receive auth code
+     * @return the port
      */
     public int getAuthCodeListenerPort();
+    
+    /**
+     * The amount of time in seconds the internal Http server will wait for 
+     * authorization before timing out
+     * @return the timeout in seconds
+     */
+    public int getAuthCodeListenerTimeout();
 }

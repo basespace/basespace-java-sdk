@@ -15,15 +15,28 @@
 
 package com.illumina.basespace;
 
-import java.util.EventListener;
-
 /**
- * 
+ * Listener interface related to file download events
  * @author bking
  *
  */
-interface AuthTokenListener extends EventListener
+public interface DownloadListener
 {
-    void authTokenReceived(AuthTokenEvent evt);
-    void errorOccured(AuthTokenEvent evt);
+    /**
+     * Reports progress during the download of a file
+     * @param evt the download event
+     */
+    public void progress(DownloadEvent evt);
+    
+    /**
+     * The download has been completed
+     * @param evt the download event
+     */
+    public void complete(DownloadEvent evt);
+    
+    /**
+     * The download has been canceled
+     * @param evt the download event
+     */
+    public void canceled(DownloadEvent evt);
 }

@@ -134,6 +134,17 @@ public interface BaseSpaceSession
      * @param targetFolder the target local folder
      * @param progressListener an optional implementor of the DownloadProgressListener interface that wishes to track progress of the download
      */
-    public void download(com.illumina.basespace.File file,java.io.File targetFolder,
-            DownloadProgressListener progressListener);
+    public void download(com.illumina.basespace.File file,java.io.File targetFolder);
+    
+    /**
+     * Add a download listener to this session
+     * @param listener
+     */
+    public void addDownloadListener(DownloadListener listener);
+    
+    /**
+     * Remove a download listener from this session
+     * @param listener
+     */
+    public void removeDownloadListener(DownloadListener listener);
 }

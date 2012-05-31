@@ -71,14 +71,26 @@ public final class BaseSpaceSessionManager implements AuthTokenListener
         for(BaseSpaceSessionListener listener:sessionListeners)
         {
             listener.sessionEstablished(evt);
-        }
+         }
     }
-    
+    protected void fireErrorEvent(BaseSpaceSessionEvent evt)
+    {
+        for(BaseSpaceSessionListener listener:sessionListeners)
+        {
+            listener.errorOccurred(evt);
+         }
+    }
       
     public void requestSession(String id,BaseSpaceConfiguration configuration)
     {
         BaseSpaceUtilities.assertNotNull(configuration, "configuration");
         configMap.put(id, new AuthenticationPipeline(id,configuration,this));
+    }
+    public AuthorizationStatus getRequestStatus(String id)
+    {
+        AuthenticationPipeline pipeline = configMap.get(id);
+        if (pipeline == null)return AuthorizationStatus.InvalidSessionId;
+        return pipeline.getStatus();
     }
     
     
@@ -90,5 +102,11 @@ public final class BaseSpaceSessionManager implements AuthTokenListener
         BaseSpaceSession session = new DefaultBaseSpaceSession(rootApi,evt.getToken());
         BaseSpaceSessionEvent event = new BaseSpaceSessionEvent(this,evt.getSessionId(),session);
         fireSessionEvent(event);
+    }
+    @Override
+    public void errorOccured(AuthTokenEvent evt)
+    {
+        BaseSpaceSessionEvent event = new BaseSpaceSessionEvent(this,evt.getSessionId(),evt.getThrowable());
+        fireErrorEvent(event);
     }
 }
