@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -47,6 +48,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private static Logger logger = Logger.getLogger(DefaultBaseSpaceSession.class.getPackage().getName());
     private static ObjectMapper mapper = new ObjectMapper();
     private static final String RESPONSE = "Response";
+    private List<DownloadListener>downloadListeners;
     private URI apiUri;
      
     /**
@@ -141,11 +143,12 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
 
     @Override
-    public void download(com.illumina.basespace.File file,java.io.File targetFolder,
-            DownloadProgressListener progressListener)
+    public void download(final com.illumina.basespace.File file,java.io.File targetFolder)
     {
         FileOutputStream fos = null;
         InputStream in = null;
+        boolean canceled = false;
+        java.io.File targetFile = null;
         try
         {
             final int CHUNK_SIZE = 4096;
@@ -157,8 +160,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             {
                 throw new IllegalArgumentException("Unable to create local folder " + targetFolder.toString());
             }
-            targetFolder = new java.io.File(targetFolder,file.getName());
-            
+            targetFile = new java.io.File(targetFolder,file.getName());
             in= getRootApiWebResource().path("files")
                         .path(String.valueOf(file.getId())).path("content")
                         .accept(MediaType.APPLICATION_OCTET_STREAM)
@@ -166,16 +168,21 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                         .accept(MediaType.APPLICATION_XHTML_XML)
                         .get(InputStream.class);
             
-            fos = new FileOutputStream(targetFolder);
+            fos = new FileOutputStream(targetFile);
             long progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
+         
+            readTheFile:
             while(in.read(outputByte, 0, CHUNK_SIZE) != -1)
             {
                 fos.write(outputByte, 0, CHUNK_SIZE);
-                if (progressListener != null)
+                progress += CHUNK_SIZE;
+                DownloadEvent evt = new DownloadEvent(this,file,progress,file.getSize());
+                fireProgressEvent(evt);
+                if (evt.isCanceled())
                 {
-                    progress += CHUNK_SIZE;
-                    progressListener.progress(progress, file.getSize());
+                    canceled = true;
+                    break readTheFile;
                 }
             }
             fos.close();
@@ -192,6 +199,17 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         {
             try{if (in != null)in.close();}catch(Throwable t){}
             try{if (fos != null)fos.close();}catch(Throwable t){}
+             if (canceled)
+            {
+                if (targetFile != null)targetFile.delete();
+                DownloadEvent evt = new DownloadEvent(this,file,0,file.getSize());
+                fireCanceledEvent(evt);
+            }
+            else
+            {
+                DownloadEvent evt = new DownloadEvent(this,file,file.getSize(),file.getSize());
+                fireCompleteEvent(evt);
+            }
         }
     }
     
@@ -300,5 +318,42 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             }
         });
         return client;
+    }
+    
+    public void addDownloadListener(DownloadListener listener)
+    {
+        if (downloadListeners == null)
+            downloadListeners =  Collections.synchronizedList(new ArrayList<DownloadListener>());
+        
+        if (!downloadListeners.contains(listener))
+            downloadListeners.add(listener);
+    }
+    public void removeDownloadListener(DownloadListener listener)
+    {
+        if (downloadListeners == null)return;
+        if (downloadListeners.contains(listener))
+            downloadListeners.remove(listener);
+    }
+    
+    protected void fireProgressEvent(DownloadEvent evt)
+    {
+        for(DownloadListener listener:downloadListeners)
+        {
+            listener.progress(evt);
+         }
+    }
+    protected void fireCompleteEvent(DownloadEvent evt)
+    {
+        for(DownloadListener listener:downloadListeners)
+        {
+            listener.complete(evt);
+         }
+    }
+    protected void fireCanceledEvent(DownloadEvent evt)
+    {
+        for(DownloadListener listener:downloadListeners)
+        {
+            listener.canceled(evt);
+         }
     }
 }

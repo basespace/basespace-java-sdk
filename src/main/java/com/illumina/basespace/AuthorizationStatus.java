@@ -12,18 +12,12 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 */
-
 package com.illumina.basespace;
 
-import java.util.EventListener;
-
-/**
- * 
- * @author bking
- *
- */
-interface AuthTokenListener extends EventListener
+public enum AuthorizationStatus
 {
-    void authTokenReceived(AuthTokenEvent evt);
-    void errorOccured(AuthTokenEvent evt);
+    WaitingForPermission,
+    InvalidSessionId,
+    TimedOut,
+    TokenReceived
 }

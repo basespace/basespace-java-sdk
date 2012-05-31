@@ -67,6 +67,13 @@ public class BaseSpaceTest
                         System.out.println("Project " + project.getId() + " owned by " + project.getUserOwnedBy().getName());
                     }
                 }
+
+                @Override
+                public void errorOccurred(BaseSpaceSessionEvent evt)
+                {
+                    
+                    
+                }
             });
             BaseSpaceSessionManager.instance().requestSession("test",config);
         }

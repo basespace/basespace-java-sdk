@@ -17,6 +17,7 @@ package com.illumina.basespace;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
@@ -43,6 +44,7 @@ public class AuthenticationPipeline implements AuthCodeListener
     private String sessionId;
     private List<AuthTokenListener>authTokenListeners =  Collections.synchronizedList(new ArrayList<AuthTokenListener>());
     private String localServer;
+    private AuthorizationStatus status = AuthorizationStatus.WaitingForPermission;
     
     public AuthenticationPipeline(String sessionId,BaseSpaceConfiguration config,AuthTokenListener authTokenListener)
     {
@@ -54,10 +56,15 @@ public class AuthenticationPipeline implements AuthCodeListener
         requestAuthorization();
     }
     
+    AuthorizationStatus getStatus()
+    {
+        return status;
+    }
     
     private void startServer()
     {
-        httpServer = new HttpServer(getConfig().getAuthCodeListenerPort());
+        httpServer = new HttpServer(getConfig().getAuthCodeListenerPort(),
+                getConfig().getAuthCodeListenerTimeout());
         httpServer.addAuthCodeListener(this);
         new Thread(httpServer).start();
     }
@@ -87,7 +94,6 @@ public class AuthenticationPipeline implements AuthCodeListener
             form.add("client_secret", config.getClientSecret());
             
             Client client = Client.create(new DefaultClientConfig());
-            
             WebResource resource = client.resource(UriBuilder.fromUri(config.getApiRootUri()).path(config.getVersion()).build());
             String response = resource.path(config.getAuthTokenUriFragment())
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_FORM_URLENCODED,
@@ -126,11 +132,28 @@ public class AuthenticationPipeline implements AuthCodeListener
         requestAuthToken(evt.getAuthCode());
     }
     
+    @Override
+    public void timedOut(EventObject obj)
+    {
+        status = AuthorizationStatus.TimedOut;
+        fireErrorOccured(new AuthTokenEvent(this,this.sessionId,
+                new Throwable("Server timed-out waiting for authorization. Please try again.")));
+
+    }
+    
     protected void fireAuthTokenEvent(AuthTokenEvent evt)
     {
+        status = AuthorizationStatus.TokenReceived;
         for(AuthTokenListener listener:authTokenListeners)
         {
             listener.authTokenReceived(evt);
+        }
+    }
+    protected void fireErrorOccured(AuthTokenEvent evt)
+    {
+        for(AuthTokenListener listener:authTokenListeners)
+        {
+            listener.errorOccured(evt);
         }
     }
     
@@ -138,5 +161,5 @@ public class AuthenticationPipeline implements AuthCodeListener
     {
         return config;
     }
-     
+  
 }

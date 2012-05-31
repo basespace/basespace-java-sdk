@@ -16,11 +16,21 @@
 package com.illumina.basespace;
 
 /**
- * 
+ * Listener for session related events
  * @author bking
  *
  */
 public interface BaseSpaceSessionListener
 {
+    /**
+     * Authentication was performed and a BaseSpace session was established
+     * @param evt the BaseSpace event
+     */
     public void sessionEstablished(BaseSpaceSessionEvent evt);
+    
+    /**
+     * An error occurred attempting to establish a session
+     * @param evt the BaseSpace event
+     */
+    public void errorOccurred(BaseSpaceSessionEvent evt);
 }

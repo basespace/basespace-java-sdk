@@ -40,7 +40,7 @@ public class Analysis extends BaseSpaceEntity
         this.status = status;
     }
 
-    @JsonProperty("UserOwnerBy")
+    @JsonProperty("UserOwnedBy")
     private User userOwnedBy;
     public User getUserOwnedBy()
     {

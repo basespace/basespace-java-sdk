@@ -15,7 +15,28 @@
 
 package com.illumina.basespace;
 
-public interface DownloadProgressListener
+/**
+ * Listener interface related to file download events
+ * @author bking
+ *
+ */
+public interface DownloadListener
 {
-    public void progress(long current,long total);
+    /**
+     * Reports progress during the download of a file
+     * @param evt the download event
+     */
+    public void progress(DownloadEvent evt);
+    
+    /**
+     * The download has been completed
+     * @param evt the download event
+     */
+    public void complete(DownloadEvent evt);
+    
+    /**
+     * The download has been canceled
+     * @param evt the download event
+     */
+    public void canceled(DownloadEvent evt);
 }

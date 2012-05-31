@@ -16,6 +16,7 @@
 package com.illumina.basespace;
 
 import java.util.EventListener;
+import java.util.EventObject;
 
 /**
  * 
@@ -25,4 +26,5 @@ import java.util.EventListener;
 interface AuthCodeListener extends EventListener
 {
     void authCodeReceived(AuthCodeEvent evt);
+    void timedOut(EventObject obj);
 }
