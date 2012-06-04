@@ -48,6 +48,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private static Logger logger = Logger.getLogger(DefaultBaseSpaceSession.class.getPackage().getName());
     private static ObjectMapper mapper = new ObjectMapper();
     private static final String RESPONSE = "Response";
+    private static final String ITEMS = "Items";
     private List<DownloadListener>downloadListeners;
     private URI apiUri;
      
@@ -132,7 +133,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     @Override
     public List<File> getFiles(Analysis analysis,FetchParams params)
     {
-        return (List)getList(analysis,File.class,"/results",params);
+        return (List)getList(analysis,File.class,params);
 
     }
 
@@ -192,7 +193,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
         catch(Throwable t)
         {
-            t.printStackTrace();
             throw new RuntimeException("Error during file download",t);
         }
         finally
@@ -257,7 +257,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     .queryParams(queryParams)
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(String.class);
             logger.info(response);
-            JsonNode responseNode = mapper.readValue(response, JsonNode.class).findPath(RESPONSE);
+            JsonNode responseNode = mapper.readValue(response, JsonNode.class).findPath(ITEMS);
             for(int i = 0; i < responseNode.size(); i++)
             {
                 rtn.add(mapper.readValue(responseNode.get(i).toString(),clazz));
@@ -270,6 +270,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
         catch(Throwable t)
         {
+            t.printStackTrace();
             throw new RuntimeException(t.getMessage());
         }
     }

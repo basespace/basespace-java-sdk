@@ -15,6 +15,8 @@
 
 package com.illumina.basespace;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 /**
  * A BaseSpace sample
@@ -24,5 +26,14 @@ package com.illumina.basespace;
 @UriPath("/samples")
 public class Sample extends BaseSpaceEntity
 {
-
+    @JsonProperty("UserOwnedBy")
+    private User userOwnedBy;
+    public User getUserOwnedBy()
+    {
+        return userOwnedBy;
+    }
+    protected void setUserOwnedBy(User userOwnedBy)
+    {
+        this.userOwnedBy = userOwnedBy;
+    }
 }

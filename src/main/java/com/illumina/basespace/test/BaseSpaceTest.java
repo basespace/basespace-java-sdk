@@ -17,12 +17,15 @@ package com.illumina.basespace.test;
 
 import java.util.List;
 
+import com.illumina.basespace.Analysis;
 import com.illumina.basespace.BaseSpaceSession;
 import com.illumina.basespace.BaseSpaceSessionEvent;
 import com.illumina.basespace.BaseSpaceSessionListener;
 import com.illumina.basespace.BaseSpaceSessionManager;
 import com.illumina.basespace.FetchParams;
 import com.illumina.basespace.Project;
+import com.illumina.basespace.Run;
+import com.illumina.basespace.Sample;
 import com.illumina.basespace.User;
 
 
@@ -65,6 +68,24 @@ public class BaseSpaceTest
                     for(Project project:projects)
                     {
                         System.out.println("Project " + project.getId() + " owned by " + project.getUserOwnedBy().getName());
+                    
+                        for(Analysis analysis:session.getAnalyses(project, params))
+                        {
+                            System.out.println("Analysis: " + analysis.toString());
+                            
+                        }
+                        
+                        for(Sample sample:session.getSamples(project, params))
+                        {
+                            System.out.println("Sample: " + sample.toString());
+                            
+                        }
+                    
+                    }
+                    for(Run run:session.getRuns(user, params))
+                    {
+                        System.out.println("Run " + run.toString());
+                        
                     }
                 }
 

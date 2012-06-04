@@ -15,6 +15,8 @@
 
 package com.illumina.basespace;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
@@ -36,6 +38,28 @@ public class Project extends BaseSpaceEntity
     protected void setUserOwnedBy(User userOwnedBy)
     {
         this.userOwnedBy = userOwnedBy;
+    }
+    
+    @JsonProperty("HrefSamples")
+    private URI hrefSamples;
+    public URI getSamplesHref()
+    {
+        return hrefSamples;
+    }
+    protected void setSamplesHref(URI hrefSamples)
+    {
+        this.hrefSamples = hrefSamples;
+    }
+    
+    @JsonProperty("HrefAnalyses")
+    private URI hrefAnalyses;
+    public URI getAnalysesHref()
+    {
+        return hrefAnalyses;
+    }
+    protected void setAnalysesHref(URI hrefAnalyses)
+    {
+        this.hrefAnalyses = hrefAnalyses;
     }
 
     @Override

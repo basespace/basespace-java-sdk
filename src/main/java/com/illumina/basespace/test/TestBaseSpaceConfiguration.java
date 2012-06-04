@@ -23,7 +23,7 @@ public abstract class TestBaseSpaceConfiguration implements BaseSpaceConfigurati
     @Override
     public String getVersion()
     {
-        return "v1pre1";
+        return "v1pre2";
     }
 
     @Override
