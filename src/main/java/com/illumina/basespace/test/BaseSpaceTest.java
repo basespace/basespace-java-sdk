@@ -15,6 +15,8 @@
 
 package com.illumina.basespace.test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import com.illumina.basespace.Analysis;
@@ -22,9 +24,10 @@ import com.illumina.basespace.BaseSpaceSession;
 import com.illumina.basespace.BaseSpaceSessionEvent;
 import com.illumina.basespace.BaseSpaceSessionListener;
 import com.illumina.basespace.BaseSpaceSessionManager;
+import com.illumina.basespace.DownloadEvent;
+import com.illumina.basespace.DownloadListener;
 import com.illumina.basespace.FetchParams;
 import com.illumina.basespace.Project;
-import com.illumina.basespace.Run;
 import com.illumina.basespace.Sample;
 import com.illumina.basespace.User;
 
@@ -65,6 +68,8 @@ public class BaseSpaceTest
                     System.out.println("Current user is " + user.getName() + " id# " + user.getId()  + "[" + user.getEmail() + "]");
                     FetchParams params = new FetchParams(1); //Fetch 1 project
                     List<Project>projects = session.getProjects(user, params);
+                    
+                
                     for(Project project:projects)
                     {
                         System.out.println("Project " + project.getId() + " owned by " + project.getUserOwnedBy().getName());
@@ -82,11 +87,28 @@ public class BaseSpaceTest
                         }
                     
                     }
+                    
+                    /*
                     for(Run run:session.getRuns(user, params))
                     {
-                        System.out.println("Run " + run.toString());
+                        System.out.println("Run " + run.getExperimentName());
+                        
+                        for(Sample sample:session.getSamples(run, params))
+                        {
+                            System.out.println("Sample: " + sample.toString());
+                            
+                        }
+                        
+                        for(File file:session.getFiles(run, null))
+                        {
+                            System.out.println("File " + run.toString());
+                        }
                         
                     }
+                    */
+                    
+   
+                    
                 }
 
                 @Override

@@ -43,6 +43,12 @@ public abstract class TestBaseSpaceConfiguration implements BaseSpaceConfigurati
     {
         return "https://cloud-endor.illumina.com/oauth/authorize";
     }
+    
+    @Override
+    public String getAuthorizationScope()
+    {
+        return "browse global";
+    }
 
     @Override
     public int getAuthCodeListenerPort()

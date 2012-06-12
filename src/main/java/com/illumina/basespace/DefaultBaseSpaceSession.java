@@ -93,6 +93,12 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         return (List)getList(project,Sample.class,params);
     }
     
+    @Override
+    public List<Sample> getSamples(Run run, FetchParams params)
+    {
+        return (List)getList(run,Sample.class,params);
+    }
+    
 
     @Override
     public Sample getSample(String id)
@@ -131,6 +137,12 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
     
     @Override
+    public List<File> getFiles(Run run,FetchParams params)
+    {
+        return (List)getList(run,File.class,params);
+    }
+    
+    @Override
     public List<File> getFiles(Analysis analysis,FetchParams params)
     {
         return (List)getList(analysis,File.class,params);
@@ -144,41 +156,66 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
 
     @Override
-    public void download(final com.illumina.basespace.File file,java.io.File targetFolder)
+    public URI getDownloadURI(File file)
+    {
+        WebResource resource = getRootApiWebResource().path("files")
+                .path(String.valueOf(file.getId())).path("content");
+        return resource.getURI();
+    }
+    
+    @Override
+    public InputStream getFileInputStream(File file)
+    {
+        return getRootApiWebResource().path("files")
+                .path(String.valueOf(file.getId())).path("content")
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .accept(MediaType.TEXT_HTML)
+                .accept(MediaType.APPLICATION_XHTML_XML)
+                .get(InputStream.class);
+    }
+    
+    @Override
+    public InputStream getFileInputStream(File file,long start,long end)
+    {
+        InputStream in= getRootApiWebResource().path("files")
+                .path(String.valueOf(file.getId())).path("content")
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .accept(MediaType.TEXT_HTML)
+                .accept(MediaType.APPLICATION_XHTML_XML)
+                .header("Range","bytes=" + start + "-" + end)
+                .get(InputStream.class);
+        return in;
+    }
+    
+    @Override
+    public void download(final com.illumina.basespace.File file,java.io.File target)
     {
         FileOutputStream fos = null;
         InputStream in = null;
         boolean canceled = false;
-        java.io.File targetFile = null;
         try
         {
             final int CHUNK_SIZE = 4096;
-            if (!targetFolder.isDirectory())
+            if (target.isDirectory())
             {
-                throw new IllegalArgumentException("Target folder must be a directory");
+                if (!target.exists() && !target.mkdirs())
+                {
+                    throw new IllegalArgumentException("Unable to create local folder " + target.toString());
+                }
+                target = new java.io.File(target,file.getName());
             }
-            if (!targetFolder.exists() && !targetFolder.mkdirs())
-            {
-                throw new IllegalArgumentException("Unable to create local folder " + targetFolder.toString());
-            }
-            targetFile = new java.io.File(targetFolder,file.getName());
-            in= getRootApiWebResource().path("files")
-                        .path(String.valueOf(file.getId())).path("content")
-                        .accept(MediaType.APPLICATION_OCTET_STREAM)
-                        .accept(MediaType.TEXT_HTML)
-                        .accept(MediaType.APPLICATION_XHTML_XML)
-                        .get(InputStream.class);
-            
-            fos = new FileOutputStream(targetFile);
+            in = getFileInputStream(file);
+            fos = new FileOutputStream(target);
             long progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
-         
+            int bytesRead = 0;
+            
             readTheFile:
-            while(in.read(outputByte, 0, CHUNK_SIZE) != -1)
+            while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
             {
-                fos.write(outputByte, 0, CHUNK_SIZE);
-                progress += CHUNK_SIZE;
-                DownloadEvent evt = new DownloadEvent(this,file,progress,file.getSize());
+                fos.write(outputByte, 0, bytesRead);
+                progress += bytesRead;
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,file.getSize());
                 fireProgressEvent(evt);
                 if (evt.isCanceled())
                 {
@@ -201,13 +238,13 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             try{if (fos != null)fos.close();}catch(Throwable t){}
              if (canceled)
             {
-                if (targetFile != null)targetFile.delete();
-                DownloadEvent evt = new DownloadEvent(this,file,0,file.getSize());
+                if (target != null)target.delete();
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),0,file.getSize());
                 fireCanceledEvent(evt);
             }
             else
             {
-                DownloadEvent evt = new DownloadEvent(this,file,file.getSize(),file.getSize());
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),file.getSize(),file.getSize());
                 fireCompleteEvent(evt);
             }
         }
@@ -283,7 +320,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     
     protected WebResource getRootApiWebResource()
     {
-        return getClient().resource(apiUri);
+        return getClient().resource(getRootURI());
     }
 
     
@@ -338,6 +375,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     
     protected void fireProgressEvent(DownloadEvent evt)
     {
+        if (downloadListeners == null)return;
         for(DownloadListener listener:downloadListeners)
         {
             listener.progress(evt);
@@ -345,16 +383,25 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
     protected void fireCompleteEvent(DownloadEvent evt)
     {
+        if (downloadListeners == null)return;
         for(DownloadListener listener:downloadListeners)
         {
             listener.complete(evt);
-         }
+        }
     }
     protected void fireCanceledEvent(DownloadEvent evt)
     {
+        if (downloadListeners == null)return;
         for(DownloadListener listener:downloadListeners)
         {
             listener.canceled(evt);
          }
     }
+
+    @Override
+    public URI getRootURI()
+    {
+        return apiUri;
+    }
+   
 }

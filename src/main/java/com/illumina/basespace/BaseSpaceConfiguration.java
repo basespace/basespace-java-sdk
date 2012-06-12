@@ -59,6 +59,8 @@ public interface BaseSpaceConfiguration
      */
     public String getAuthorizationUri();
     
+    public String getAuthorizationScope();
+    
     /**
      * Port for the internal Http server that will receive auth code
      * @return the port

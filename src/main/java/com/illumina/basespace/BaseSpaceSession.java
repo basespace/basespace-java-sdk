@@ -15,6 +15,8 @@
 
 package com.illumina.basespace;
 
+import java.io.InputStream;
+import java.net.URI;
 import java.util.List;
 
 
@@ -72,6 +74,14 @@ public interface BaseSpaceSession
     public List<Sample> getSamples(Project project,FetchParams params);
 
     /**
+     * Get a list of samples for a run
+     * @param run the run for which samples will be retrieved
+     * @param params optional fetch parameters to limit the scope of the result list
+     * @return a list of samples, or an empty list
+     */
+    public List<Sample> getSamples(Run run,FetchParams params);
+    
+    /**
      * Retrieve an analysis by id
      * @param id
      * @return the retrieved analysis
@@ -121,6 +131,14 @@ public interface BaseSpaceSession
     public List<File> getFiles(Analysis analysis,FetchParams params);
     
     /**
+     * Get a list of files for a run
+     * @param run the run for which files will be retrieved
+     * @param params optional fetch parameters to limit the scope of the result list
+     * @return a list of files, or an empty list
+     */
+    public List<File> getFiles(Run run,FetchParams params);
+    
+    /**
      * Retrieve a file by id
      * @param id
      * @return the retrieved file
@@ -147,4 +165,37 @@ public interface BaseSpaceSession
      * @param listener
      */
     public void removeDownloadListener(DownloadListener listener);
+    
+    /**
+     * Get the root URI for BaseSpace API operations
+     * @return the root URI
+     */
+    public URI getRootURI();
+    
+    /**
+     * Get the download URI for a BaseSpace File
+     * @param file the file for which to retrieve URI
+     * @return the download URI for the file
+     */
+    public URI getDownloadURI(File file);
+    
+    /**
+     * Get the input stream for a BaseSpace file
+     * @param file the file for which to get the InputStream
+     * @return the input stream for the file
+     */
+    public InputStream getFileInputStream(File file);
+    
+    /**
+     * Get an input stream byte range for a basespace file
+     * @param file the file for which to get the InputStream
+     * @param start the starting position for the stream
+     * @param end the ending position for the stream
+     * @return the input stream for the file
+     */
+    public InputStream getFileInputStream(File file,long start,long end);
+ 
+    
+    
+    
 }

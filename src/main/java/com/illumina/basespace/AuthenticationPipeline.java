@@ -77,6 +77,7 @@ public class AuthenticationPipeline implements AuthCodeListener
         params.add("client_id",getConfig().getClientId());
         params.add("redirect_uri",localServer);
         params.add("response_type","code" );
+        params.add("scope",getConfig().getAuthorizationScope());
         WebResource resource = client.resource(UriBuilder.fromUri(getConfig().getAuthorizationUri()).build());
         resource = resource.queryParams(params);
         BrowserLaunch.openURL(resource.getURI().toString());

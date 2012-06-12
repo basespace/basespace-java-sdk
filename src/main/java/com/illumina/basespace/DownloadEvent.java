@@ -1,5 +1,6 @@
 package com.illumina.basespace;
 
+import java.net.URI;
 import java.util.EventObject;
 
 /**
@@ -12,14 +13,15 @@ public class DownloadEvent extends EventObject
     private long currentBytes;
     private long totalBytes;
     private boolean canceled;
-    private File file;
+    private URI uri;
     
-    public DownloadEvent(Object source,File file,long currentBytes,long totalBytes)
+    
+    public DownloadEvent(Object source,URI uri,long currentBytes,long totalBytes)
     {
         super(source);
         this.currentBytes = currentBytes;
         this.totalBytes = totalBytes;
-        this.file = file;
+        this.uri = uri;
     }
 
     /**
@@ -62,9 +64,9 @@ public class DownloadEvent extends EventObject
      * Get the BaseSpace file that is being downloaded
      * @return the BaseSpace file
      */
-    public File getTheFile()
+    public URI getURI()
     {
-        return file;
+        return uri;
     }
     
     

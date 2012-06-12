@@ -15,6 +15,8 @@
 
 package com.illumina.basespace;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 /**
  * A BaseSpace instrument run
@@ -24,5 +26,26 @@ package com.illumina.basespace;
 @UriPath("/runs")
 public class Run extends BaseSpaceEntity
 {
-
+    @JsonProperty("ExperimentName")
+    private String experimentName;
+    public String getExperimentName()
+    {
+        return experimentName;
+    }
+    protected void setExperimentName(String experimentName)
+    {
+        this.experimentName = experimentName;
+    }
+    @Override
+    public String getName()
+    {
+        return getExperimentName();
+    }
+    @Override
+    public String toString()
+    {
+        return "Run [experimentName=" + experimentName + ", toString()=" + super.toString() + "]";
+    }
+    
+    
 }
