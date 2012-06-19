@@ -59,6 +59,10 @@ public interface BaseSpaceConfiguration
      */
     public String getAuthorizationUri();
     
+    /**
+     * Get the desired authorization scope of the session
+     * @return the authorization scope
+     */
     public String getAuthorizationScope();
     
     /**
@@ -73,4 +77,16 @@ public interface BaseSpaceConfiguration
      * @return the timeout in seconds
      */
     public int getAuthCodeListenerTimeout();
+    
+    /**
+     * Get the name of the proxy host for BaseSpace requests
+     * @return the name of the proxy host, or null if not using a proxy
+     */
+    public String getProxyHost();
+    
+    /**
+     * Get the proxy port 
+     * @return the proxy port if applicable
+     */
+    public int getProxyPort();
 }

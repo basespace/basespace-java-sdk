@@ -15,8 +15,6 @@
 
 package com.illumina.basespace.test;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import com.illumina.basespace.Analysis;
@@ -24,8 +22,6 @@ import com.illumina.basespace.BaseSpaceSession;
 import com.illumina.basespace.BaseSpaceSessionEvent;
 import com.illumina.basespace.BaseSpaceSessionListener;
 import com.illumina.basespace.BaseSpaceSessionManager;
-import com.illumina.basespace.DownloadEvent;
-import com.illumina.basespace.DownloadListener;
 import com.illumina.basespace.FetchParams;
 import com.illumina.basespace.Project;
 import com.illumina.basespace.Sample;

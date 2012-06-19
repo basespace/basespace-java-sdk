@@ -61,6 +61,18 @@ public abstract class TestBaseSpaceConfiguration implements BaseSpaceConfigurati
     {
         return 30;
     }
-    
 
+    @Override
+    public String getProxyHost()
+    {
+        return null;
+    }
+
+    @Override
+    public int getProxyPort()
+    {
+        return 0;
+    }
+    
+    
 }

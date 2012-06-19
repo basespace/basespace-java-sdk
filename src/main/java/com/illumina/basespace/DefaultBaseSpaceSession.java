@@ -15,8 +15,13 @@
 package com.illumina.basespace;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -24,6 +29,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +41,8 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.client.urlconnection.HttpURLConnectionFactory;
+import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
 /**
@@ -51,14 +59,16 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private static final String ITEMS = "Items";
     private List<DownloadListener>downloadListeners;
     private URI apiUri;
+    private BaseSpaceConfiguration configuration;
      
     /**
      * Create a BaseSpace session 
      * @param config the configuration to use to establish the session
      */
-    DefaultBaseSpaceSession(URI apiUri,AuthToken authToken)
+    DefaultBaseSpaceSession(BaseSpaceConfiguration configuration,AuthToken authToken)
     {
-        this.apiUri = apiUri;
+        this.configuration = configuration;
+        this.apiUri = UriBuilder.fromUri(configuration.getApiRootUri()).path(configuration.getVersion()).build();
         this.token = authToken;
     }
     
@@ -334,7 +344,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         ClientConfig config = new DefaultClientConfig();
         
-        Client client = Client.create(config);
+        URLConnectionClientHandler urlConnectionClientHandler = 
+                new URLConnectionClientHandler(new BaseSpaceURLConnectionFactory());
+
+        Client client = new Client(urlConnectionClientHandler,config); 
         client.addFilter(new ClientFilter()
         {
             @Override
@@ -402,6 +415,21 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     public URI getRootURI()
     {
         return apiUri;
+    }
+    
+    private class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
+    {
+        @Override
+        public HttpURLConnection getHttpURLConnection(URL url) throws IOException
+        {
+            Proxy proxy = null;
+            if (configuration.getProxyHost() != null && configuration.getProxyHost().length() > 0)
+            {
+                proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(configuration.getProxyHost(), configuration.getProxyPort()));
+            }
+            return (HttpURLConnection) (proxy != null?url.openConnection(proxy):url.openConnection());
+        }
+        
     }
    
 }
