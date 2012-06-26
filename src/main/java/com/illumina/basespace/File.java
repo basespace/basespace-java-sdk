@@ -62,8 +62,12 @@ public class File extends BaseSpaceEntity
     @Override
     public String toString()
     {
-        return "File [size=" + size + ", path=" + path + ", toString()=" + super.toString() + "]";
+        return "File [contentType=" + contentType + ", size=" + size + ", path=" + path + ", toString()="
+                + super.toString() + "]";
     }
+
+
+    
     
     
     

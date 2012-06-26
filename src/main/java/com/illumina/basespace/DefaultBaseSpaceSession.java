@@ -33,6 +33,7 @@ import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.illumina.basespace.VariantFetchParams.ReturnFormat;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
@@ -58,7 +59,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private static final String RESPONSE = "Response";
     private static final String ITEMS = "Items";
     private List<DownloadListener>downloadListeners;
-    private URI apiUri;
     private BaseSpaceConfiguration configuration;
      
     /**
@@ -68,7 +68,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     DefaultBaseSpaceSession(BaseSpaceConfiguration configuration,AuthToken authToken)
     {
         this.configuration = configuration;
-        this.apiUri = UriBuilder.fromUri(configuration.getApiRootUri()).path(configuration.getVersion()).build();
         this.token = authToken;
     }
     
@@ -265,7 +264,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         try
         {
             UriPath path = BaseSpaceUtilities.getAnnotation(UriPath.class, clazz);
-            ClientResponse response = getClient().resource(apiUri).path(path.value()).path(id)
+            ClientResponse response = getClient().resource(
+                    configuration.getApiRootUri())
+                    .path(configuration.getVersion())
+                    .path(path.value()).path(id)
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
             String rtn = response.getEntity(String.class);
             return (T) mapper.readValue( mapper.readValue(rtn, JsonNode.class).findPath(RESPONSE).toString(), clazz);
@@ -279,6 +281,94 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             throw new RuntimeException(t);
         }
     }
+    
+
+    @Override
+    public <T extends File> T getFileExtendedInfo(File file, Class<T> clazz)
+    {
+        try
+        {
+            WebResource resource = getRootApiWebResource().path("files")
+                    .path(String.valueOf(file.getId()));
+            ClientResponse response = getClient().resource(resource.getURI())
+                    .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
+            String rtn = response.getEntity(String.class);
+            return (T) mapper.readValue( mapper.readValue(rtn, JsonNode.class).findPath(RESPONSE).toString(), clazz);
+        }
+        catch(ForbiddenResourceException fr)
+        {
+            throw fr;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
+    }
+
+
+
+    @Override
+    public List<VariantRecord> queryJSON(VariantFile file, String chromosome,int start,int end)
+    {
+        try
+        {
+            VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.json);
+            String rtn = queryInternal(file,chromosome,params);
+            logger.info(rtn);
+            JsonNode responseNode = mapper.readValue(rtn, JsonNode.class).findPath(ITEMS);
+            List<VariantRecord>records = new ArrayList<VariantRecord>();
+            for(int i = 0; i < responseNode.size(); i++)
+            {
+                records.add((VariantRecord)mapper.readValue(responseNode.get(i).toString(),VariantRecord.class));
+            }            
+            return records;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException("Error during JSON query " + t);
+        }   
+    }  
+    
+
+    @Override
+    public String queryRaw(VariantFile file, String chromosome,int start,int end)
+    {
+        VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.vcf);
+        String rtn = queryInternal(file,chromosome,params);
+        logger.info(rtn);
+        return rtn;
+    }
+    
+    protected String queryInternal(VariantFile file, String chromosome, VariantFetchParams params)
+    {
+        if (file == null || file.getHrefVariants() == null)
+        {
+            throw new IllegalArgumentException("null VariantFile or hrefVariants property for VariantFile object");
+        }
+        try
+        {
+            MultivaluedMap<String, String> queryParams = params == null? new MultivaluedMapImpl():params.toMap();
+            WebResource resource = getClient().resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(file.getHrefVariants())
+                    .path("variants")
+                    .path(chromosome)
+                    .build())
+                    .queryParams(queryParams);
+    
+            ClientResponse response = getClient().resource(resource.getURI())
+                    .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
+            return response.getEntity(String.class);
+        }
+        catch(ForbiddenResourceException fr)
+        {
+            throw fr;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }       
+    }
+   
     
     protected List<BaseSpaceEntity>getList(BaseSpaceEntity containingObject,Class<? extends BaseSpaceEntity>clazz,
             FetchParams params)
@@ -330,7 +420,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     
     protected WebResource getRootApiWebResource()
     {
-        return getClient().resource(getRootURI());
+        return getClient().resource( UriBuilder.fromUri(configuration.getApiRootUri()).path(configuration.getVersion()).build());
     }
 
     
@@ -414,7 +504,14 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     @Override
     public URI getRootURI()
     {
-        return apiUri;
+        try
+        {
+            return new URI(configuration.getApiRootUri());
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
     }
     
     private class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
@@ -431,5 +528,8 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
         
     }
-   
+
+
+
+ 
 }

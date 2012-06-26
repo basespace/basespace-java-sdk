@@ -195,7 +195,32 @@ public interface BaseSpaceSession
      */
     public InputStream getFileInputStream(File file,long start,long end);
  
+    /**
+     * Get extended information for a file
+     * @param file the source file for extended information
+     * @param clazz the subclass of file to load with more specific information
+     * @return the specific subclass of file with extended properties loaded
+     */
+    public <T extends File>T getFileExtendedInfo(File file,Class<T>clazz);
     
+    /**
+     * Perform a variant query against the JSON API
+     * @param file the variant file to query
+     * @param chromosome the chromosome to query
+     * @param start
+     * @param end
+     * @return a list of Variant records, or an empty list
+     */
+    public List<VariantRecord> queryJSON(VariantFile file,String chromosome,int start,int end);
     
+    /**
+     * Perform a variant query against the raw API
+     * @param file the variant file to query
+     * @param chromosome the chromosome to query
+     * @param start
+     * @param end
+     * @return a string containing one or more records from the vcf
+     */
+    public String queryRaw(VariantFile file,String chromosome,int start,int end);
     
 }

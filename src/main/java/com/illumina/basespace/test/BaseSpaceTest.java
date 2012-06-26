@@ -15,7 +15,9 @@
 
 package com.illumina.basespace.test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import com.illumina.basespace.Analysis;
 import com.illumina.basespace.BaseSpaceSession;
@@ -23,9 +25,10 @@ import com.illumina.basespace.BaseSpaceSessionEvent;
 import com.illumina.basespace.BaseSpaceSessionListener;
 import com.illumina.basespace.BaseSpaceSessionManager;
 import com.illumina.basespace.FetchParams;
+import com.illumina.basespace.File;
 import com.illumina.basespace.Project;
-import com.illumina.basespace.Sample;
 import com.illumina.basespace.User;
+import com.illumina.basespace.VariantFile;
 
 
 public class BaseSpaceTest
@@ -72,16 +75,40 @@ public class BaseSpaceTest
                     
                         for(Analysis analysis:session.getAnalyses(project, params))
                         {
-                            System.out.println("Analysis: " + analysis.toString());
+                            //System.out.println("Analysis: " + analysis.toString());
                             
+                            
+                            for(File file:session.getFiles(analysis, null))
+                            {
+                                System.out.println("File: " + file.toString());
+                                if (file.getName().endsWith("vcf"))
+                                {
+                                    VariantFile vFile = session.getFileExtendedInfo(file, VariantFile.class);
+                                    System.out.println("Variant File: " + vFile.toString());
+                                    
+                                    /* 
+                                    List<VariantRecord>records = session.queryJSON(vFile,"chr2",1,99999999); 
+                                    for(VariantRecord record:records)
+                                    {
+                                        System.out.println(record.toString());
+                                        
+                                    }*/
+                                    
+                                    String raw = session.queryRaw(vFile,"chr2",1,99999999);
+                                    getRecords(raw);
+                                }
+                                
+                              
+                            }
                         }
                         
+                        /*
                         for(Sample sample:session.getSamples(project, params))
                         {
                             System.out.println("Sample: " + sample.toString());
                             
                         }
-                    
+                        */
                     }
                     
                     /*
@@ -122,5 +149,19 @@ public class BaseSpaceTest
         }
     }
     
+    public static List<String>getRecords(String raw)
+    {
+        List<String>rtn = new ArrayList<String>();
+
+        StringTokenizer st = new StringTokenizer(raw,"\r\n");        
+        while(st.hasMoreTokens())
+        {
+            String next = st.nextToken();
+            System.out.println("line: " + next);
+        }
+        
+        return rtn;
+        
+    }
     
 }

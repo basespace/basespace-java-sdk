@@ -113,7 +113,6 @@ class HttpServer implements Runnable
                     if (timedOut)
                     {
                         running = false;
-                        fireTimedOutEvent();
                     }
                 }
                 catch(Throwable t)
@@ -136,6 +135,10 @@ class HttpServer implements Runnable
                     } 
                 }
             }//While server running
+            if (timedOut)
+            {
+                fireTimedOutEvent();
+            }  
             if (authCode != null)
             {
                 fireAuthCodeEvent(new AuthCodeEvent(this,authCode));

@@ -32,6 +32,11 @@ public class FetchParams
     private SortDirection sortDirection = SortDirection.Ascending;
     private int limit = ALL;
     
+    public FetchParams()
+    {
+        
+    }
+    
     /**
      * Create fetch params
      * @param limit the maximum number of entities to retrieve
