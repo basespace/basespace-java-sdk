@@ -21,14 +21,14 @@ import java.util.StringTokenizer;
 
 import com.illumina.basespace.Analysis;
 import com.illumina.basespace.BaseSpaceSession;
-import com.illumina.basespace.BaseSpaceSessionEvent;
-import com.illumina.basespace.BaseSpaceSessionListener;
 import com.illumina.basespace.BaseSpaceSessionManager;
+import com.illumina.basespace.CoverageMetaData;
+import com.illumina.basespace.CoverageRecord;
+import com.illumina.basespace.ExtendedFileInfo;
 import com.illumina.basespace.FetchParams;
 import com.illumina.basespace.File;
 import com.illumina.basespace.Project;
 import com.illumina.basespace.User;
-import com.illumina.basespace.VariantFile;
 
 
 public class BaseSpaceTest
@@ -42,7 +42,6 @@ public class BaseSpaceTest
                 System.out.println("Usage: BaseSpaceTest [clientId] [clientSecret]");
                 System.exit(0);
             }
-            
             TestBaseSpaceConfiguration config = new TestBaseSpaceConfiguration()
             {
                 @Override
@@ -57,59 +56,119 @@ public class BaseSpaceTest
                 }
             };            
             
-            BaseSpaceSessionManager.instance().addSessionListener(new BaseSpaceSessionListener()
-            {
-                @Override
-                public void sessionEstablished(BaseSpaceSessionEvent evt)
-                {
-                    BaseSpaceSession session = evt.getSession();
-                    User user = session.getCurrentUser();
-                    System.out.println("Current user is " + user.getName() + " id# " + user.getId()  + "[" + user.getEmail() + "]");
-                    FetchParams params = new FetchParams(1); //Fetch 1 project
-                    List<Project>projects = session.getProjects(user, params);
+            
+            BaseSpaceSession session = BaseSpaceSessionManager.instance().requestSession(config);
+            
+
+            User user = session.getCurrentUser();
+            System.out.println("Current user is " + user.getName() + " id# " + user.getId()  + "[" + user.getEmail() + "]");
+            FetchParams params = new FetchParams(1); //Fetch 1 project
+            List<Project>projects = session.getProjects(user, params);
                     
                 
-                    for(Project project:projects)
+            
+                for(Project project:projects)
+                {
+                    System.out.println("Project " + project.getId() + " owned by " + project.getUserOwnedBy().getName());
+                
+                    for(Analysis analysis:session.getAnalyses(project, params))
                     {
-                        System.out.println("Project " + project.getId() + " owned by " + project.getUserOwnedBy().getName());
-                    
-                        for(Analysis analysis:session.getAnalyses(project, params))
-                        {
-                            //System.out.println("Analysis: " + analysis.toString());
-                            
-                            
-                            for(File file:session.getFiles(analysis, null))
-                            {
-                                System.out.println("File: " + file.toString());
-                                if (file.getName().endsWith("vcf"))
-                                {
-                                    VariantFile vFile = session.getFileExtendedInfo(file, VariantFile.class);
-                                    System.out.println("Variant File: " + vFile.toString());
-                                    
-                                    /* 
-                                    List<VariantRecord>records = session.queryJSON(vFile,"chr2",1,99999999); 
-                                    for(VariantRecord record:records)
-                                    {
-                                        System.out.println(record.toString());
-                                        
-                                    }*/
-                                    
-                                    String raw = session.queryRaw(vFile,"chr2",1,99999999);
-                                    getRecords(raw);
-                                }
-                                
-                              
-                            }
-                        }
+                        //System.out.println("Analysis: " + analysis.toString());
                         
-                        /*
-                        for(Sample sample:session.getSamples(project, params))
+                        
+                        for(File file:session.getFiles(analysis, null))
                         {
-                            System.out.println("Sample: " + sample.toString());
+                            System.out.println("File: " + file.toString());
                             
+                            if (file.getName().endsWith("bam"))
+                            {
+                                ExtendedFileInfo extInfo = session.getFileExtendedInfo(file.getId(), ExtendedFileInfo.class);
+                                
+                               /*
+                                CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 137931431, 
+                                        240658294, 1);
+                               */
+                                
+                                CoverageMetaData metaData = session.getCoverageMetaData(extInfo,  "chr1");
+                                
+                                /*
+                                CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 67108864, 
+                                        67110912, 0);
+                                */
+                                
+                                CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 121485425, 
+                                        121490000 , 12);
+                                
+                                System.out.println(coverage.toString());
+                                
+                                
+                                break;
+                                
+                            }
+                            
+                            if (file.getName().endsWith("vcf"))
+                            {
+                                /*
+                                session.addDownloadListener(new DownloadListener()
+                                {
+
+                                    @Override
+                                    public void progress(DownloadEvent evt)
+                                    {
+                                        System.out.println(evt.getCurrentBytes());
+                                        
+                                    }
+
+                                    @Override
+                                    public void complete(DownloadEvent evt)
+                                    {
+                                        // TODO Auto-generated method stub
+                                        
+                                    }
+
+                                    @Override
+                                    public void canceled(DownloadEvent evt)
+                                    {
+                                        // TODO Auto-generated method stub
+                                        
+                                    }
+                                    
+                                });
+                                
+                                session.download(file, new java.io.File("C:\\theFile.vcf"));
+                                */
+                            }
+                            
+                            /*
+                            if (file.getName().endsWith("vcf"))
+                            {
+                                VariantFile vFile = session.getFileExtendedInfo(file, VariantFile.class);
+                                System.out.println("Variant File: " + vFile.toString());
+                                
+                                /* 
+                                List<VariantRecord>records = session.queryJSON(vFile,"chr2",1,99999999); 
+                                for(VariantRecord record:records)
+                                {
+                                    System.out.println(record.toString());
+                                    
+                                }*/
+                                
+                                //String raw = session.queryRaw(vFile,"chr2",1,99999999);
+                                //getRecords(raw);
+                            }
+                           
+                          
                         }
-                        */
                     }
+                    
+                    /*
+                    for(Sample sample:session.getSamples(project, params))
+                    {
+                        System.out.println("Sample: " + sample.toString());
+                        
+                    }
+                    */
+               
                     
                     /*
                     for(Run run:session.getRuns(user, params))
@@ -129,19 +188,7 @@ public class BaseSpaceTest
                         
                     }
                     */
-                    
-   
-                    
-                }
-
-                @Override
-                public void errorOccurred(BaseSpaceSessionEvent evt)
-                {
-                    
-                    
-                }
-            });
-            BaseSpaceSessionManager.instance().requestSession("test",config);
+    
         }
         catch(Throwable t)
         {

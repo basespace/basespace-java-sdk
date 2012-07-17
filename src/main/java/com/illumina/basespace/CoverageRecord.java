@@ -15,32 +15,25 @@
 
 package com.illumina.basespace;
 
-import javax.ws.rs.core.MultivaluedMap;
+import java.io.Serializable;
+import java.util.Arrays;
 
-public class VariantFetchParams extends FetchParams
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class CoverageRecord  implements Serializable
 {
-    public VariantFetchParams()
+    @JsonProperty("Chrom")
+    private String chromosome;
+    public String getChromosome()
     {
- 
+        return chromosome;
+    }
+    public void setChromosome(String chromosome)
+    {
+        this.chromosome = chromosome;
     }
     
-    
-    
-    public VariantFetchParams(int startPosition, int endPosition, ReturnFormat format)
-    {
-        super();
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
-        this.format = format;
-    }
-
-
-
-    public VariantFetchParams(int limit)
-    {
-        super(limit);
-    }
-
+    @JsonProperty("StartPos")
     private int startPosition;
     public int getStartPosition()
     {
@@ -50,7 +43,8 @@ public class VariantFetchParams extends FetchParams
     {
         this.startPosition = startPosition;
     }
-  
+    
+    @JsonProperty("EndPos")
     private int endPosition;
     public int getEndPosition()
     {
@@ -60,31 +54,26 @@ public class VariantFetchParams extends FetchParams
     {
         this.endPosition = endPosition;
     }
-
-    private ReturnFormat format = ReturnFormat.json;
-    public ReturnFormat getFormat()
+    
+    @JsonProperty("MeanCoverage")
+    private float[]meanCoverage;
+    public float[] getMeanCoverage()
     {
-        return format;
+        return meanCoverage;
     }
-    public void setFormat(ReturnFormat format)
+    public void setMeanCoverage(float[] meanCoverage)
     {
-        this.format = format;
+        this.meanCoverage = meanCoverage;
     }
-
     @Override
-    public MultivaluedMap<String, String> toMap()
+    public String toString()
     {
-        MultivaluedMap<String,String>rtn = super.toMap();
-        rtn.add("StartPos",String.valueOf(getStartPosition()));
-        rtn.add("EndPos",String.valueOf(getEndPosition()));
-        rtn.add("Format",getFormat().name());
-        return rtn;
+        return "CoverageRecord [chromosome=" + chromosome + ", startPosition=" + startPosition + ", endPosition="
+                + endPosition 
+                + ",totalCoverage=" + meanCoverage.length
+                + ", meanCoverage=" + Arrays.toString(meanCoverage)
+                + "]";
     }
     
-    public static enum ReturnFormat
-    {
-        json,
-        vcf
-    }
     
 }

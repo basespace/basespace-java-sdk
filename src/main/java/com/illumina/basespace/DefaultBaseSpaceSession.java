@@ -15,16 +15,14 @@
 package com.illumina.basespace;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
@@ -42,7 +40,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.ClientFilter;
-import com.sun.jersey.client.urlconnection.HttpURLConnectionFactory;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
@@ -60,15 +57,16 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private static final String ITEMS = "Items";
     private List<DownloadListener>downloadListeners;
     private BaseSpaceConfiguration configuration;
-     
+    private Map<Long,FileMetaData>fileToUriMap = new HashMap<Long,FileMetaData>();
+    
     /**
      * Create a BaseSpace session 
      * @param config the configuration to use to establish the session
      */
-    DefaultBaseSpaceSession(BaseSpaceConfiguration configuration,AuthToken authToken)
+    DefaultBaseSpaceSession(BaseSpaceConfiguration configuration,String accessToken)
     {
         this.configuration = configuration;
-        this.token = authToken;
+        this.accessToken = accessToken;
     }
     
     @Override
@@ -175,25 +173,59 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     @Override
     public InputStream getFileInputStream(File file)
     {
-        return getRootApiWebResource().path("files")
-                .path(String.valueOf(file.getId())).path("content")
-                .accept(MediaType.APPLICATION_OCTET_STREAM)
-                .accept(MediaType.TEXT_HTML)
-                .accept(MediaType.APPLICATION_XHTML_XML)
-                .get(InputStream.class);
+        return getFileInputStream(file,0,file.getSize());
     }
     
     @Override
     public InputStream getFileInputStream(File file,long start,long end)
     {
-        InputStream in= getRootApiWebResource().path("files")
-                .path(String.valueOf(file.getId())).path("content")
+        try
+        {
+            FileMetaData fileInfo = fileToUriMap.get(file.getId());
+            if (fileInfo == null || new Date().after(fileInfo.getExpires()))
+            {
+                fileInfo = getFileContentInfo(file);
+                fileToUriMap.put(file.getId(), fileInfo);
+            }
+            InputStream in = getClient()
+                .resource(new URI(fileInfo.getHrefContent()))
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .accept(MediaType.TEXT_HTML)
                 .accept(MediaType.APPLICATION_XHTML_XML)
                 .header("Range","bytes=" + start + "-" + end)
                 .get(InputStream.class);
-        return in;
+            return in;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
+        
+    }
+    
+    private FileMetaData getFileContentInfo(File file)
+    {
+        try
+        {
+            MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
+            queryParams.add("redirect", "meta");
+            ClientResponse resp =   getRootApiWebResource().path("files")
+                    .path(String.valueOf(file.getId())).path("content")
+                    .queryParams(queryParams)
+                    .accept(MediaType.APPLICATION_OCTET_STREAM)
+                    .accept(MediaType.TEXT_HTML)
+                    .accept(MediaType.APPLICATION_XHTML_XML)
+                    .get(ClientResponse.class);
+            
+            String sResp = resp.getEntity(String.class);
+            FileMetaData fileInfo = mapper.readValue( mapper.readValue(sResp, JsonNode.class).findPath(RESPONSE).toString(), FileMetaData.class);
+            logger.info(fileInfo.toString());
+            return fileInfo;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
     }
     
     @Override
@@ -258,6 +290,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             }
         }
     }
+
     
     protected <T extends BaseSpaceEntity> T getSingle(Class<? extends BaseSpaceEntity>clazz,String id)
     {
@@ -284,20 +317,21 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     
 
     @Override
-    public <T extends File> T getFileExtendedInfo(File file, Class<T> clazz)
+    public <T extends File> T getFileExtendedInfo(long fileId, Class<T> clazz)
     {
         try
         {
             WebResource resource = getRootApiWebResource().path("files")
-                    .path(String.valueOf(file.getId()));
+                    .path(String.valueOf(fileId));
             ClientResponse response = getClient().resource(resource.getURI())
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
             String rtn = response.getEntity(String.class);
+            logger.info(rtn);
             return (T) mapper.readValue( mapper.readValue(rtn, JsonNode.class).findPath(RESPONSE).toString(), clazz);
         }
-        catch(ForbiddenResourceException fr)
+        catch(RuntimeException rte)
         {
-            throw fr;
+            throw rte;
         }
         catch(Throwable t)
         {
@@ -305,15 +339,94 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
     }
 
+    @Override
+    public CoverageRecord getCoverage(ExtendedFileInfo file,String chromosome, int start, int end, int zoomLevel)
+    {
+        try
+        {
+            MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
+            queryParams.add("startPos", String.valueOf(start));
+            queryParams.add("endPos", String.valueOf(end));
+            queryParams.add("zoomLevel", String.valueOf(zoomLevel));
+            
+            WebResource resource = getClient().resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(file.getHrefCoverage())
+                    .path(chromosome)
+                    .build())
+                    .queryParams(queryParams);
+    
+            ClientResponse response = getClient().resource(resource.getURI())
+                    .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
+           
+            switch(response.getClientResponseStatus())
+            {
+                case OK:
+                    String data = response.getEntity(String.class);       
+                    logger.info(data);
+                    CoverageRecord record = mapper.readValue( mapper.readValue(data, JsonNode.class).findPath(RESPONSE).toString(), CoverageRecord.class);
+                    logger.info(record.toString());
+                    return record;
+                default:
+                    data = response.getEntity(String.class);       
+                    Response status = mapper.readValue(data,Response.class);
+                    throw new IllegalArgumentException(status.getResponseStatus().getMessage());
+            }
+        }
+        catch(RuntimeException rte)
+        {
+            throw rte;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }  
+    }
+    
+
+    @Override
+    public CoverageMetaData getCoverageMetaData(ExtendedFileInfo file, String chromosome)
+    {
+        try
+        {
+            WebResource resource = getClient().resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(file.getHrefCoverage())
+                    .path(chromosome)
+                    .path("meta")
+                    .build());
+            ClientResponse response = getClient().resource(resource.getURI())
+                    .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
+            switch(response.getClientResponseStatus())
+            {
+                case OK:
+                    String data = response.getEntity(String.class);       
+                    logger.info(data);
+                    CoverageMetaData metaData = mapper.readValue( mapper.readValue(data, JsonNode.class).findPath(RESPONSE).toString(), CoverageMetaData.class);
+                    logger.info(metaData.toString());
+                    return metaData;
+                default:
+                    data = response.getEntity(String.class);       
+                    Response status = mapper.readValue(data,Response.class);
+                    throw new IllegalArgumentException(status.getResponseStatus().getMessage());
+            }
+        }
+        catch(RuntimeException rte)
+        {
+            throw rte;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException(t);
+        }  
+    }
 
 
     @Override
-    public List<VariantRecord> queryJSON(VariantFile file, String chromosome,int start,int end)
+    public List<VariantRecord> queryJSON(ExtendedFileInfo file, String chromosome,int start,int end)
     {
         try
         {
             VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.json);
-            String rtn = queryInternal(file,chromosome,params);
+            String rtn = queryVariantsInternal(file,chromosome,params);
             logger.info(rtn);
             JsonNode responseNode = mapper.readValue(rtn, JsonNode.class).findPath(ITEMS);
             List<VariantRecord>records = new ArrayList<VariantRecord>();
@@ -329,17 +442,16 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }   
     }  
     
-
     @Override
-    public String queryRaw(VariantFile file, String chromosome,int start,int end)
+    public String queryRaw(ExtendedFileInfo file, String chromosome,int start,int end)
     {
         VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.vcf);
-        String rtn = queryInternal(file,chromosome,params);
+        String rtn = queryVariantsInternal(file,chromosome,params);
         logger.info(rtn);
         return rtn;
     }
     
-    protected String queryInternal(VariantFile file, String chromosome, VariantFetchParams params)
+    protected String queryVariantsInternal(ExtendedFileInfo file, String chromosome, VariantFetchParams params)
     {
         if (file == null || file.getHrefVariants() == null)
         {
@@ -412,10 +524,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
     }
     
-    private AuthToken token;
-    protected AuthToken getAuthToken()
+    private String accessToken;
+    protected String getAccessToken()
     {
-        return token;
+        return accessToken;
     }
     
     protected WebResource getRootApiWebResource()
@@ -435,7 +547,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         ClientConfig config = new DefaultClientConfig();
         
         URLConnectionClientHandler urlConnectionClientHandler = 
-                new URLConnectionClientHandler(new BaseSpaceURLConnectionFactory());
+                new URLConnectionClientHandler(new BaseSpaceURLConnectionFactory(this.configuration));
 
         Client client = new Client(urlConnectionClientHandler,config); 
         client.addFilter(new ClientFilter()
@@ -444,16 +556,17 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             public ClientResponse handle(ClientRequest request) throws ClientHandlerException
             {
                 logger.info(request.getMethod() + " to " + request.getURI().toString());
-                if (getAuthToken() != null)
+                if (accessToken != null)
                 {
-                    logger.fine("Auth token " + getAuthToken().getAccessToken());
-                    request.getHeaders().add("x-access-token",getAuthToken().getAccessToken());
+                    logger.fine("Auth token " + accessToken);
+                    request.getHeaders().add("x-access-token",accessToken);
                 }
                 ClientResponse response = getNext().handle(request); 
                 switch(response.getClientResponseStatus())
                 {
                     case FORBIDDEN:
                         throw new ForbiddenResourceException(request.getURI());
+                        
                 }
                 return response;
             }
@@ -513,22 +626,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             throw new RuntimeException(t);
         }
     }
-    
-    private class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
-    {
-        @Override
-        public HttpURLConnection getHttpURLConnection(URL url) throws IOException
-        {
-            Proxy proxy = null;
-            if (configuration.getProxyHost() != null && configuration.getProxyHost().length() > 0)
-            {
-                proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(configuration.getProxyHost(), configuration.getProxyPort()));
-            }
-            return (HttpURLConnection) (proxy != null?url.openConnection(proxy):url.openConnection());
-        }
-        
-    }
-
 
 
  

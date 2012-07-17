@@ -15,15 +15,13 @@
 
 package com.illumina.basespace;
 
-import java.util.EventListener;
-
-/**
- * 
- * @author bking
- *
- */
-interface AuthTokenListener extends EventListener
+public class AccessDeniedException extends Exception
 {
-    void authTokenReceived(AuthTokenEvent evt);
-    void errorOccured(AuthTokenEvent evt);
+
+    @Override
+    public String getMessage()
+    {
+        return "The user denied authorization for the application";
+    }
+    
 }

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author bking
  *
  */
-class AuthToken extends BaseSpaceEntity
+class AccessToken
 {
     @JsonProperty("access_token")
     private String accessToken;
@@ -37,22 +37,45 @@ class AuthToken extends BaseSpaceEntity
     }
 
     @JsonProperty("expires_in")
-    private String expiresIn;
-
-    public String getExpiresIn()
+    private int expiresIn;
+    public int getExpiresIn()
     {
         return expiresIn;
     }
-    public void setExpiresIn(String expiresIn)
+    public void setExpiresIn(int expiresIn)
     {
         this.expiresIn = expiresIn;
+    }
+
+    @JsonProperty("error")
+    private String error;
+    public String getError()
+    {
+        return error;
+    }
+    public void setError(String error)
+    {
+        this.error = error;
+    }
+    
+    @JsonProperty("error_description")
+    private String errorDescription;
+    public String getErrorDescription()
+    {
+        return errorDescription;
+    }
+    public void setErrorDescription(String errorDescription)
+    {
+        this.errorDescription = errorDescription;
     }
     @Override
     public String toString()
     {
-        return "AuthToken [accessToken=" + accessToken + ", expiresIn=" + expiresIn + "]";
+        return "AccessToken [accessToken=" + accessToken + ", expiresIn=" + expiresIn + ", error=" + error
+                + ", errorDescription=" + errorDescription + "]";
     }
-
+    
+    
     
 
     

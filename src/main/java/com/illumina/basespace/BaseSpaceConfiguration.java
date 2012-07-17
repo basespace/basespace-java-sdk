@@ -51,32 +51,13 @@ public interface BaseSpaceConfiguration
      * Get the URI fragment for requesting authorization code
      * @return authorization URI
      */
-    public String getAuthTokenUriFragment();
-    
-    /**
-     * Get the URI fragment for requesting authorization token
-     * @return authorization token URI
-     */
-    public String getAuthorizationUri();
+    public String getAccessTokenUriFragment();
     
     /**
      * Get the desired authorization scope of the session
      * @return the authorization scope
      */
     public String getAuthorizationScope();
-    
-    /**
-     * Port for the internal Http server that will receive auth code
-     * @return the port
-     */
-    public int getAuthCodeListenerPort();
-    
-    /**
-     * The amount of time in seconds the internal Http server will wait for 
-     * authorization before timing out
-     * @return the timeout in seconds
-     */
-    public int getAuthCodeListenerTimeout();
     
     /**
      * Get the name of the proxy host for BaseSpace requests
@@ -89,4 +70,6 @@ public interface BaseSpaceConfiguration
      * @return the proxy port if applicable
      */
     public int getProxyPort();
+    
+    public String getAuthorizationUriFragment();
 }

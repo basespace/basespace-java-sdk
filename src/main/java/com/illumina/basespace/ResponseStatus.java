@@ -12,12 +12,22 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 */
+
 package com.illumina.basespace;
 
-public enum AuthorizationStatus
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class ResponseStatus
 {
-    WaitingForPermission,
-    InvalidSessionId,
-    TimedOut,
-    TokenReceived
+    @JsonProperty("Message")
+    private String message;
+    public String getMessage()
+    {
+        return message;
+    }
+    public void setMessage(String message)
+    {
+        this.message = message;
+    }
+    
 }

@@ -15,37 +15,37 @@
 
 package com.illumina.basespace;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- *
- * @author bking
- *
- */
-public class BaseSpaceSessionEvent extends SessionEvent
+public class CoverageMetaData
 {
-    private BaseSpaceSession session;
-    
-    public BaseSpaceSessionEvent(Object src,String sessionId,BaseSpaceSession session)
+    @JsonProperty("MaxCoverage")
+    private int maxCoverage;
+    public int getMaxCoverage()
     {
-        super(src,sessionId);
-        this.session = session;
+        return maxCoverage;
+    }
+    public void setMaxCoverage(int maxCoverage)
+    {
+        this.maxCoverage = maxCoverage;
     }
     
-    public BaseSpaceSessionEvent(Object source, String sessionId, Throwable throwable)
+    @JsonProperty("ZoomLevel")
+    private int zoomLevel;
+    public int getZoomLevel()
     {
-        super(source, sessionId, throwable);
+        return zoomLevel;
     }
-
-    /**
-     * Get the session associated with this event
-     * @return the BaseSpaceSession associated with this event, or null if a session was not 
-     * successfully established
-     */
-    public BaseSpaceSession getSession()
+    public void setZoomLevel(int zoomLevel)
     {
-        return session;
+        this.zoomLevel = zoomLevel;
     }
-
-  
+    @Override
+    public String toString()
+    {
+        return "CoverageMetaData [maxCoverage=" + maxCoverage + ", zoomLevel=" + zoomLevel + "]";
+    }
+    
+    
     
 }

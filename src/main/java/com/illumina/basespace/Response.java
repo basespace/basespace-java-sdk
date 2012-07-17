@@ -15,29 +15,31 @@
 
 package com.illumina.basespace;
 
-import java.util.EventObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-
-/**
- * 
- * @author bking
- *
- */
-class AuthCodeEvent extends EventObject
+public class Response
 {
-    private String authCode;
-
-    public AuthCodeEvent(Object source,String authCode)
+    @JsonProperty("ResponseStatus")
+    private ResponseStatus responseStatus;
+    public ResponseStatus getResponseStatus()
     {
-        super(source);
-        this.authCode = authCode;
+        return responseStatus;
     }
-
-    public String getAuthCode()
+    public void setResponseStatus(ResponseStatus responseStatus)
     {
-        return authCode;
+        this.responseStatus = responseStatus;
+    }
+    
+    @JsonProperty("Notifications")
+    private String[]notifications;
+    public String[] getNotifications()
+    {
+        return notifications;
+    }
+    public void setNotifications(String[] notifications)
+    {
+        this.notifications = notifications;
     }
     
     
-
 }

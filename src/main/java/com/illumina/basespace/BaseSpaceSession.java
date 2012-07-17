@@ -201,7 +201,7 @@ public interface BaseSpaceSession
      * @param clazz the subclass of file to load with more specific information
      * @return the specific subclass of file with extended properties loaded
      */
-    public <T extends File>T getFileExtendedInfo(File file,Class<T>clazz);
+    public <T extends File>T getFileExtendedInfo(long fileId,Class<T>clazz);
     
     /**
      * Perform a variant query against the JSON API
@@ -211,7 +211,7 @@ public interface BaseSpaceSession
      * @param end
      * @return a list of Variant records, or an empty list
      */
-    public List<VariantRecord> queryJSON(VariantFile file,String chromosome,int start,int end);
+    public List<VariantRecord> queryJSON(ExtendedFileInfo file,String chromosome,int start,int end);
     
     /**
      * Perform a variant query against the raw API
@@ -221,6 +221,25 @@ public interface BaseSpaceSession
      * @param end
      * @return a string containing one or more records from the vcf
      */
-    public String queryRaw(VariantFile file,String chromosome,int start,int end);
+    public String queryRaw(ExtendedFileInfo file,String chromosome,int start,int end);
+    
+    /**
+     * Retrieve coverage information for a file
+     * @param file 
+     * @param chromosome
+     * @param start
+     * @param end
+     * @param zoomLevel
+     * @return a Coverage Record
+     */
+    public CoverageRecord getCoverage(ExtendedFileInfo file,String chromosome,int start,int end,int zoomLevel);
+    
+    /**
+     * Get coverage meta data for a file
+     * @param file
+     * @param chromosome
+     * @return
+     */
+    public CoverageMetaData getCoverageMetaData(ExtendedFileInfo file,String chromosome);
     
 }

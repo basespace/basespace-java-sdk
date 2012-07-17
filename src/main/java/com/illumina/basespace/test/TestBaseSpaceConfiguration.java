@@ -33,17 +33,17 @@ public abstract class TestBaseSpaceConfiguration implements BaseSpaceConfigurati
     }
 
     @Override
-    public String getAuthTokenUriFragment()
+    public String getAccessTokenUriFragment()
     {
         return "/oauthv2/token";
     }
 
     @Override
-    public String getAuthorizationUri()
+    public String getAuthorizationUriFragment()
     {
-        return "https://cloud-endor.illumina.com/oauth/authorize";
+        return "/oauthv2/deviceauthorization";
     }
-    
+
     @Override
     public String getAuthorizationScope()
     {
@@ -51,27 +51,15 @@ public abstract class TestBaseSpaceConfiguration implements BaseSpaceConfigurati
     }
 
     @Override
-    public int getAuthCodeListenerPort()
-    {
-        return 7777;
-    }
-
-    @Override
-    public int getAuthCodeListenerTimeout()
-    {
-        return 30;
-    }
-
-    @Override
     public String getProxyHost()
     {
-        return null;
+        return "127.0.0.1";
     }
 
     @Override
     public int getProxyPort()
     {
-        return 0;
+        return 8888;
     }
     
     
