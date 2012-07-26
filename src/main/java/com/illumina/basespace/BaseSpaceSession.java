@@ -211,7 +211,7 @@ public interface BaseSpaceSession
      * @param end
      * @return a list of Variant records, or an empty list
      */
-    public List<VariantRecord> queryJSON(ExtendedFileInfo file,String chromosome,int start,int end);
+    public List<VariantRecord> queryVariantJSON(ExtendedFileInfo file,String chromosome,int start,int end);
     
     /**
      * Perform a variant query against the raw API
@@ -221,7 +221,7 @@ public interface BaseSpaceSession
      * @param end
      * @return a string containing one or more records from the vcf
      */
-    public String queryRaw(ExtendedFileInfo file,String chromosome,int start,int end);
+    public String queryVariantRaw(ExtendedFileInfo file,String chromosome,int start,int end);
     
     /**
      * Retrieve coverage information for a file

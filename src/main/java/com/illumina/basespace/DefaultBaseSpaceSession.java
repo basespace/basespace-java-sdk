@@ -421,7 +421,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 
 
     @Override
-    public List<VariantRecord> queryJSON(ExtendedFileInfo file, String chromosome,int start,int end)
+    public List<VariantRecord> queryVariantJSON(ExtendedFileInfo file, String chromosome,int start,int end)
     {
         try
         {
@@ -443,7 +443,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }  
     
     @Override
-    public String queryRaw(ExtendedFileInfo file, String chromosome,int start,int end)
+    public String queryVariantRaw(ExtendedFileInfo file, String chromosome,int start,int end)
     {
         VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.vcf);
         String rtn = queryVariantsInternal(file,chromosome,params);

@@ -55,6 +55,18 @@ public class CoverageRecord  implements Serializable
         this.endPosition = endPosition;
     }
     
+    
+    @JsonProperty("BucketSize")
+    private int bucketSize;
+    public int getBucketSize()
+    {
+        return bucketSize;
+    }
+    public void setBucketSize(int bucketSize)
+    {
+        this.bucketSize = bucketSize;
+    }
+
     @JsonProperty("MeanCoverage")
     private float[]meanCoverage;
     public float[] getMeanCoverage()
@@ -69,11 +81,9 @@ public class CoverageRecord  implements Serializable
     public String toString()
     {
         return "CoverageRecord [chromosome=" + chromosome + ", startPosition=" + startPosition + ", endPosition="
-                + endPosition 
-                + ",totalCoverage=" + meanCoverage.length
-                + ", meanCoverage=" + Arrays.toString(meanCoverage)
-                + "]";
+                + endPosition + ", bucketSize=" + bucketSize + ", meanCoverage=" + Arrays.toString(meanCoverage) + "]";
     }
+    
     
     
 }
