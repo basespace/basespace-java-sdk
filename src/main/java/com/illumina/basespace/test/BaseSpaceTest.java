@@ -22,7 +22,6 @@ import java.util.StringTokenizer;
 import com.illumina.basespace.Analysis;
 import com.illumina.basespace.BaseSpaceSession;
 import com.illumina.basespace.BaseSpaceSessionManager;
-import com.illumina.basespace.CoverageMetaData;
 import com.illumina.basespace.CoverageRecord;
 import com.illumina.basespace.ExtendedFileInfo;
 import com.illumina.basespace.FetchParams;
@@ -65,15 +64,13 @@ public class BaseSpaceTest
             FetchParams params = new FetchParams(1); //Fetch 1 project
             List<Project>projects = session.getProjects(user, params);
                     
-                
-            
                 for(Project project:projects)
                 {
                     System.out.println("Project " + project.getId() + " owned by " + project.getUserOwnedBy().getName());
                 
                     for(Analysis analysis:session.getAnalyses(project, params))
                     {
-                        //System.out.println("Analysis: " + analysis.toString());
+                        System.out.println("Analysis: " + analysis.toString());
                         
                         
                         for(File file:session.getFiles(analysis, null))
@@ -82,27 +79,27 @@ public class BaseSpaceTest
                             
                             if (file.getName().endsWith("bam"))
                             {
-                                ExtendedFileInfo extInfo = session.getFileExtendedInfo(file.getId(), ExtendedFileInfo.class);
+                               // ExtendedFileInfo extInfo = session.getFileExtendedInfo(file.getId(), ExtendedFileInfo.class);
                                 
                                /*
                                 CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 137931431, 
                                         240658294, 1);
                                */
                                 
-                                CoverageMetaData metaData = session.getCoverageMetaData(extInfo,  "chr1");
+                                //CoverageMetaData metaData = session.getCoverageMetaData(extInfo,  "chr1");
                                 
                                 /*
                                 CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 67108864, 
                                         67110912, 0);
                                 */
                                 
-                                CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 121485425, 
-                                        121490000 , 12);
+                               // CoverageRecord coverage = session.getCoverage(extInfo, "chr1", 63773027, 
+                               //         64259844 , 9);
                                 
-                                System.out.println(coverage.toString());
+                               // System.out.println(coverage.toString());
                                 
                                 
-                                break;
+                                
                                 
                             }
                             
@@ -139,10 +136,10 @@ public class BaseSpaceTest
                                 */
                             }
                             
-                            /*
+                          
                             if (file.getName().endsWith("vcf"))
                             {
-                                VariantFile vFile = session.getFileExtendedInfo(file, VariantFile.class);
+                                ExtendedFileInfo vFile = session.getFileExtendedInfo(file.getId(), ExtendedFileInfo.class);
                                 System.out.println("Variant File: " + vFile.toString());
                                 
                                 /* 
@@ -188,7 +185,7 @@ public class BaseSpaceTest
                         
                     }
                     */
-    
+                }
         }
         catch(Throwable t)
         {

@@ -19,6 +19,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ResponseStatus
 {
+    @JsonProperty("ErrorCode")
+    private String errorCode;
+    public String getErrorCode()
+    {
+        return errorCode;
+    }
+    public void setErrorCode(String errorCode)
+    {
+        this.errorCode = errorCode;
+    }
     @JsonProperty("Message")
     private String message;
     public String getMessage()
