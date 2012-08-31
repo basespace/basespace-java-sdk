@@ -87,12 +87,17 @@ public final class BaseSpaceSessionManager
                     MediaType.APPLICATION_FORM_URLENCODED,
                     MediaType.APPLICATION_JSON)
                     .post(ClientResponse.class,form);
+            String responseAsJSONString = response.getEntity(String.class);
+            logger.info(responseAsJSONString);
             
             ObjectMapper mapper = new ObjectMapper();
-            AuthVerificationCode authCode = mapper.readValue(response.getEntity(String.class), AuthVerificationCode.class);
-            //logger.info(authCode.toString());
+            AuthVerificationCode authCode = mapper.readValue(responseAsJSONString, AuthVerificationCode.class);
+            logger.info(authCode.toString());
             
-            String uri = authCode.getVerificationWithCodeUri().replace("cloud-test", "cloud-endor");
+            //TODO: This is a temporary fix
+            String uri = authCode.getVerificationWithCodeUri().replace("https://oauth/", "https://cloud-endor.illumina.com/oauth/");
+            //String uri = authCode.getVerificationWithCodeUri();
+            
             BrowserLaunch.openURL(uri);
             
             //Poll for approval
@@ -130,7 +135,6 @@ public final class BaseSpaceSessionManager
                     case OK:
                         token = mapper.readValue(response.getEntity(String.class), AccessToken.class);
                         accessToken = token.getAccessToken();
-                            
                 }
             } 
             return accessToken;

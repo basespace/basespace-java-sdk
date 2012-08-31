@@ -26,6 +26,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @UriPath("/samples")
 public class Sample extends BaseSpaceEntity
 {
+    @JsonProperty("Status")
+    private String status;
+    public String getStatus()
+    {
+        return status;
+    }
+    protected void setStatus(String status)
+    {
+        this.status = status;
+    }
+
+    @JsonProperty("StatusSummary")
+    private String statusSummary;
+    public String getStatusSummary()
+    {
+        return statusSummary;
+    }
+    public void setStatusSummary(String statusSummary)
+    {
+        this.statusSummary = statusSummary;
+    }
+    
     @JsonProperty("UserOwnedBy")
     private User userOwnedBy;
     public User getUserOwnedBy()

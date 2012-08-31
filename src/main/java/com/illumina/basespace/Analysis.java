@@ -29,8 +29,6 @@ public class Analysis extends BaseSpaceEntity
 {
     @JsonProperty("Status")
     private String status;
-    
-    
     public String getStatus()
     {
         return status;
@@ -38,6 +36,17 @@ public class Analysis extends BaseSpaceEntity
     protected void setStatus(String status)
     {
         this.status = status;
+    }
+
+    @JsonProperty("StatusSummary")
+    private String statusSummary;
+    public String getStatusSummary()
+    {
+        return statusSummary;
+    }
+    public void setStatusSummary(String statusSummary)
+    {
+        this.statusSummary = statusSummary;
     }
 
     @JsonProperty("UserOwnedBy")
