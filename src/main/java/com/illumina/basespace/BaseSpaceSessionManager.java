@@ -95,8 +95,8 @@ public final class BaseSpaceSessionManager
             logger.info(authCode.toString());
             
             //TODO: This is a temporary fix
-            String uri = authCode.getVerificationWithCodeUri().replace("https://oauth/", "https://cloud-endor.illumina.com/oauth/");
-            //String uri = authCode.getVerificationWithCodeUri();
+            //String uri = authCode.getVerificationWithCodeUri().replace("https://oauth/", "https://cloud-endor.illumina.com/oauth/");
+            String uri = authCode.getVerificationWithCodeUri();
             
             BrowserLaunch.openURL(uri);
             

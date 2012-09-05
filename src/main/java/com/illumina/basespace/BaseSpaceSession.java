@@ -82,20 +82,12 @@ public interface BaseSpaceSession
     public List<Sample> getSamples(Run run,FetchParams params);
     
     /**
-     * Retrieve an analysis by id
-     * @param id
-     * @return the retrieved analysis
-     * @throws ForbiddenResourceException if inadequate permissions in the current context to perform the operation
+     * Get a list of app results for a project
+     * @param project the project for which appresults will be retrieved
+     * @param params optional fetch parameters to limit the scope of the result list
+     * @return a list of app results, or an empty list
      */
-    public Analysis getAnalysis(String id)throws ForbiddenResourceException;
-    
-    /**
-     * Get a list of analyses for a project 
-     * @param project the project for which analyses will be retrieved
-     * @param optional params fetch parameters to limit the scope of the result list
-     * @return a list of analyses, or an empty list
-     */
-    public List<Analysis> getAnalyses(Project project,FetchParams params);
+    public List<AppResult> getAppResults(Project project,FetchParams params);
   
     /**
      * Retrieve a run by id
@@ -123,12 +115,12 @@ public interface BaseSpaceSession
     public List<File> getFiles(Sample sample,FetchParams params);
     
     /**
-     * Get a list of files for an analysis
-     * @param analysis the analysis for which files will be retrieved
+     * Get a list of files for an app result
+     * @param appresult the appresult for which files will be retrieved
      * @param params optional fetch parameters to limit the scope of the result list
      * @return a list of files, or an empty list
      */
-    public List<File> getFiles(Analysis analysis,FetchParams params);
+    public List<File> getFiles(AppResult appResult,FetchParams params);
     
     /**
      * Get a list of files for a run
@@ -207,21 +199,19 @@ public interface BaseSpaceSession
      * Perform a variant query against the JSON API
      * @param file the variant file to query
      * @param chromosome the chromosome to query
-     * @param start
-     * @param end
+     * @param params the variant fetch parameters
      * @return a list of Variant records, or an empty list
      */
-    public List<VariantRecord> queryVariantJSON(ExtendedFileInfo file,String chromosome,int start,int end);
+    public List<VariantRecord> queryVariantJSON(ExtendedFileInfo file,String chromosome,VariantFetchParams params);
     
     /**
      * Perform a variant query against the raw API
      * @param file the variant file to query
      * @param chromosome the chromosome to query
-     * @param start
-     * @param end
+     * @param params the variant fetch parameters
      * @return a string containing one or more records from the vcf
      */
-    public String queryVariantRaw(ExtendedFileInfo file,String chromosome,int start,int end);
+    public String queryVariantRaw(ExtendedFileInfo file,String chromosome,VariantFetchParams params);
     
     /**
      * Retrieve coverage information for a file

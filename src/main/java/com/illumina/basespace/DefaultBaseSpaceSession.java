@@ -114,15 +114,9 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
 
     @Override
-    public List<Analysis> getAnalyses(Project project,FetchParams params)
+    public List<AppResult> getAppResults(Project project, FetchParams params)
     {
-        return (List)getList(project,Analysis.class,params);
-    }
-    
-    @Override
-    public Analysis getAnalysis(String id)
-    {
-        return getSingle(Analysis.class,id);
+        return (List)getList(project,AppResult.class,params);
     }
 
     @Override
@@ -150,11 +144,11 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
     
     @Override
-    public List<File> getFiles(Analysis analysis,FetchParams params)
+    public List<File> getFiles(AppResult appResults, FetchParams params)
     {
-        return (List)getList(analysis,File.class,params);
-
+        return (List)getList(appResults,File.class,params);
     }
+
 
     @Override
     public File getFile(String id)
@@ -421,11 +415,12 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 
 
     @Override
-    public List<VariantRecord> queryVariantJSON(ExtendedFileInfo file, String chromosome,int start,int end)
+    public List<VariantRecord> queryVariantJSON(ExtendedFileInfo file, String chromosome,VariantFetchParams params)
     {
         try
         {
-            VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.json);
+            //VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.json);
+            params.setFormat(ReturnFormat.json);
             String rtn = queryVariantsInternal(file,chromosome,params);
             logger.info(rtn);
             JsonNode responseNode = mapper.readValue(rtn, JsonNode.class).findPath(ITEMS);
@@ -443,9 +438,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }  
     
     @Override
-    public String queryVariantRaw(ExtendedFileInfo file, String chromosome,int start,int end)
+    public String queryVariantRaw(ExtendedFileInfo file, String chromosome,VariantFetchParams params)
     {
-        VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.vcf);
+        //VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.vcf);
+        params.setFormat(ReturnFormat.vcf);
         String rtn = queryVariantsInternal(file,chromosome,params);
         logger.info(rtn);
         return rtn;
@@ -626,6 +622,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             throw new RuntimeException(t);
         }
     }
+
 
 
  

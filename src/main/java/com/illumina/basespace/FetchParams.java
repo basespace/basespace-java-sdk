@@ -127,7 +127,7 @@ public class FetchParams
         if (getLimit() != ALL) rtn.add("Limit",String.valueOf(getLimit()));
         if (getSortBy() != null) rtn.add("SortBy", getSortBy());
         rtn.add("SortDir",getSortDirection()==SortDirection.Ascending?"Asc":"Desc");
-        if (getOffSet()>0) rtn.add("Offset",String.valueOf(getOffSet()));
+        rtn.add("Offset",String.valueOf(getOffSet()));
         return rtn;
     }
 }

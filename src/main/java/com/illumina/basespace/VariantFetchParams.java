@@ -24,6 +24,14 @@ public class VariantFetchParams extends FetchParams
  
     }
     
+    public VariantFetchParams(int startPosition, int endPosition,int offset,int limit)
+    {
+        super();
+        this.startPosition = startPosition;
+        this.endPosition = endPosition;
+        this.setOffSet(offset);
+        this.setLimit(limit);
+    }
     
     
     public VariantFetchParams(int startPosition, int endPosition, ReturnFormat format)
