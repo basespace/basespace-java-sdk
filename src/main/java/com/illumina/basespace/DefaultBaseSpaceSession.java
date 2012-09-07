@@ -419,7 +419,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         try
         {
-            //VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.json);
             params.setFormat(ReturnFormat.json);
             String rtn = queryVariantsInternal(file,chromosome,params);
             logger.info(rtn);
@@ -440,7 +439,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     @Override
     public String queryVariantRaw(ExtendedFileInfo file, String chromosome,VariantFetchParams params)
     {
-        //VariantFetchParams params = new VariantFetchParams(start,end,ReturnFormat.vcf);
         params.setFormat(ReturnFormat.vcf);
         String rtn = queryVariantsInternal(file,chromosome,params);
         logger.info(rtn);
@@ -462,14 +460,24 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     .path(chromosome)
                     .build())
                     .queryParams(queryParams);
-    
             ClientResponse response = getClient().resource(resource.getURI())
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
-            return response.getEntity(String.class);
+            switch(response.getClientResponseStatus())
+            {
+                case OK:
+                    return response.getEntity(String.class);
+                default:
+                    Response status = mapper.readValue(response.getEntity(String.class),Response.class);
+                    throw new IllegalArgumentException(status.getResponseStatus().getMessage());
+            }
         }
         catch(ForbiddenResourceException fr)
         {
             throw fr;
+        }
+        catch(IllegalArgumentException iae)
+        {
+            throw iae;
         }
         catch(Throwable t)
         {
