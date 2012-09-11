@@ -48,8 +48,8 @@ public interface BaseSpaceConfiguration
     public String getApiRootUri();
    
     /**
-     * Get the URI fragment for requesting authorization code
-     * @return authorization URI
+     * Get the URI fragment for requesting an access token
+     * @return access token fragment URI
      */
     public String getAccessTokenUriFragment();
     
@@ -71,5 +71,15 @@ public interface BaseSpaceConfiguration
      */
     public int getProxyPort();
     
+    /**
+     * Get the URI fragment for requesting authorization code
+     * @return authorization fragment URI
+     */
     public String getAuthorizationUriFragment();
+    
+    /**
+     * Allows for pre-authorization. If present, SDK will not initiate OAuth workflow for obtaining an access token
+     * @return the access token the SDK should use for the session
+     */
+    public String getAccessToken();
 }

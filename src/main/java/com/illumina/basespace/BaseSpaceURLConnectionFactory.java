@@ -17,13 +17,14 @@ package com.illumina.basespace;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 
 import com.sun.jersey.client.urlconnection.HttpURLConnectionFactory;
 
-public class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
+class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
 {
     BaseSpaceConfiguration configuration = null;
     BaseSpaceURLConnectionFactory(BaseSpaceConfiguration config)
@@ -37,7 +38,7 @@ public class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
         Proxy proxy = null;
         if (configuration.getProxyHost() != null && configuration.getProxyHost().length() > 0)
         {
-            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(configuration.getProxyHost(), configuration.getProxyPort()));
+            proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(InetAddress.getByName(configuration.getProxyHost()), configuration.getProxyPort()));
         }
         return (HttpURLConnection) (proxy != null?url.openConnection(proxy):url.openConnection());
     }

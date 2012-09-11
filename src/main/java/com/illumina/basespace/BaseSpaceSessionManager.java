@@ -37,7 +37,6 @@ public final class BaseSpaceSessionManager
     private static Logger logger = Logger.getLogger(BaseSpaceSessionManager.class.getPackage().getName());
     private static BaseSpaceSessionManager singletonObject;
     private static final String ACCESS_DENIED = "access_denied";
-    //private static final String AUTHORIZATION_PENDING = "authorization_pending";
     
     private BaseSpaceSessionManager()
     {
@@ -61,15 +60,18 @@ public final class BaseSpaceSessionManager
     {
         BaseSpaceUtilities.assertNotNull(configuration, "configuration");
         return new DefaultBaseSpaceSession(configuration,requestAccessToken(configuration));
-
     }
 
-    
     protected String requestAccessToken(BaseSpaceConfiguration configuration)
             throws AccessDeniedException
     {
         try
         {
+            if (configuration.getAccessToken() != null)
+            {
+                return configuration.getAccessToken();
+            }
+                
             Form form = new Form();
             form.add("client_id", configuration.getClientId());
             form.add("scope",  configuration.getAuthorizationScope());
@@ -80,7 +82,7 @@ public final class BaseSpaceSessionManager
                     .path(configuration.getVersion())
                     .path(configuration.getAuthorizationUriFragment())
                     .build());
-            logger.info(resource.toString());
+            logger.finer(resource.toString());
         
             ClientResponse response = resource.accept(
                     MediaType.APPLICATION_XHTML_XML,
@@ -88,16 +90,13 @@ public final class BaseSpaceSessionManager
                     MediaType.APPLICATION_JSON)
                     .post(ClientResponse.class,form);
             String responseAsJSONString = response.getEntity(String.class);
-            logger.info(responseAsJSONString);
+            logger.finer(responseAsJSONString);
             
-            ObjectMapper mapper = new ObjectMapper();
+            final ObjectMapper mapper = new ObjectMapper();
             AuthVerificationCode authCode = mapper.readValue(responseAsJSONString, AuthVerificationCode.class);
-            logger.info(authCode.toString());
+            logger.finer(authCode.toString());
             
-            //TODO: This is a temporary fix
-            //String uri = authCode.getVerificationWithCodeUri().replace("https://oauth/", "https://cloud-endor.illumina.com/oauth/");
             String uri = authCode.getVerificationWithCodeUri();
-            
             BrowserLaunch.openURL(uri);
             
             //Poll for approval
@@ -123,17 +122,20 @@ public final class BaseSpaceSessionManager
                         MediaType.APPLICATION_JSON)
                         .post(ClientResponse.class,form);
                
+                responseAsJSONString = response.getEntity(String.class); 
                 switch(response.getClientResponseStatus())
                 {
                     case BAD_REQUEST:
-                        AccessToken token = mapper.readValue(response.getEntity(String.class), AccessToken.class);
+
+                        AccessToken token = mapper.readValue(responseAsJSONString, AccessToken.class);
                         if (token.getError().equalsIgnoreCase(ACCESS_DENIED))
                         {
                             throw new AccessDeniedException();
                         }
                         break;
                     case OK:
-                        token = mapper.readValue(response.getEntity(String.class), AccessToken.class);
+                        logger.info(responseAsJSONString);
+                        token = mapper.readValue(responseAsJSONString, AccessToken.class);
                         accessToken = token.getAccessToken();
                 }
             } 

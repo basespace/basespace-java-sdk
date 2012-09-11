@@ -190,6 +190,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 .get(InputStream.class);
             return in;
         }
+        catch(ForbiddenResourceException fr)
+        {
+            throw fr;
+        }
         catch(Throwable t)
         {
             throw new RuntimeException(t);
@@ -544,9 +548,9 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private Client getClient()
     {
         if (client !=  null)return client;
-        return client = createClient(false);
+        return client = createClient();
     }
-    private Client createClient(boolean ssl)
+    private Client createClient()
     {
         ClientConfig config = new DefaultClientConfig();
         
@@ -562,7 +566,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 logger.info(request.getMethod() + " to " + request.getURI().toString());
                 if (accessToken != null)
                 {
-                    logger.fine("Auth token " + accessToken);
+                    logger.finer("Auth token " + accessToken);
                     request.getHeaders().add("x-access-token",accessToken);
                 }
                 ClientResponse response = getNext().handle(request); 
