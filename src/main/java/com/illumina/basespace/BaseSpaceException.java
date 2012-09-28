@@ -13,32 +13,31 @@
 *  limitations under the License.
 */
 
+
 package com.illumina.basespace;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class Response
+/**
+ * Base class for BaseSpace specific exceptions
+ * @author bking
+ *
+ */
+public class BaseSpaceException extends RuntimeException
 {
-    @JsonProperty("ResponseStatus")
-    private ResponseStatus responseStatus;
-    public ResponseStatus getResponseStatus()
+    public BaseSpaceException(String message,Throwable cause)
     {
-        return responseStatus;
+        super(message,cause);
     }
-    public void setResponseStatus(ResponseStatus responseStatus)
-    {
-        this.responseStatus = responseStatus;
-    }
+
     
-    @JsonProperty("Notifications")
-    private String[]notifications;
-    public String[] getNotifications()
+    public BaseSpaceException(Throwable cause)
     {
-        return notifications;
+        super(cause);
     }
-    public void setNotifications(String[] notifications)
+
+    public BaseSpaceException()
     {
-        this.notifications = notifications;
+        super();
+ 
     }
     
     

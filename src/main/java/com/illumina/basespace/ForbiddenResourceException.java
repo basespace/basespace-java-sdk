@@ -23,7 +23,7 @@ import java.net.URI;
  * @author bking
  *
  */
-public class ForbiddenResourceException extends RuntimeException
+public class ForbiddenResourceException extends BaseSpaceException
 {
     private URI uri;
     public ForbiddenResourceException(URI uri)
@@ -33,6 +33,6 @@ public class ForbiddenResourceException extends RuntimeException
     
     public String getMessage()
     {
-        return "Resource at " + uri.toString() + " is forbidden. Please check permissions.";
+        return uri.toString() + " is forbidden. Please check permissions.";
     }
 }

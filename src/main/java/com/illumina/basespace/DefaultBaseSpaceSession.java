@@ -132,19 +132,19 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
     
     @Override
-    public List<File> getFiles(Sample sample,FetchParams params)
+    public List<File> getFiles(Sample sample,FileFetchParams params)
     {
         return (List)getList(sample,File.class,params);
     }
     
     @Override
-    public List<File> getFiles(Run run,FetchParams params)
+    public List<File> getFiles(Run run,FileFetchParams params)
     {
         return (List)getList(run,File.class,params);
     }
     
     @Override
-    public List<File> getFiles(AppResult appResults, FetchParams params)
+    public List<File> getFiles(AppResult appResults, FileFetchParams params)
     {
         return (List)getList(appResults,File.class,params);
     }
@@ -175,8 +175,33 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         try
         {
+            return getInputStreamInternal(file,start,end,false);
+        }
+        catch(BaseSpaceException bs)
+        {
+            try
+            {
+                //File access has probably expired, attempt to obtain new link, if this doesn't work, exception out
+                return getInputStreamInternal(file,start,end,true);
+            }
+            catch (BaseSpaceException bs1)
+            {
+                throw bs1;
+            }
+        }
+        catch(RuntimeException t)
+        {
+            throw t;
+        }
+        
+    }
+    
+    private InputStream getInputStreamInternal(File file,long start,long end,boolean refreshMeta)
+    {
+        try
+        {
             FileMetaData fileInfo = fileToUriMap.get(file.getId());
-            if (fileInfo == null || new Date().after(fileInfo.getExpires()))
+            if (refreshMeta || (fileInfo == null || new Date().after(fileInfo.getExpires())))
             {
                 fileInfo = getFileContentInfo(file);
                 fileToUriMap.put(file.getId(), fileInfo);
@@ -190,15 +215,14 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 .get(InputStream.class);
             return in;
         }
-        catch(ForbiddenResourceException fr)
+        catch(BaseSpaceException bs)
         {
-            throw fr;
+            throw bs;
         }
         catch(Throwable t)
         {
             throw new RuntimeException(t);
         }
-        
     }
     
     private FileMetaData getFileContentInfo(File file)
@@ -219,6 +243,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             FileMetaData fileInfo = mapper.readValue( mapper.readValue(sResp, JsonNode.class).findPath(RESPONSE).toString(), FileMetaData.class);
             logger.info(fileInfo.toString());
             return fileInfo;
+        }
+        catch(BaseSpaceException bs)
+        {
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -267,6 +295,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             fos = null;
             in = null;
         }
+        catch(BaseSpaceException bs)
+        {
+            throw bs;
+        }
         catch(Throwable t)
         {
             throw new RuntimeException("Error during file download",t);
@@ -301,11 +333,12 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     .path(path.value()).path(id)
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(ClientResponse.class);
             String rtn = response.getEntity(String.class);
+            logger.info(rtn);
             return (T) mapper.readValue( mapper.readValue(rtn, JsonNode.class).findPath(RESPONSE).toString(), clazz);
         }
-        catch(ForbiddenResourceException fr)
+        catch(BaseSpaceException bs)
         {
-            throw fr;
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -327,9 +360,9 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             logger.info(rtn);
             return (T) mapper.readValue( mapper.readValue(rtn, JsonNode.class).findPath(RESPONSE).toString(), clazz);
         }
-        catch(RuntimeException rte)
+        catch(BaseSpaceException bs)
         {
-            throw rte;
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -366,13 +399,13 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     return record;
                 default:
                     data = response.getEntity(String.class);       
-                    Response status = mapper.readValue(data,Response.class);
+                    BasicResponse status = mapper.readValue(data,BasicResponse.class);
                     throw new IllegalArgumentException(status.getResponseStatus().getMessage());
             }
         }
-        catch(RuntimeException rte)
+        catch(BaseSpaceException bs)
         {
-            throw rte;
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -403,13 +436,13 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     return metaData;
                 default:
                     data = response.getEntity(String.class);       
-                    Response status = mapper.readValue(data,Response.class);
+                    BasicResponse status = mapper.readValue(data,BasicResponse.class);
                     throw new IllegalArgumentException(status.getResponseStatus().getMessage());
             }
         }
-        catch(RuntimeException rte)
+        catch(BaseSpaceException bs)
         {
-            throw rte;
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -433,6 +466,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 records.add((VariantRecord)mapper.readValue(responseNode.get(i).toString(),VariantRecord.class));
             }            
             return records;
+        }
+        catch(BaseSpaceException bs)
+        {
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -471,13 +508,13 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 case OK:
                     return response.getEntity(String.class);
                 default:
-                    Response status = mapper.readValue(response.getEntity(String.class),Response.class);
+                    BasicResponse status = mapper.readValue(response.getEntity(String.class),BasicResponse.class);
                     throw new IllegalArgumentException(status.getResponseStatus().getMessage());
             }
         }
-        catch(ForbiddenResourceException fr)
+        catch(BaseSpaceException bs)
         {
-            throw fr;
+            throw bs;
         }
         catch(IllegalArgumentException iae)
         {
@@ -514,16 +551,20 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     .queryParams(queryParams)
                     .accept(MediaType.APPLICATION_XHTML_XML,MediaType.APPLICATION_JSON).get(String.class);
             logger.info(response);
+            
+            ItemListMetaData itemMetaData = (ItemListMetaData) mapper.readValue( mapper.readValue(response, JsonNode.class).findPath(RESPONSE).toString(), ItemListMetaData.class);
             JsonNode responseNode = mapper.readValue(response, JsonNode.class).findPath(ITEMS);
             for(int i = 0; i < responseNode.size(); i++)
             {
-                rtn.add(mapper.readValue(responseNode.get(i).toString(),clazz));
+                BaseSpaceEntity obj = mapper.readValue(responseNode.get(i).toString(),clazz);
+                obj.setListMetaData(itemMetaData);
+                rtn.add(obj);
             }
             return rtn;
         }
-        catch(ForbiddenResourceException fr)
+        catch(BaseSpaceException bs)
         {
-            throw fr;
+            throw bs;
         }
         catch(Throwable t)
         {
@@ -569,12 +610,19 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     logger.finer("Auth token " + accessToken);
                     request.getHeaders().add("x-access-token",accessToken);
                 }
-                ClientResponse response = getNext().handle(request); 
-                switch(response.getClientResponseStatus())
+                ClientResponse response = null;
+                try
                 {
-                    case FORBIDDEN:
-                        throw new ForbiddenResourceException(request.getURI());
-                        
+                    response = getNext().handle(request);
+                    switch(response.getClientResponseStatus())
+                    {
+                        case FORBIDDEN:
+                            throw new ForbiddenResourceException(request.getURI());
+                    }
+                }
+                catch(ClientHandlerException t)
+                {
+                    throw new BaseSpaceConnectionException(request.getURI().toString(),t);
                 }
                 return response;
             }
@@ -634,8 +682,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             throw new RuntimeException(t);
         }
     }
-
-
 
  
 }

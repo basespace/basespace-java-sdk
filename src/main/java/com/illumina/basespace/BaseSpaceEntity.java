@@ -97,7 +97,17 @@ public abstract class BaseSpaceEntity implements Serializable
     {
         this.dateCreated = dateCreated;
     }
-     
+    
+    private ItemListMetaData listMetaData;
+    public ItemListMetaData getListMetaData()
+    {
+        return listMetaData;
+    }
+    public void setListMetaData(ItemListMetaData listMetaData)
+    {
+        this.listMetaData = listMetaData;
+    }
+    
     @Override
     public int hashCode()
     {

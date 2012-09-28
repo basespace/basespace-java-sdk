@@ -22,9 +22,12 @@ import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.ClientFilter;
 import com.sun.jersey.api.representation.Form;
 
 /**
@@ -55,7 +58,12 @@ public final class BaseSpaceSessionManager
         throw new CloneNotSupportedException();
     }
 
-      
+    /**
+     * Request a BaseSpace session  
+     * @param configuration configuration for the session
+     * @return a new BaseSpaceSession
+     * @throws AccessDeniedException if an access token could not be obtained from BaseSpace
+     */
     public BaseSpaceSession requestSession(BaseSpaceConfiguration configuration)throws AccessDeniedException
     {
         BaseSpaceUtilities.assertNotNull(configuration, "configuration");
@@ -78,6 +86,25 @@ public final class BaseSpaceSessionManager
             form.add("response_type", "device_code");
 
             Client client = Client.create(new DefaultClientConfig());
+            client.addFilter(new ClientFilter()
+            {
+                @Override
+                public ClientResponse handle(ClientRequest request) throws ClientHandlerException
+                {
+                    logger.fine(request.getMethod() + " to " + request.getURI().toString());
+                    ClientResponse response = null;
+                    try
+                    {
+                        response = getNext().handle(request);
+                    }
+                    catch(ClientHandlerException t)
+                    {
+                        throw new BaseSpaceConnectionException(request.getURI().toString(),t);
+                    }
+                    return response;
+                }
+            });
+            
             WebResource resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
                     .path(configuration.getVersion())
                     .path(configuration.getAuthorizationUriFragment())
@@ -142,14 +169,14 @@ public final class BaseSpaceSessionManager
             return accessToken;
             
         }
-        catch(AccessDeniedException denied)
+        catch(BaseSpaceException bs)
         {
-            throw denied;
+            throw bs;
         }
         catch(Throwable t)
         {
             t.printStackTrace();
-            throw new RuntimeException(t);
+            throw new RuntimeException("Error requesting access token from BaseSpace: " + t.getMessage());
         }
     }
     

@@ -15,13 +15,17 @@
 
 package com.illumina.basespace;
 
-public class AccessDeniedException extends Exception
+/**
+ * This exception wraps a BaseSpace Access Denied response when attempting to obtain an access token
+ * @author bking
+ *
+ */
+public class AccessDeniedException extends BaseSpaceException
 {
-
     @Override
     public String getMessage()
     {
-        return "The user denied authorization for the application";
+        return "The user was denied authorization for the application";
     }
     
 }

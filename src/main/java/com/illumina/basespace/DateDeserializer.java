@@ -30,7 +30,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 class DateDeserializer extends JsonDeserializer<Date> 
 {
     private static final DateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
-    protected Logger logger = Logger.getLogger(BaseSpaceEntity.class.getPackage().getName());
+    protected Logger logger = Logger.getLogger(DateDeserializer.class.getPackage().getName());
     
     @Override
     public Date deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException
@@ -38,7 +38,7 @@ class DateDeserializer extends JsonDeserializer<Date>
         //   /Date(2012-05-01T17:37:53.0000000)/
         try
         {
-            return dateFormat.parse( parser.getText().substring(6,parser.getTextLength()-2));
+            return dateFormat.parse(parser.getText());
         }
         catch(Throwable t)
         {
@@ -46,6 +46,4 @@ class DateDeserializer extends JsonDeserializer<Date>
             return null;
         }
     }
-    
-    
 }

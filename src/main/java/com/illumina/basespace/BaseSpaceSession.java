@@ -112,7 +112,7 @@ public interface BaseSpaceSession
      * @param params optional fetch parameters to limit the scope of the result list
      * @return a list of files, or an empty list
      */
-    public List<File> getFiles(Sample sample,FetchParams params);
+    public List<File> getFiles(Sample sample,FileFetchParams params);
     
     /**
      * Get a list of files for an app result
@@ -120,7 +120,7 @@ public interface BaseSpaceSession
      * @param params optional fetch parameters to limit the scope of the result list
      * @return a list of files, or an empty list
      */
-    public List<File> getFiles(AppResult appResult,FetchParams params);
+    public List<File> getFiles(AppResult appResult,FileFetchParams params);
     
     /**
      * Get a list of files for a run
@@ -128,7 +128,7 @@ public interface BaseSpaceSession
      * @param params optional fetch parameters to limit the scope of the result list
      * @return a list of files, or an empty list
      */
-    public List<File> getFiles(Run run,FetchParams params);
+    public List<File> getFiles(Run run,FileFetchParams params);
     
     /**
      * Retrieve a file by id

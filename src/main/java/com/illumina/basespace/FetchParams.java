@@ -43,9 +43,14 @@ public class FetchParams
      */
     public FetchParams(int limit)
     {
-        super();
-        this.limit = limit;
+        this(limit,0);
     }
+    
+    public FetchParams(int limit,int offset)
+    {
+        this(null,SortDirection.Ascending,limit,0);
+    }
+    
     /**
      * Create fetch params
      * @param sortBy the sort by property name of the target entity
@@ -54,11 +59,18 @@ public class FetchParams
      */
     public FetchParams(String sortBy, SortDirection sortDirection, int limit)
     {
+        this(sortBy,sortDirection,limit,0);
+    }
+    
+    public FetchParams(String sortBy, SortDirection sortDirection, int limit,int offset)
+    {
         super();
         this.sortBy = sortBy;
         this.sortDirection = sortDirection;
         this.limit = limit;
+        this.offSet = offset;
     }
+    
     /**
      * Get the sort by property name
      * @return the sort by name
@@ -117,6 +129,9 @@ public class FetchParams
     {
         this.offSet = offSet;
     }
+    
+    
+    
     /**
      * Convert these parameters to a map
      * @return the parameters as a map

@@ -51,21 +51,34 @@ public class Project extends BaseSpaceEntity
         this.hrefSamples = hrefSamples;
     }
     
-    @JsonProperty("HrefAnalyses")
-    private URI hrefAnalyses;
-    public URI getAnalysesHref()
+    @JsonProperty("HrefAppResults")
+    private URI hrefAppResults;
+    public URI getAppResultsHref()
     {
-        return hrefAnalyses;
+        return hrefAppResults;
     }
-    protected void setAnalysesHref(URI hrefAnalyses)
+    protected void setAppResultsHref(URI hrefAppResults)
     {
-        this.hrefAnalyses = hrefAnalyses;
+        this.hrefAppResults = hrefAppResults;
     }
-
+    
+    @JsonProperty("HrefBaseSpaceUI")
+    private String hrefBaseSpaceUI;
+    public String getHrefBaseSpaceUI()
+    {
+        return hrefBaseSpaceUI;
+    }
+    public void setHrefBaseSpaceUI(String hrefBaseSpaceUI)
+    {
+        this.hrefBaseSpaceUI = hrefBaseSpaceUI;
+    }
     @Override
     public String toString()
     {
-        return "Project [toString()=" + super.toString() + "]";
+        return "Project [userOwnedBy=" + userOwnedBy + ", hrefSamples=" + hrefSamples + ", hrefAppResults="
+                + hrefAppResults + ", hrefBaseSpaceUI=" + hrefBaseSpaceUI + ", toString()=" + super.toString() + "]";
     }
+    
+    
     
 }
