@@ -108,6 +108,39 @@ public abstract class BaseSpaceEntity implements Serializable
         this.listMetaData = listMetaData;
     }
     
+    @JsonProperty("UserOwnedBy")
+    private User userOwnedBy;
+    public User getUserOwnedBy()
+    {
+        return userOwnedBy;
+    }
+    protected void setUserOwnedBy(User userOwnedBy)
+    {
+        this.userOwnedBy = userOwnedBy;
+    }
+    
+    @JsonProperty("Status")
+    private String status;
+    public String getStatus()
+    {
+        return status;
+    }
+    protected void setStatus(String status)
+    {
+        this.status = status;
+    }
+    
+    @JsonProperty("StatusSummary")
+    private String statusSummary;
+    public String getStatusSummary()
+    {
+        return statusSummary;
+    }
+    public void setStatusSummary(String statusSummary)
+    {
+        this.statusSummary = statusSummary;
+    }
+    
     @Override
     public int hashCode()
     {

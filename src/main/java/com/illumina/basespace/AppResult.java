@@ -1,5 +1,7 @@
 package com.illumina.basespace;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -9,36 +11,62 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @UriPath("/appresults")
 public class AppResult extends BaseSpaceEntity
 {
-    @JsonProperty("Status")
-    private String status;
-    public String getStatus()
+    
+    @JsonProperty("Description")
+    private String description;
+    public String getDescription()
     {
-        return status;
+        return description;
     }
-    protected void setStatus(String status)
+    public void setDescription(String description)
     {
-        this.status = status;
+        this.description = description;
     }
     
-    @JsonProperty("UserOwnedBy")
-    private User userOwnedBy;
-    public User getUserOwnedBy()
+    @JsonProperty("HrefFiles")
+    private URI hrefFiles;
+    public URI getHrefFiles()
     {
-        return userOwnedBy;
+        return hrefFiles;
     }
-    protected void setUserOwnedBy(User userOwnedBy)
+    public void setHrefFiles(URI hrefFiles)
     {
-        this.userOwnedBy = userOwnedBy;
+        this.hrefFiles = hrefFiles;
     }
     
-    @JsonProperty("StatusSummary")
-    private String statusSummary;
-    public String getStatusSummary()
+    @JsonProperty("HrefGenome")
+    private URI hrefGenome;
+    public URI getHrefGenome()
     {
-        return statusSummary;
+        return hrefGenome;
     }
-    public void setStatusSummary(String statusSummary)
+    public void setHrefGenome(URI hrefGenome)
     {
-        this.statusSummary = statusSummary;
+        this.hrefGenome = hrefGenome;
     }
+    
+    @JsonProperty("AppSession")
+    private AppSession appSession;
+    public AppSession getAppSession()
+    {
+        return appSession;
+    }
+    public void setAppSession(AppSession appSession)
+    {
+        this.appSession = appSession;
+    }
+    
+    @JsonProperty("References")
+    private Reference[] references;
+    public Reference[] getReferences()
+    {
+        return references;
+    }
+    public void setReferences(Reference[] references)
+    {
+        this.references = references;
+    }
+    
+    
+    
 }

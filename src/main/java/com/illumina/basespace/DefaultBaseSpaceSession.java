@@ -112,6 +112,12 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         return getSingle(Sample.class,id);
     }
+    
+    @Override
+    public AppResult getAppResult(String id)
+    {
+        return getSingle(AppResult.class,id);
+    }
 
     @Override
     public List<AppResult> getAppResults(Project project, FetchParams params)

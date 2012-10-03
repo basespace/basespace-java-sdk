@@ -12,36 +12,39 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 */
-
 package com.illumina.basespace;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Deprecated
-public class ExtendedFileInfo extends File
+/**
+ * A reference point between one or more BaseSpace entities
+ * @author bking
+ *
+ */
+public class Reference extends BaseSpaceEntity
 {
-    @JsonProperty("HrefVariants")
-    private String hrefVariants;
-    public String getHrefVariants()
+    @JsonProperty("Rel")
+    private String relation;
+    public String getRelation()
     {
-        return hrefVariants;
+        return relation;
     }
-    protected void setHrefVariants(String hrefVariants)
+    public void setRelation(String relation)
     {
-        this.hrefVariants = hrefVariants;
+        this.relation = relation;
     }
     
-    @JsonProperty("HrefCoverage")
-    private String hrefCoverage;
-    public String getHrefCoverage()
+    @JsonProperty("Type")
+    private String type;
+    public String getType()
     {
-        return hrefCoverage;
+        return type;
     }
-    public void setHrefCoverage(String hrefCoverage)
+    public void setType(String type)
     {
-        this.hrefCoverage = hrefCoverage;
+        this.type = type;
     }
-
+    
     @JsonProperty("HrefContent")
     private String hrefContent;
     public String getHrefContent()
@@ -53,21 +56,16 @@ public class ExtendedFileInfo extends File
         this.hrefContent = hrefContent;
     }
     
-    @JsonProperty("UploadStatus")
-    private String uploadStatus;
-    public String getUploadStatus()
+    @JsonProperty("Content")
+    private Content content;
+    public Content getContent()
     {
-        return uploadStatus;
+        return content;
     }
-    public void setUploadStatus(String uploadStatus)
+    public void setContent(Content content)
     {
-        this.uploadStatus = uploadStatus;
+        this.content = content;
     }
     
-    @Override
-    public String toString()
-    {
-        return "VariantFile [hrefVariants=" + hrefVariants + ", hrefContent=" + hrefContent + ", toString()="
-                + super.toString() + "]";
-    }
+    
 }

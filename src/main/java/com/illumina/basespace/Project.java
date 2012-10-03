@@ -28,18 +28,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @UriPath("/projects")
 public class Project extends BaseSpaceEntity
 {
-
-    @JsonProperty("UserOwnedBy")
-    private User userOwnedBy;
-    public User getUserOwnedBy()
-    {
-        return userOwnedBy;
-    }
-    protected void setUserOwnedBy(User userOwnedBy)
-    {
-        this.userOwnedBy = userOwnedBy;
-    }
-    
     @JsonProperty("HrefSamples")
     private URI hrefSamples;
     public URI getSamplesHref()
@@ -75,7 +63,7 @@ public class Project extends BaseSpaceEntity
     @Override
     public String toString()
     {
-        return "Project [userOwnedBy=" + userOwnedBy + ", hrefSamples=" + hrefSamples + ", hrefAppResults="
+        return "Project [hrefSamples=" + hrefSamples + ", hrefAppResults="
                 + hrefAppResults + ", hrefBaseSpaceUI=" + hrefBaseSpaceUI + ", toString()=" + super.toString() + "]";
     }
     

@@ -12,40 +12,26 @@
 *  See the License for the specific language governing permissions and
 *  limitations under the License.
 */
-
 package com.illumina.basespace;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
- * A BaseSpace instrument run
+ * Represents content attached to a Reference
  * @author bking
  *
  */
-@UriPath("/runs")
-public class Run extends BaseSpaceEntity
+public class Content extends BaseSpaceEntity
 {
-    @JsonProperty("ExperimentName")
-    private String experimentName;
-    public String getExperimentName()
+    @JsonProperty("SampleId")
+    private String sampleId;
+    public String getSampleId()
     {
-        return experimentName;
+        return sampleId;
     }
-    protected void setExperimentName(String experimentName)
+    public void setSampleId(String sampleId)
     {
-        this.experimentName = experimentName;
+        this.sampleId = sampleId;
     }
-    @Override
-    public String getName()
-    {
-        return getExperimentName();
-    }
-    @Override
-    public String toString()
-    {
-        return "Run [experimentName=" + experimentName + ", toString()=" + super.toString() + "]";
-    }
-    
     
 }

@@ -88,6 +88,14 @@ public interface BaseSpaceSession
      * @return a list of app results, or an empty list
      */
     public List<AppResult> getAppResults(Project project,FetchParams params);
+    
+    /**
+     * Retrieve an appresult by id
+     * @param id
+     * @return the retrieved appresult
+     * @throws ForbiddenResourceException if inadequate permissions in the current context to perform the operation
+     */
+    public AppResult getAppResult(String id)throws ForbiddenResourceException;
   
     /**
      * Retrieve a run by id
@@ -193,6 +201,7 @@ public interface BaseSpaceSession
      * @param clazz the subclass of file to load with more specific information
      * @return the specific subclass of file with extended properties loaded
      */
+    @Deprecated
     public <T extends File>T getFileExtendedInfo(long fileId,Class<T>clazz);
     
     /**
