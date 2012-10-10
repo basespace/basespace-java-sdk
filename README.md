@@ -5,5 +5,5 @@ This is the initial client library for support for most v1pre API functions of B
 The JavaDoc can be viewed here http://basespace.github.com/basespace-java-sdk/
 
 
-
+Please refer to the [Java SDK Overview](https://developer.basespace.illumina.com/docs/content/documentation/sdk-samples/java-sdk-overview) for more information.
 
