@@ -277,7 +277,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 }
                 target = new java.io.File(target,file.getName());
             }
-            in = getFileInputStream(file);
+            in = getFileInputStream(file); 
             fos = new FileOutputStream(target);
             long progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
@@ -326,6 +326,94 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             }
         }
     }
+
+
+    /** 
+     * download
+     *
+     * Expose a single chunk of download to the client.  The goal is to remain a single-threaded
+     * API.  Multiple threads may use this call to do parallel fetches of a single file. 
+     *
+     * Assumes:  If target = directory, create file with name file.getName()
+     * Chunks are named: name_c<#>.dat 
+     * <#> starts at 0, goes to file.size() / CHUNK_SIZE + file.size()%CHUNK?1:0
+     * Each call is by a single thread.  
+     *
+     * Actually we just do none of the above.  Just a range download and will place in file.  Or, if directory
+     * will place in target/<file.getName()>-start-len.dat
+     */
+    public void download(final com.illumina.basespace.File file, int start, int len, java.io.File target)
+    {
+        FileOutputStream fos = null;
+        InputStream in = null;
+        boolean canceled = false;
+	final int CHUNK_SIZE = 4096;
+
+	try{
+	    if ((start + len) > file.getSize()){
+		throw new Exception("Invalid download range start("+start+ ") + len ("+len+") > file size ("+file.getSize()+")");
+	    }
+            if (target.isDirectory())
+		{
+                if (!target.exists() && !target.mkdirs())
+		    {
+			throw new IllegalArgumentException("Unable to create local folder " + target.toString());
+		    }
+                target = new java.io.File(target,new String(file.getName()+"-"+Integer.toString(start)+
+							    "-"+Integer.toString(len)+".dat"));
+		}
+	    in = getFileInputStream(file,  new Integer(start).longValue(), new Integer(start+len).longValue()); // Key difference
+            fos = new FileOutputStream(target);
+            long progress = 0;
+            byte[] outputByte = new byte[CHUNK_SIZE];
+            int bytesRead = 0;
+            
+            readTheFile:
+            while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
+            {
+                fos.write(outputByte, 0, bytesRead);
+                progress += bytesRead;
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,file.getSize());
+                fireProgressEvent(evt);
+                if (evt.isCanceled())
+                {
+                    canceled = true;
+                    break readTheFile;
+                }
+            }
+            fos.close();
+            in.close();
+            fos = null;
+            in = null;
+        }
+        catch(BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException("Error during file download",t);
+        }
+        finally
+        {
+            try{if (in != null)in.close();}catch(Throwable t){}
+            try{if (fos != null)fos.close();}catch(Throwable t){}
+             if (canceled)
+            {
+                if (target != null)target.delete();
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),0,file.getSize());
+                fireCanceledEvent(evt);
+            }
+            else
+            {
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),file.getSize(),file.getSize());
+                fireCompleteEvent(evt);
+            }
+        }
+    }
+
+
+
 
     
     protected <T extends BaseSpaceEntity> T getSingle(Class<? extends BaseSpaceEntity>clazz,String id)
