@@ -16,6 +16,7 @@
 package com.illumina.basespace;
 
 import java.net.URI;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -160,4 +161,15 @@ public class Sample extends BaseSpaceEntity
     {
         this.sampleId = sampleId;
     }
+    @Override
+    public String toString()
+    {
+        return "Sample [hrefGenome=" + hrefGenome + ", experimentName=" + experimentName + ", sampleNumber="
+                + sampleNumber + ", hrefFiles=" + hrefFiles + ", appSession=" + appSession + ", isPairedEnd="
+                + isPairedEnd + ", read1=" + read1 + ", read2=" + read2 + ", numberOfReadsRaw=" + numberOfReadsRaw
+                + ", numberOfReadsPF=" + numberOfReadsPF + ", references=" + Arrays.toString(references)
+                + ", sampleId=" + sampleId + ", toString()=" + super.toString() + "]";
+    }
+    
+    
 }

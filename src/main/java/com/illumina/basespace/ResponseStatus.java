@@ -15,8 +15,10 @@
 
 package com.illumina.basespace;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties({ "Errors"})
 public class ResponseStatus
 {
     @JsonProperty("ErrorCode")
@@ -40,4 +42,5 @@ public class ResponseStatus
         this.message = message;
     }
     
+
 }

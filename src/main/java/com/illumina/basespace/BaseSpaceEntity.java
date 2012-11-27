@@ -166,10 +166,15 @@ public abstract class BaseSpaceEntity implements Serializable
     @Override
     public String toString()
     {
-        return "BaseSpaceEntity [Id=" + Id + ", href=" + href + ", name=" + name + ", dateCreated=" + dateCreated + "]";
+        return "BaseSpaceEntity [Id=" + Id + ", href=" + href + ", name=" + name + ", dateCreated=" + dateCreated
+                + ", listMetaData=" + listMetaData + ", userOwnedBy=" + userOwnedBy + ", status=" + status
+                + ", statusSummary=" + statusSummary + "]";
     }
 
 
+    
+
+    
     
     
 
