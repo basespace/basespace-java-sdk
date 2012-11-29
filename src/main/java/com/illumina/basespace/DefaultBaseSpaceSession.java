@@ -14,7 +14,12 @@
 */
 package com.illumina.basespace;
 
+import java.nio.ByteBuffer;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.channels.FileChannel;
 import java.io.FileOutputStream;
+import java.io.RandomAccessFile;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -56,7 +61,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private static final String RESPONSE = "Response";
     private static final String ITEMS = "Items";
     private List<DownloadListener>downloadListeners;
-    private BaseSpaceConfiguration configuration;
+    private BaseSpaceConfiguration configuration; 
     private Map<Long,FileMetaData>fileToUriMap = new HashMap<Long,FileMetaData>();
     
     /**
@@ -212,6 +217,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 fileInfo = getFileContentInfo(file);
                 fileToUriMap.put(file.getId(), fileInfo);
             }
+
             InputStream in = getClient()
                 .resource(new URI(fileInfo.getHrefContent()))
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
@@ -331,39 +337,43 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     /** 
      * download
      *
-     * Expose a single chunk of download to the client.  The goal is to remain a single-threaded
-     * API.  Multiple threads may use this call to do parallel fetches of a single file. 
+     * Expose a single chunk of download to the client.  Thread-safe
+     * API call.  Multiple threads may use this call to do parallel
+     * fetches of a single file.
      *
-     * Assumes:  If target = directory, create file with name file.getName()
-     * Chunks are named: name_c<#>.dat 
-     * <#> starts at 0, goes to file.size() / CHUNK_SIZE + file.size()%CHUNK?1:0
-     * Each call is by a single thread.  
+     * This is a range download from file, starting at fileStart for
+     * len bytes.  It will write data into target starting at
+     * targetStart.  If file is a directory, this will use
+     * target/<file.getName()>-start-len.dat
      *
-     * Actually we just do none of the above.  Just a range download and will place in file.  Or, if directory
-     * will place in target/<file.getName()>-start-len.dat
      */
-    public void download(final com.illumina.basespace.File file, int start, int len, java.io.File target)
+    @Override
+    public void download(final com.illumina.basespace.File file, long fileStart, long len, java.io.File target,
+			     long targetStart)
     {
         FileOutputStream fos = null;
+        RandomAccessFile ras = null;
         InputStream in = null;
         boolean canceled = false;
 	final int CHUNK_SIZE = 4096;
 
 	try{
-	    if ((start + len) > file.getSize()){
-		throw new Exception("Invalid download range start("+start+ ") + len ("+len+") > file size ("+file.getSize()+")");
+	    if ((fileStart + len) > file.getSize()){
+		throw new Exception("Invalid download range start("+fileStart+ ") + len ("+len+") > file size ("+file.getSize()+")");
 	    }
-            if (target.isDirectory())
-		{
+            if (target.isDirectory()){
                 if (!target.exists() && !target.mkdirs())
 		    {
 			throw new IllegalArgumentException("Unable to create local folder " + target.toString());
 		    }
-                target = new java.io.File(target,new String(file.getName()+"-"+Integer.toString(start)+
-							    "-"+Integer.toString(len)+".dat"));
-		}
-	    in = getFileInputStream(file,  new Integer(start).longValue(), new Integer(start+len).longValue()); // Key difference
-            fos = new FileOutputStream(target);
+                target = new java.io.File(target,new String(file.getName()));
+	    }
+	    in = getFileInputStream(file,  fileStart, fileStart+len-1); // These are *positions*; end at len minus 1
+	    ras = new RandomAccessFile(target,"rw");
+
+	    FileChannel fc = ras.getChannel(); // Open for WRITE default. 
+
+	    fc.position(targetStart);  // Place the position at our place in the file
             long progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
             int bytesRead = 0;
@@ -371,9 +381,14 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             readTheFile:
             while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
             {
-                fos.write(outputByte, 0, bytesRead);
+		// OK, I'm making a new ByteBuffer for each read, YUCK! 
+		// probably better than calling .put(byte[]) (that probably does a copy)
+		ByteBuffer bb = ByteBuffer.wrap(outputByte,0,bytesRead);
+		//		logger.info("------FC at ("+fc.position()+") setting WRITE at ("+targetStart+progress+")");
+		fc.write(bb);
+		fc.force(true);
                 progress += bytesRead;
-                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,file.getSize());
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireProgressEvent(evt);
                 if (evt.isCanceled())
                 {
@@ -381,9 +396,9 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     break readTheFile;
                 }
             }
-            fos.close();
+	    ras.close();
             in.close();
-            fos = null;
+	    ras = null;
             in = null;
         }
         catch(BaseSpaceException bs)
@@ -397,16 +412,16 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         finally
         {
             try{if (in != null)in.close();}catch(Throwable t){}
-            try{if (fos != null)fos.close();}catch(Throwable t){}
+            try{if (ras != null)ras.close();}catch(Throwable t){}
              if (canceled)
             {
                 if (target != null)target.delete();
-                DownloadEvent evt = new DownloadEvent(this,file.getHref(),0,file.getSize());
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),0,len);
                 fireCanceledEvent(evt);
             }
             else
             {
-                DownloadEvent evt = new DownloadEvent(this,file.getHref(),file.getSize(),file.getSize());
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),len,len);
                 fireCompleteEvent(evt);
             }
         }
@@ -728,40 +743,51 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         if (downloadListeners == null)
             downloadListeners =  Collections.synchronizedList(new ArrayList<DownloadListener>());
-        
-        if (!downloadListeners.contains(listener))
-            downloadListeners.add(listener);
+	// Though this is a synchronized list, you *must* manually synchronize when iterating on it
+	// Also, if you're doing a test-and-set, you need an external lock. 
+	synchronized (downloadListeners){
+	    if (!downloadListeners.contains(listener))
+		downloadListeners.add(listener);
+	}
     }
     public void removeDownloadListener(DownloadListener listener)
     {
         if (downloadListeners == null)return;
-        if (downloadListeners.contains(listener))
-            downloadListeners.remove(listener);
+	synchronized (downloadListeners){
+	    if (downloadListeners.contains(listener))
+		downloadListeners.remove(listener);
+	}
     }
     
     protected void fireProgressEvent(DownloadEvent evt)
     {
         if (downloadListeners == null)return;
-        for(DownloadListener listener:downloadListeners)
-        {
-            listener.progress(evt);
-         }
+	synchronized (downloadListeners) {
+	    for(DownloadListener listener:downloadListeners)
+		{
+		    listener.progress(evt);
+		}
+	}
     }
     protected void fireCompleteEvent(DownloadEvent evt)
     {
         if (downloadListeners == null)return;
-        for(DownloadListener listener:downloadListeners)
-        {
-            listener.complete(evt);
-        }
+	synchronized (downloadListeners) {	
+	    for(DownloadListener listener:downloadListeners)
+		{
+		    listener.complete(evt);
+		}
+	}
     }
     protected void fireCanceledEvent(DownloadEvent evt)
     {
         if (downloadListeners == null)return;
-        for(DownloadListener listener:downloadListeners)
-        {
-            listener.canceled(evt);
-         }
+	synchronized (downloadListeners) {
+	    for(DownloadListener listener:downloadListeners)
+		{
+		    listener.canceled(evt);
+		}
+	}
     }
 
     @Override
