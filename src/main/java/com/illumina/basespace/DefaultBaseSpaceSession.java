@@ -413,9 +413,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             readTheFile:
             while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
             {
-		// Old way was to make a new one each time. 
-		//		ByteBuffer bb = ByteBuffer.wrap(outputByte,0,bytesRead);
-		//		logger.info("------FC at ("+fc.position()+") setting WRITE at ("+targetStart+progress+")");
 		bb.clear();
 		bb.put(outputByte,0,bytesRead);
 		fc.write(bb);
@@ -454,9 +451,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             }
             else
             {
-		// Could be called even if we get an exception, must pass progress, not length: KGY
-		// In addition, we won't know that it is canceled if it is first chunk!!!
-		// At the moment, I handle this above this call. 
+		// Could be called even if we get an exception, must pass progress, not length
                 DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireCompleteEvent(evt);
             }
