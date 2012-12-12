@@ -66,6 +66,13 @@ public class Reference extends BaseSpaceEntity
     {
         this.content = content;
     }
+    @Override
+    public String toString()
+    {
+        return "Reference [relation=" + relation + ", type=" + type + ", hrefContent=" + hrefContent + ", content="
+                + content + ", toString()=" + super.toString() + "]";
+    }
+    
     
     
 }

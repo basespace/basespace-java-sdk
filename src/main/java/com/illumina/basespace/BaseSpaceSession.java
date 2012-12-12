@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Defines the operations that can be performed against the BaseSpace API
  * @author bking
- *
+ * @author kyokum
  */
 public interface BaseSpaceSession
 {
@@ -124,7 +124,7 @@ public interface BaseSpaceSession
     
     /**
      * Get a list of files for an app result
-     * @param appresult the appresult for which files will be retrieved
+     * @param appResult the appresult for which files will be retrieved
      * @param params optional fetch parameters to limit the scope of the result list
      * @return a list of files, or an empty list
      */
@@ -150,12 +150,28 @@ public interface BaseSpaceSession
      * Download a file to local folder. The destination file will have the same name as the source file.
      * @param file the file to download
      * @param targetFolder the target local folder
-     * @param progressListener an optional implementor of the DownloadProgressListener interface that wishes to track progress of the download
      */
     public void download(com.illumina.basespace.File file,java.io.File targetFolder);
 
-    public void download(final com.illumina.basespace.File file, long fileStart, long len, java.io.File target, 
-			 long targetStart);
+    /**
+     * Expose a single chunk of download to the client.  Thread-safe
+     * API call.  Multiple threads may use this call to do parallel
+     * fetches of a single file.
+     * 
+     * This is a range download from file, starting at fileStart for
+     * len bytes.  It will write data into target starting at
+     * targetStart.  If file is a directory, this will use
+     * target/<file.getName()>-start-len.dat
+     * 
+     * @param file the file to download
+     * @param fileStart the starting position for the file
+     * @param len the length to retrieve
+     * @param target the target local file
+     * @param targetStart target local file starting position
+     */
+    public void download(final com.illumina.basespace.File file, long fileStart, long len, java.io.File target,long targetStart);
+    
+    
     /**
      * Add a download listener to this session
      * @param listener
@@ -199,7 +215,7 @@ public interface BaseSpaceSession
  
     /**
      * Get extended information for a file
-     * @param file the source file for extended information
+     * @param fileId the source file id for extended information
      * @param clazz the subclass of file to load with more specific information
      * @return the specific subclass of file with extended properties loaded
      */
@@ -239,7 +255,7 @@ public interface BaseSpaceSession
      * Get coverage meta data for a file
      * @param file
      * @param chromosome
-     * @return
+     * @return Metadata of the coverage
      */
     public CoverageMetaData getCoverageMetaData(ExtendedFileInfo file,String chromosome);
     

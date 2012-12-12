@@ -33,5 +33,11 @@ public class Content extends BaseSpaceEntity
     {
         this.sampleId = sampleId;
     }
+    @Override
+    public String toString()
+    {
+        return "Content [sampleId=" + sampleId + ", toString()=" + super.toString() + "]";
+    }
+    
     
 }
