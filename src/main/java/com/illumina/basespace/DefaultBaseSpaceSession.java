@@ -21,6 +21,7 @@ import java.nio.channels.FileChannel;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.io.InputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,13 +30,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.illumina.basespace.VariantFetchParams.ReturnFormat;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -63,6 +71,25 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private List<DownloadListener>downloadListeners;
     private BaseSpaceConfiguration configuration; 
     private Map<Long,FileMetaData>fileToUriMap = new HashMap<Long,FileMetaData>();
+
+
+    static
+    {
+        mapper.addHandler(new DeserializationProblemHandler()
+	    {
+		@Override
+		    public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser jp,
+							 JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException,
+																	   JsonProcessingException
+		{
+		    logger.warning("Ignoring unknown property '" + propertyName + "' when attempting to deserialize JSON to "
+				   + beanOrClass.getClass().getName());
+		    return true;
+		}
+	    });
+
+	logger.setLevel(Level.WARNING);
+    }
     
     /**
      * Create a BaseSpace session 
@@ -355,7 +382,8 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         RandomAccessFile ras = null;
         InputStream in = null;
         boolean canceled = false;
-	final int CHUNK_SIZE = 4096;
+	final int CHUNK_SIZE = 8192; // for part downloads, reduce the number of calls by 1/2. 
+	long progress = 0;
 
 	try{
 	    if ((fileStart + len) > file.getSize()){
@@ -368,23 +396,28 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 		    }
                 target = new java.io.File(target,new String(file.getName()));
 	    }
+
+
 	    in = getFileInputStream(file,  fileStart, fileStart+len-1); // These are *positions*; end at len minus 1
+	    
 	    ras = new RandomAccessFile(target,"rw");
 
 	    FileChannel fc = ras.getChannel(); // Open for WRITE default. 
 
 	    fc.position(targetStart);  // Place the position at our place in the file
-            long progress = 0;
+            progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
             int bytesRead = 0;
+	    ByteBuffer bb = ByteBuffer.allocateDirect(CHUNK_SIZE);
             
             readTheFile:
             while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
             {
-		// OK, I'm making a new ByteBuffer for each read, YUCK! 
-		// probably better than calling .put(byte[]) (that probably does a copy)
-		ByteBuffer bb = ByteBuffer.wrap(outputByte,0,bytesRead);
+		// Old way was to make a new one each time. 
+		//		ByteBuffer bb = ByteBuffer.wrap(outputByte,0,bytesRead);
 		//		logger.info("------FC at ("+fc.position()+") setting WRITE at ("+targetStart+progress+")");
+		bb.clear();
+		bb.put(outputByte,0,bytesRead);
 		fc.write(bb);
 		fc.force(true);
                 progress += bytesRead;
@@ -421,7 +454,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
             }
             else
             {
-                DownloadEvent evt = new DownloadEvent(this,file.getHref(),len,len);
+		// Could be called even if we get an exception, must pass progress, not length: KGY
+		// In addition, we won't know that it is canceled if it is first chunk!!!
+		// At the moment, I handle this above this call. 
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireCompleteEvent(evt);
             }
         }
