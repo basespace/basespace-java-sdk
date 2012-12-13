@@ -76,6 +76,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private BaseSpaceConfiguration configuration; 
     private Map<Long,FileMetaData>fileToUriMap = new HashMap<Long,FileMetaData>();
 
+    
 
     /**
      * Create a BaseSpace session
@@ -376,7 +377,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     public void download(final com.illumina.basespace.File file, long fileStart, long len, java.io.File target,
 			     long targetStart)
     {
-        FileOutputStream fos = null;
         RandomAccessFile ras = null;
         InputStream in = null;
         boolean canceled = false;
