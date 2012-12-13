@@ -152,7 +152,7 @@ public interface BaseSpaceSession
      * @param targetFolder the target local folder
      */
     public void download(com.illumina.basespace.File file,java.io.File targetFolder);
-    
+
     /**
      * Expose a single chunk of download to the client.  Thread-safe
      * API call.  Multiple threads may use this call to do parallel

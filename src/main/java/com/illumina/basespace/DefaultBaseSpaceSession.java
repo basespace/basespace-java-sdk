@@ -14,13 +14,16 @@
  */
 package com.illumina.basespace;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
+
 import java.nio.channels.FileChannel;
+import java.io.FileOutputStream;
+import java.io.RandomAccessFile;
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -28,17 +31,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.illumina.basespace.VariantFetchParams.ReturnFormat;
 import com.sun.jersey.api.client.Client;
@@ -60,16 +65,36 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 class DefaultBaseSpaceSession implements BaseSpaceSession
 {
-    private Logger logger = Logger.getLogger(DefaultBaseSpaceSession.class.getPackage().getName());
-    private ObjectMapper mapper = new ObjectMapper();
+    private static Logger logger = Logger.getLogger(DefaultBaseSpaceSession.class.getPackage().getName());
+    private static ObjectMapper mapper = new ObjectMapper();
     private static final String RESPONSE = "Response";
     private static final String RESPONSE_STATUS = "ResponseStatus";
     private static final String ITEMS = "Items";
-    private static final String UNAUTHORIZED = "Unauthorized";
-    private List<DownloadListener> downloadListeners;
-    private BaseSpaceConfiguration configuration;
-    private Map<Long, FileMetaData> fileToUriMap = new HashMap<Long, FileMetaData>();
 
+    private static final String UNAUTHORIZED = "Unauthorized";
+    private List<DownloadListener>downloadListeners;
+    private BaseSpaceConfiguration configuration; 
+    private Map<Long,FileMetaData>fileToUriMap = new HashMap<Long,FileMetaData>();
+
+
+    static
+    {
+        mapper.addHandler(new DeserializationProblemHandler()
+	    {
+		@Override
+		    public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser jp,
+							 JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException,
+																	   JsonProcessingException
+		{
+		    logger.warning("Ignoring unknown property '" + propertyName + "' when attempting to deserialize JSON to "
+				   + beanOrClass.getClass().getName());
+		    return true;
+		}
+	    });
+
+	logger.setLevel(Level.WARNING);
+    }
+    
     /**
      * Create a BaseSpace session
      * @param config the configuration to use to establish the session
@@ -78,18 +103,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         this.configuration = configuration;
         this.accessToken = accessToken;
-        mapper.addHandler(new DeserializationProblemHandler()
-        {
-            @Override
-            public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser jp,
-                    JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException,
-                    JsonProcessingException
-            {
-                logger.warning("Ignoring unknown property '" + propertyName + "' when attempting to deserialize JSON to " 
-                        + beanOrClass.getClass().getName());
-                return true;
-            }
-        });
     }
 
     @Override
@@ -349,72 +362,66 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
     }
 
-    /**
+
+    /** 
      * download
-     * 
+     *
      * Expose a single chunk of download to the client.  Thread-safe
      * API call.  Multiple threads may use this call to do parallel
      * fetches of a single file.
-     * 
+     *
      * This is a range download from file, starting at fileStart for
      * len bytes.  It will write data into target starting at
      * targetStart.  If file is a directory, this will use
      * target/<file.getName()>-start-len.dat
-     * 
+     *
      */
     @Override
     public void download(final com.illumina.basespace.File file, long fileStart, long len, java.io.File target,
-            long targetStart)
+			     long targetStart)
     {
         FileOutputStream fos = null;
         RandomAccessFile ras = null;
         InputStream in = null;
         boolean canceled = false;
-        final int CHUNK_SIZE = 4096;
 
-        try
-        {
-            if ((fileStart + len) > file.getSize())
-            {
-                throw new Exception("Invalid download range start(" + fileStart + ") + len (" + len + ") > file size ("
-                        + file.getSize() + ")");
-            }
-            if (target.isDirectory())
-            {
+	final int CHUNK_SIZE = 8192; // for part downloads, reduce the number of calls by 1/2. 
+	long progress = 0;
+
+	try{
+	    if ((fileStart + len) > file.getSize()){
+		throw new Exception("Invalid download range start("+fileStart+ ") + len ("+len+") > file size ("+file.getSize()+")");
+	    }
+            if (target.isDirectory()){
                 if (!target.exists() && !target.mkdirs())
-                {
-                    throw new IllegalArgumentException("Unable to create local folder " + target.toString());
-                }
-                target = new java.io.File(target, new String(file.getName()));
-            }
-            in = getFileInputStream(file, fileStart, fileStart + len - 1); // These
-                                                                           // are
-                                                                           // *positions*;
-                                                                           // end
-                                                                           // at
-                                                                           // len
-                                                                           // minus
-                                                                           // 1
-            ras = new RandomAccessFile(target, "rw");
+		    {
+			throw new IllegalArgumentException("Unable to create local folder " + target.toString());
+		    }
+                target = new java.io.File(target,new String(file.getName()));
+	    }
 
-            FileChannel fc = ras.getChannel(); // Open for WRITE default.
 
-            fc.position(targetStart); // Place the position at our place in the
-                                      // file
-            long progress = 0;
+	    in = getFileInputStream(file,  fileStart, fileStart+len-1); // These are *positions*; end at len minus 1
+	    
+	    ras = new RandomAccessFile(target,"rw");
+
+	    FileChannel fc = ras.getChannel(); // Open for WRITE default. 
+
+	    fc.position(targetStart);  // Place the position at our place in the file
+            progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
             int bytesRead = 0;
-
-            readTheFile: while ((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
+	    ByteBuffer bb = ByteBuffer.allocateDirect(CHUNK_SIZE);
+            
+            readTheFile:
+            while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
             {
-                // OK, I'm making a new ByteBuffer for each read, YUCK!
-		// probably better than calling .put(byte[]) (that probably does a copy)
-                ByteBuffer bb = ByteBuffer.wrap(outputByte, 0, bytesRead);
-                // logger.info("------FC at ("+fc.position()+") setting WRITE at ("+targetStart+progress+")");
-                fc.write(bb);
-                fc.force(true);
+		bb.clear();
+		bb.put(outputByte,0,bytesRead);
+		fc.write(bb);
+		fc.force(true);
                 progress += bytesRead;
-                DownloadEvent evt = new DownloadEvent(this, file.getHref(), progress, len);
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireProgressEvent(evt);
                 if (evt.isCanceled())
                 {
@@ -422,38 +429,39 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     break readTheFile;
                 }
             }
-            ras.close();
+	    ras.close();
             in.close();
-            ras = null;
+	    ras = null;
             in = null;
         }
-        catch (BaseSpaceException bs)
+        catch(BaseSpaceException bs)
         {
             throw bs;
         }
-        catch (Throwable t)
+        catch(Throwable t)
         {
-            throw new RuntimeException("Error during file download", t);
+            throw new RuntimeException("Error during file download",t);
         }
         finally
         {
             try{if (in != null)in.close();}catch(Throwable t){}
             try{if (ras != null)ras.close();}catch(Throwable t){}
-            if (canceled)
+             if (canceled)
             {
-                if (target != null) target.delete();
-                DownloadEvent evt = new DownloadEvent(this, file.getHref(), 0, len);
+                if (target != null)target.delete();
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),0,len);
                 fireCanceledEvent(evt);
             }
             else
             {
-                DownloadEvent evt = new DownloadEvent(this, file.getHref(), len, len);
+		// Could be called even if we get an exception, must pass progress, not length
+                DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireCompleteEvent(evt);
             }
         }
     }
 
-    protected <T extends BaseSpaceEntity> T getSingle(Class<? extends BaseSpaceEntity> clazz, String id)
+    protected <T extends BaseSpaceEntity> T getSingle(Class<? extends BaseSpaceEntity>clazz,String id)
     {
         try
         {
@@ -770,7 +778,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     }
     public void removeDownloadListener(DownloadListener listener)
     {
-        if (downloadListeners == null) return;
+        if (downloadListeners == null)return;
 	synchronized (downloadListeners){
 	    if (downloadListeners.contains(listener))
 		downloadListeners.remove(listener);
@@ -779,38 +787,36 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 
     protected void fireProgressEvent(DownloadEvent evt)
     {
-        if (downloadListeners == null) return;
-        synchronized (downloadListeners)
-        {
-            for (DownloadListener listener : downloadListeners)
-            {
-                listener.progress(evt);
-            }
-        }
+
+        if (downloadListeners == null)return;
+	synchronized (downloadListeners) {
+	    for(DownloadListener listener:downloadListeners)
+		{
+		    listener.progress(evt);
+		}
+	}
     }
 
     protected void fireCompleteEvent(DownloadEvent evt)
     {
-        if (downloadListeners == null) return;
-        synchronized (downloadListeners)
-        {
-            for (DownloadListener listener : downloadListeners)
-            {
-                listener.complete(evt);
-            }
-        }
+        if (downloadListeners == null)return;
+	synchronized (downloadListeners) {	
+	    for(DownloadListener listener:downloadListeners)
+		{
+		    listener.complete(evt);
+		}
+	}
     }
 
     protected void fireCanceledEvent(DownloadEvent evt)
     {
-        if (downloadListeners == null) return;
-        synchronized (downloadListeners)
-        {
-            for (DownloadListener listener : downloadListeners)
-            {
-                listener.canceled(evt);
-            }
-        }
+        if (downloadListeners == null)return;
+	synchronized (downloadListeners) {
+	    for(DownloadListener listener:downloadListeners)
+		{
+		    listener.canceled(evt);
+		}
+	}
     }
 
     @Override

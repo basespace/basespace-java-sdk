@@ -44,13 +44,13 @@ public final class BaseSpaceSessionManager
     private BaseSpaceSessionManager()
     {
      
-
     }
+
     public static synchronized BaseSpaceSessionManager instance()
     {
-        if (singletonObject == null)
-            singletonObject = new BaseSpaceSessionManager();
-        return singletonObject;
+	if (singletonObject == null)
+	    singletonObject = new BaseSpaceSessionManager();
+	return singletonObject;
     }
 
     public Object clone() throws CloneNotSupportedException 
@@ -84,7 +84,7 @@ public final class BaseSpaceSessionManager
             form.add("client_id", configuration.getClientId());
             form.add("scope",  configuration.getAuthorizationScope());
             form.add("response_type", "device_code");
-
+	    
             Client client = Client.create(new DefaultClientConfig());
             client.addFilter(new ClientFilter()
             {
