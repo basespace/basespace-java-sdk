@@ -48,27 +48,38 @@ public interface BaseSpaceConfiguration
     public String getApiRootUri();
    
     /**
+     * Get the URI fragment for requesting an access token
+     * @return access token fragment URI
+     */
+    public String getAccessTokenUriFragment();
+    
+    /**
+     * Get the desired authorization scope of the session
+     * @return the authorization scope
+     */
+    public String getAuthorizationScope();
+    
+    /**
+     * Get the name of the proxy host for BaseSpace requests
+     * @return the name of the proxy host, or null if not using a proxy
+     */
+    public String getProxyHost();
+    
+    /**
+     * Get the proxy port 
+     * @return the proxy port if applicable
+     */
+    public int getProxyPort();
+    
+    /**
      * Get the URI fragment for requesting authorization code
-     * @return authorization URI
+     * @return authorization fragment URI
      */
-    public String getAuthTokenUriFragment();
+    public String getAuthorizationUriFragment();
     
     /**
-     * Get the URI fragment for requesting authorization token
-     * @return authorization token URI
+     * Allows for pre-authorization. If present, SDK will not initiate OAuth workflow for obtaining an access token
+     * @return the access token the SDK should use for the session
      */
-    public String getAuthorizationUri();
-    
-    /**
-     * Port for the internal Http server that will receive auth code
-     * @return the port
-     */
-    public int getAuthCodeListenerPort();
-    
-    /**
-     * The amount of time in seconds the internal Http server will wait for 
-     * authorization before timing out
-     * @return the timeout in seconds
-     */
-    public int getAuthCodeListenerTimeout();
+    public String getAccessToken();
 }

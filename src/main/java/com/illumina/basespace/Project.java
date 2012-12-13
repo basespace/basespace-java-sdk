@@ -15,6 +15,8 @@
 
 package com.illumina.basespace;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
@@ -26,22 +28,45 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @UriPath("/projects")
 public class Project extends BaseSpaceEntity
 {
-
-    @JsonProperty("UserOwnedBy")
-    private User userOwnedBy;
-    public User getUserOwnedBy()
+    @JsonProperty("HrefSamples")
+    private URI hrefSamples;
+    public URI getSamplesHref()
     {
-        return userOwnedBy;
+        return hrefSamples;
     }
-    protected void setUserOwnedBy(User userOwnedBy)
+    protected void setSamplesHref(URI hrefSamples)
     {
-        this.userOwnedBy = userOwnedBy;
+        this.hrefSamples = hrefSamples;
     }
-
+    
+    @JsonProperty("HrefAppResults")
+    private URI hrefAppResults;
+    public URI getAppResultsHref()
+    {
+        return hrefAppResults;
+    }
+    protected void setAppResultsHref(URI hrefAppResults)
+    {
+        this.hrefAppResults = hrefAppResults;
+    }
+    
+    @JsonProperty("HrefBaseSpaceUI")
+    private String hrefBaseSpaceUI;
+    public String getHrefBaseSpaceUI()
+    {
+        return hrefBaseSpaceUI;
+    }
+    public void setHrefBaseSpaceUI(String hrefBaseSpaceUI)
+    {
+        this.hrefBaseSpaceUI = hrefBaseSpaceUI;
+    }
     @Override
     public String toString()
     {
-        return "Project [toString()=" + super.toString() + "]";
+        return "Project [hrefSamples=" + hrefSamples + ", hrefAppResults="
+                + hrefAppResults + ", hrefBaseSpaceUI=" + hrefBaseSpaceUI + ", toString()=" + super.toString() + "]";
     }
+    
+    
     
 }

@@ -32,15 +32,25 @@ public class FetchParams
     private SortDirection sortDirection = SortDirection.Ascending;
     private int limit = ALL;
     
+    public FetchParams()
+    {
+        
+    }
+    
     /**
      * Create fetch params
      * @param limit the maximum number of entities to retrieve
      */
     public FetchParams(int limit)
     {
-        super();
-        this.limit = limit;
+        this(limit,0);
     }
+    
+    public FetchParams(int limit,int offset)
+    {
+        this(null,SortDirection.Ascending,limit,0);
+    }
+    
     /**
      * Create fetch params
      * @param sortBy the sort by property name of the target entity
@@ -49,11 +59,18 @@ public class FetchParams
      */
     public FetchParams(String sortBy, SortDirection sortDirection, int limit)
     {
+        this(sortBy,sortDirection,limit,0);
+    }
+    
+    public FetchParams(String sortBy, SortDirection sortDirection, int limit,int offset)
+    {
         super();
         this.sortBy = sortBy;
         this.sortDirection = sortDirection;
         this.limit = limit;
+        this.offSet = offset;
     }
+    
     /**
      * Get the sort by property name
      * @return the sort by name
@@ -112,6 +129,9 @@ public class FetchParams
     {
         this.offSet = offSet;
     }
+    
+    
+    
     /**
      * Convert these parameters to a map
      * @return the parameters as a map
@@ -122,7 +142,7 @@ public class FetchParams
         if (getLimit() != ALL) rtn.add("Limit",String.valueOf(getLimit()));
         if (getSortBy() != null) rtn.add("SortBy", getSortBy());
         rtn.add("SortDir",getSortDirection()==SortDirection.Ascending?"Asc":"Desc");
-        if (getOffSet()>0) rtn.add("Offset",String.valueOf(getOffSet()));
+        rtn.add("Offset",String.valueOf(getOffSet()));
         return rtn;
     }
 }

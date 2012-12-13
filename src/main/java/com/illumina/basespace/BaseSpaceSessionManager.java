@@ -15,25 +15,31 @@
 
 package com.illumina.basespace;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.logging.Logger;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.representation.Form;
 
 /**
  * 
  * @author bking
  *
  */
-public final class BaseSpaceSessionManager implements AuthTokenListener
+public final class BaseSpaceSessionManager
 {
+    private static Logger logger = Logger.getLogger(BaseSpaceSessionManager.class.getPackage().getName());
     private static BaseSpaceSessionManager singletonObject;
-    private List<BaseSpaceSessionListener>sessionListeners;
-    private Map<String,AuthenticationPipeline>configMap = Collections.synchronizedMap(new HashMap<String,AuthenticationPipeline>());
+    private static final String ACCESS_DENIED = "access_denied";
     
     private BaseSpaceSessionManager()
     {
@@ -52,61 +58,126 @@ public final class BaseSpaceSessionManager implements AuthTokenListener
         throw new CloneNotSupportedException();
     }
 
-    public void addSessionListener(BaseSpaceSessionListener listener)
-    {
-        if (sessionListeners == null)
-            sessionListeners =  Collections.synchronizedList(new ArrayList<BaseSpaceSessionListener>());
-        
-        if (!sessionListeners.contains(listener))
-            sessionListeners.add(listener);
-    }
-    public void removeSessionListener(BaseSpaceSessionListener listener)
-    {
-        if (sessionListeners == null)return;
-        if (sessionListeners.contains(listener))
-            sessionListeners.remove(listener);
-    }
-    protected void fireSessionEvent(BaseSpaceSessionEvent evt)
-    {
-        for(BaseSpaceSessionListener listener:sessionListeners)
-        {
-            listener.sessionEstablished(evt);
-         }
-    }
-    protected void fireErrorEvent(BaseSpaceSessionEvent evt)
-    {
-        for(BaseSpaceSessionListener listener:sessionListeners)
-        {
-            listener.errorOccurred(evt);
-         }
-    }
-      
-    public void requestSession(String id,BaseSpaceConfiguration configuration)
+    /**
+     * Request a BaseSpace session  
+     * @param configuration configuration for the session
+     * @return a new BaseSpaceSession
+     * @throws AccessDeniedException if an access token could not be obtained from BaseSpace
+     */
+    public BaseSpaceSession requestSession(BaseSpaceConfiguration configuration)throws AccessDeniedException
     {
         BaseSpaceUtilities.assertNotNull(configuration, "configuration");
-        configMap.put(id, new AuthenticationPipeline(id,configuration,this));
+        return new DefaultBaseSpaceSession(configuration,requestAccessToken(configuration));
     }
-    public AuthorizationStatus getRequestStatus(String id)
+
+    protected String requestAccessToken(BaseSpaceConfiguration configuration)
+            throws AccessDeniedException
     {
-        AuthenticationPipeline pipeline = configMap.get(id);
-        if (pipeline == null)return AuthorizationStatus.InvalidSessionId;
-        return pipeline.getStatus();
+        try
+        {
+            if (configuration.getAccessToken() != null)
+            {
+                return configuration.getAccessToken();
+            }
+                
+            Form form = new Form();
+            form.add("client_id", configuration.getClientId());
+            form.add("scope",  configuration.getAuthorizationScope());
+            form.add("response_type", "device_code");
+
+            Client client = Client.create(new DefaultClientConfig());
+            client.addFilter(new ClientFilter()
+            {
+                @Override
+                public ClientResponse handle(ClientRequest request) throws ClientHandlerException
+                {
+                    logger.fine(request.getMethod() + " to " + request.getURI().toString());
+                    ClientResponse response = null;
+                    try
+                    {
+                        response = getNext().handle(request);
+                    }
+                    catch(ClientHandlerException t)
+                    {
+                        throw new BaseSpaceConnectionException(request.getURI().toString(),t);
+                    }
+                    return response;
+                }
+            });
+            
+            WebResource resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(configuration.getVersion())
+                    .path(configuration.getAuthorizationUriFragment())
+                    .build());
+            logger.finer(resource.toString());
+        
+            ClientResponse response = resource.accept(
+                    MediaType.APPLICATION_XHTML_XML,
+                    MediaType.APPLICATION_FORM_URLENCODED,
+                    MediaType.APPLICATION_JSON)
+                    .post(ClientResponse.class,form);
+            String responseAsJSONString = response.getEntity(String.class);
+            logger.finer(responseAsJSONString);
+            
+            final ObjectMapper mapper = new ObjectMapper();
+            AuthVerificationCode authCode = mapper.readValue(responseAsJSONString, AuthVerificationCode.class);
+            logger.finer(authCode.toString());
+            
+            String uri = authCode.getVerificationWithCodeUri();
+            BrowserLaunch.openURL(uri);
+            
+            //Poll for approval
+            form = new Form();
+            form.add("client_id", configuration.getClientId());
+            form.add("client_secret",configuration.getClientSecret());
+            form.add("code",authCode.getDeviceCode());
+            form.add("grant_type","device");
+           
+            resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(configuration.getVersion())
+                    .path(configuration.getAccessTokenUriFragment())
+                    .build());
+            
+            String accessToken = null;
+            while(accessToken == null)
+            {
+                long interval = authCode.getInterval() * 1000;
+                Thread.sleep(interval);
+                response = resource.accept(
+                        MediaType.APPLICATION_XHTML_XML,
+                        MediaType.APPLICATION_FORM_URLENCODED,
+                        MediaType.APPLICATION_JSON)
+                        .post(ClientResponse.class,form);
+               
+                responseAsJSONString = response.getEntity(String.class); 
+                switch(response.getClientResponseStatus())
+                {
+                    case BAD_REQUEST:
+
+                        AccessToken token = mapper.readValue(responseAsJSONString, AccessToken.class);
+                        if (token.getError().equalsIgnoreCase(ACCESS_DENIED))
+                        {
+                            throw new AccessDeniedException();
+                        }
+                        break;
+                    case OK:
+                        logger.info(responseAsJSONString);
+                        token = mapper.readValue(responseAsJSONString, AccessToken.class);
+                        accessToken = token.getAccessToken();
+                }
+            } 
+            return accessToken;
+            
+        }
+        catch(BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch(Throwable t)
+        {
+            t.printStackTrace();
+            throw new RuntimeException("Error requesting access token from BaseSpace: " + t.getMessage());
+        }
     }
     
-    
-    @Override
-    public void authTokenReceived(AuthTokenEvent evt)
-    {
-        AuthenticationPipeline pipeline = configMap.get(evt.getSessionId());
-        URI rootApi = UriBuilder.fromUri( pipeline.getConfig().getApiRootUri()).path(pipeline.getConfig().getVersion()).build();
-        BaseSpaceSession session = new DefaultBaseSpaceSession(rootApi,evt.getToken());
-        BaseSpaceSessionEvent event = new BaseSpaceSessionEvent(this,evt.getSessionId(),session);
-        fireSessionEvent(event);
-    }
-    @Override
-    public void errorOccured(AuthTokenEvent evt)
-    {
-        BaseSpaceSessionEvent event = new BaseSpaceSessionEvent(this,evt.getSessionId(),evt.getThrowable());
-        fireErrorEvent(event);
-    }
 }
