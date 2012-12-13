@@ -14,12 +14,13 @@
  */
 package com.illumina.basespace;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.io.FileOutputStream;
-import java.io.RandomAccessFile;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,8 +33,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.illumina.basespace.VariantFetchParams.ReturnFormat;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -54,8 +60,8 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 class DefaultBaseSpaceSession implements BaseSpaceSession
 {
-    private static Logger logger = Logger.getLogger(DefaultBaseSpaceSession.class.getPackage().getName());
-    private static ObjectMapper mapper = new ObjectMapper();
+    private Logger logger = Logger.getLogger(DefaultBaseSpaceSession.class.getPackage().getName());
+    private ObjectMapper mapper = new ObjectMapper();
     private static final String RESPONSE = "Response";
     private static final String RESPONSE_STATUS = "ResponseStatus";
     private static final String ITEMS = "Items";
@@ -72,6 +78,18 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     {
         this.configuration = configuration;
         this.accessToken = accessToken;
+        mapper.addHandler(new DeserializationProblemHandler()
+        {
+            @Override
+            public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser jp,
+                    JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException,
+                    JsonProcessingException
+            {
+                logger.warning("Ignoring unknown property '" + propertyName + "' when attempting to deserialize JSON to " 
+                        + beanOrClass.getClass().getName());
+                return true;
+            }
+        });
     }
 
     @Override
