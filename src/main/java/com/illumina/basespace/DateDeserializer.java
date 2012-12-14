@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 class DateDeserializer extends JsonDeserializer<Date> 
 {
-    private static final DateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+    private final DateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
     protected Logger logger = Logger.getLogger(DateDeserializer.class.getPackage().getName());
     
     @Override
