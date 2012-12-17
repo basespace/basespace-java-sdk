@@ -76,7 +76,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     private BaseSpaceConfiguration configuration; 
     private Map<Long,FileMetaData>fileToUriMap = new HashMap<Long,FileMetaData>();
 
-    
 
     /**
      * Create a BaseSpace session
