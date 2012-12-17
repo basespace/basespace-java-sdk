@@ -377,6 +377,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
     public void download(final com.illumina.basespace.File file, long fileStart, long len, java.io.File target,
 			     long targetStart)
     {
+	FileChannel fc = null; 
         RandomAccessFile ras = null;
         InputStream in = null;
         boolean canceled = false;
@@ -401,9 +402,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 	    
 	    ras = new RandomAccessFile(target,"rw");
 
-	    FileChannel fc = ras.getChannel(); // Open for WRITE default. 
+	    fc = ras.getChannel(); // Open for WRITE default. 
 
 	    fc.position(targetStart);  // Place the position at our place in the file
+	    fc.force(true);
             progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
             int bytesRead = 0;
@@ -415,7 +417,6 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 		bb.clear();
 		bb.put(outputByte,0,bytesRead);
 		fc.write(bb);
-		fc.force(true);
                 progress += bytesRead;
                 DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireProgressEvent(evt);
@@ -425,8 +426,10 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                     break readTheFile;
                 }
             }
+	    fc.close();
 	    ras.close();
             in.close();
+	    fc = null;
 	    ras = null;
             in = null;
         }
@@ -440,6 +443,7 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
         }
         finally
         {
+            try{if (fc != null)fc.close();}catch(Throwable t){}
             try{if (in != null)in.close();}catch(Throwable t){}
             try{if (ras != null)ras.close();}catch(Throwable t){}
              if (canceled)
