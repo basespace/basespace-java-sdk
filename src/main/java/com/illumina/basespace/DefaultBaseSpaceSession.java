@@ -15,9 +15,13 @@
 package com.illumina.basespace;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 
+import java.nio.file.StandardOpenOption;
 import java.nio.channels.FileChannel;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
@@ -32,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.EnumSet;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -398,24 +403,26 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
 
 
 	    in = getFileInputStream(file,  fileStart, fileStart+len-1); // These are *positions*; end at len minus 1
-	    
+
+	    // Note: It sounds simple to use a FileChannel to sparsely write a file.  It isn't.
+	    // The code is sensitive to the right combination of usage.  I use a RandomAccessStream
+	    // and aquire a FileChannel from it.  It did not work if you just use the RAS.  It did not work
+	    // if you try to open the FC w/o the RAS.  It did not work if you use a RAS:FC but allocate
+	    // a ByteBuffer once, call bb.clear, bb.put, then fc.write(bb).  This caused the FC to write
+	    // garbage for CHUNK_SIZE-bb.length.  
+	    // Thus we now always use the ByteBuffer.wrap and the FC from a RAS. 
+
 	    ras = new RandomAccessFile(target,"rw");
-
 	    fc = ras.getChannel(); // Open for WRITE default. 
-
 	    fc.position(targetStart);  // Place the position at our place in the file
 	    fc.force(true);
             progress = 0;
             byte[] outputByte = new byte[CHUNK_SIZE];
             int bytesRead = 0;
-	    ByteBuffer bb = ByteBuffer.allocateDirect(CHUNK_SIZE);
-            
             readTheFile:
             while((bytesRead = in.read(outputByte, 0, CHUNK_SIZE)) != -1)
             {
-		bb.clear();
-		bb.put(outputByte,0,bytesRead);
-		fc.write(bb);
+		fc.write(ByteBuffer.wrap(outputByte,0,bytesRead));		
                 progress += bytesRead;
                 DownloadEvent evt = new DownloadEvent(this,file.getHref(),progress,len);
                 fireProgressEvent(evt);
