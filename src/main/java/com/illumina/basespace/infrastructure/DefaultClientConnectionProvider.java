@@ -162,14 +162,29 @@ public class DefaultClientConnectionProvider implements ClientConnectionProvider
     {
         try
         {
+            ConversionContext ctx = new ConversionContext()
+            {
+                @Override
+                public ApiConfiguration getApiConfiguration()
+                {
+                    return configuration;
+                }
+                @Override
+                public ObjectMapper getMapper()
+                {
+                    return mapper;
+                }
+            };
             if (resource == null)throw new IllegalArgumentException("Null resource to create/update");
             String response = getClient().resource(
                     configuration.getApiRootUri())
                     .path(configuration.getVersion())
                     .path(path)
                     .accept(MediaType.APPLICATION_JSON)
-                    .post(String.class,resource.toForm());
+                    .post(String.class,resource.toForm() != null?resource.toForm():resource.toJson(ctx));
             logger.info(response);
+            
+          
             return (T) mapper.readValue(response,clazz);
         }
         catch (BaseSpaceException bs)

@@ -3,10 +3,7 @@ package com.illumina.basespace.entity;
 import java.io.Serializable;
 import java.net.URI;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.illumina.basespace.infrastructure.NotImplementedException;
 
 public abstract class ApiResource implements Serializable
 {

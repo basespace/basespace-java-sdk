@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.illumina.basespace.infrastructure.NotImplementedException;
+import com.illumina.basespace.infrastructure.ConversionContext;
 import com.illumina.basespace.util.DateDeserializer;
 import com.sun.jersey.api.representation.Form;
 
@@ -58,11 +58,11 @@ public abstract class UserOwnedResource extends ApiResource
     
     public Form toForm()
     {
-        throw new NotImplementedException();
+        return null;
     }
-    public String toJson()
+    public String toJson(ConversionContext context)
     {
-        throw new NotImplementedException();
+        return null;
     }
     
     

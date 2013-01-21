@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.core.UriBuilder;
 
+import com.illumina.basespace.entity.AppResult;
 import com.illumina.basespace.entity.AppResultCompact;
 import com.illumina.basespace.entity.AppSessionCompact;
 import com.illumina.basespace.entity.File;
@@ -44,7 +45,7 @@ import com.illumina.basespace.response.GetProjectResponse;
 import com.illumina.basespace.response.GetRunResponse;
 import com.illumina.basespace.response.GetSampleResponse;
 import com.illumina.basespace.response.GetUserResponse;
-import com.illumina.basespace.response.ListAppResultsReponse;
+import com.illumina.basespace.response.ListAppResultsResponse;
 import com.illumina.basespace.response.ListFilesResponse;
 import com.illumina.basespace.response.ListProjectsResponse;
 import com.illumina.basespace.response.ListRunsResponse;
@@ -126,16 +127,16 @@ class DefaultApiClient implements ApiClient
     }
 
     @Override
-    public ListAppResultsReponse getAppResults(ProjectCompact project, QueryParams params)
+    public ListAppResultsResponse getAppResults(ProjectCompact project, QueryParams params)
     {
-        return getConnectionProvider().getResponse(ListRunsResponse.class,"projects/" + project.getId() + "/appresults",params);
+        return getConnectionProvider().getResponse(ListAppResultsResponse.class,"projects/" + project.getId() + "/appresults",params);
 
     }
     
     @Override
     public GetAppSessionResponse getAppSession(String id)
     {
-        return getConnectionProvider().getResponse(ListRunsResponse.class,"appsessions/" + id + "/appresults",null);
+        return getConnectionProvider().getResponse(GetAppSessionResponse.class,"appsessions/" + id + "/appresults",null);
     }
 
 
@@ -279,6 +280,12 @@ class DefaultApiClient implements ApiClient
     public GetAppSessionResponse updateAppSession(AppSessionCompact appSession)
     {
         return getConnectionProvider().postResource(GetAppSessionResponse.class, "appsessions/" + appSession.getId(), appSession);
+    }
+
+    @Override
+    public GetAppResultResponse createAppResult(ProjectCompact project,AppResult appResult)
+    {
+        return getConnectionProvider().postResource(GetAppResultResponse.class, "projects/" + project.getId() + "/appresults", appResult);
     }
 
 }

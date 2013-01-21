@@ -21,30 +21,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author bking
  *
  */
-public class Reference
+public class Reference extends ReferenceCompact
 {
-    @JsonProperty("Rel")
-    private String relation;
-    public String getRelation()
-    {
-        return relation;
-    }
-    public void setRelation(String relation)
-    {
-        this.relation = relation;
-    }
-    
-    @JsonProperty("Type")
-    private String type;
-    public String getType()
-    {
-        return type;
-    }
-    public void setType(String type)
-    {
-        this.type = type;
-    }
-    
     @JsonProperty("Href")
     private String href;
     public String getHref()
@@ -56,16 +34,6 @@ public class Reference
         this.href = href;
     }
 
-    @JsonProperty("HrefContent")
-    private String hrefContent;
-    public String getHrefContent()
-    {
-        return hrefContent;
-    }
-    protected void setHrefContent(String hrefContent)
-    {
-        this.hrefContent = hrefContent;
-    }
     
     @JsonProperty("Content")
     private Content content;
@@ -80,9 +48,12 @@ public class Reference
     @Override
     public String toString()
     {
-        return "Reference [relation=" + relation + ", type=" + type + ", hrefContent=" + hrefContent + ", content="
-                + content + ", toString()=" + super.toString() + "]";
+        return "Reference [href=" + href + ", content=" + content + ", toString()=" + super.toString() + "]";
     }
+ 
+    
+
+    
     
     
     

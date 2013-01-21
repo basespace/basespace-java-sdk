@@ -5,7 +5,7 @@ import com.illumina.basespace.entity.AppResult;
 import com.illumina.basespace.entity.AppResultCompact;
 import com.illumina.basespace.param.QueryParams;
 
-public class ListAppResultsReponse extends ApiResponse<AppResultCompact, AppResult>
+public class ListAppResultsResponse extends ApiResponse<AppResultCompact, AppResult>
 {
     @JsonProperty("Response")
     private AppResultItems itemResponse;

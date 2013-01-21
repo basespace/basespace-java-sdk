@@ -18,6 +18,7 @@ package com.illumina.basespace;
 import java.io.InputStream;
 import java.net.URI;
 
+import com.illumina.basespace.entity.AppResult;
 import com.illumina.basespace.entity.AppResultCompact;
 import com.illumina.basespace.entity.AppSessionCompact;
 import com.illumina.basespace.entity.File;
@@ -37,7 +38,7 @@ import com.illumina.basespace.response.GetProjectResponse;
 import com.illumina.basespace.response.GetRunResponse;
 import com.illumina.basespace.response.GetSampleResponse;
 import com.illumina.basespace.response.GetUserResponse;
-import com.illumina.basespace.response.ListAppResultsReponse;
+import com.illumina.basespace.response.ListAppResultsResponse;
 import com.illumina.basespace.response.ListFilesResponse;
 import com.illumina.basespace.response.ListProjectsResponse;
 import com.illumina.basespace.response.ListRunsResponse;
@@ -104,7 +105,9 @@ public interface ApiClient
      * @param params optional fetch parameters to limit the scope of the result list
      * @return a list of app results, or an empty list
      */
-    public ListAppResultsReponse getAppResults(ProjectCompact project,QueryParams params);
+    public ListAppResultsResponse getAppResults(ProjectCompact project,QueryParams params);
+    
+   
     
     /**
      * Retrieve an appresult by id
@@ -113,7 +116,8 @@ public interface ApiClient
      */
     public GetAppResultResponse getAppResult(String id);
     
-    
+    public GetAppResultResponse createAppResult(ProjectCompact project,AppResult appResult);
+        
     public GetAppSessionResponse getAppSession(String id);
     
     public GetAppSessionResponse updateAppSession(AppSessionCompact appSession);

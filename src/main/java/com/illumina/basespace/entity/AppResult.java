@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.illumina.basespace.infrastructure.ConversionContext;
 
 /**
  * An Application Result
@@ -72,6 +73,84 @@ public class AppResult extends AppResultCompact
         return "AppResult [description=" + description + ", hrefFiles=" + hrefFiles + ", hrefGenome=" + hrefGenome
                 + ", appSession=" + appSession + ", references=" + Arrays.toString(references) + ", toString()="
                 + super.toString() + "]";
+    }
+    
+    @Override
+    public String toJson(ConversionContext context)
+    {
+        try
+        {
+            CreateUpdateAppResult var = new CreateUpdateAppResult();
+            var.setName(this.getName());
+            var.setDescription(this.getDescription());
+            var.setHrefAppSession(context.getApiConfiguration().getVersion() + "/appsessions/" + getAppSession().getAppSessionId());
+            var.setStatus(this.getStatus());
+            if (this.getReferences() != null && this.getReferences().length > 0)
+            {
+                ReferenceCompact[]crlist = new ReferenceCompact[this.getReferences().length];
+                int i = 0;
+                for(Reference r:getReferences())
+                {
+                    ReferenceCompact cr = new ReferenceCompact();
+                    cr.setType(r.getType());
+                    cr.setHrefContent(r.getHrefContent());
+                    cr.setRelation(r.getRelation());
+                    crlist[i] = cr;
+                    i++;
+                }
+                var.setReferences(crlist);
+            }
+            return context.getMapper().writeValueAsString(var);
+        }
+        catch(Throwable t)
+        {
+            throw new RuntimeException("Error converting to Json string: " + t.getMessage());
+        }
+    }
+    
+    
+    private class CreateUpdateAppResult
+    {
+        @JsonProperty("Name")
+        private String name;
+        @JsonProperty("Description")
+        private String description;
+        @JsonProperty("status")
+        private String status;
+        @JsonProperty("HrefAppSession")
+        private String hrefAppSession;
+        
+     
+        @JsonProperty("References")
+        private ReferenceCompact[]references;
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+
+        public void setDescription(String description)
+        {
+            this.description = description;
+        }
+
+        public void setStatus(String status)
+        {
+            this.status = status;
+        }
+
+        public void setHrefAppSession(String hrefAppSession)
+        {
+            this.hrefAppSession = hrefAppSession;
+        }
+
+        public void setReferences(ReferenceCompact[] references)
+        {
+            this.references = references;
+        }
+
+        
+        
+        
     }
     
     
