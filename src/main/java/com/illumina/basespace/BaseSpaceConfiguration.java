@@ -82,4 +82,19 @@ public interface BaseSpaceConfiguration
      * @return the access token the SDK should use for the session
      */
     public String getAccessToken();
+    
+    
+    /**
+     * Get the read timeout interval, in milliseconds, of the underlying connection to the API. 
+     * A (zero) 0 value indicates a timeout of infinity
+     * @return the read timeout, in milliseconds
+     */
+    public int getReadTimeout();
+    
+    /**
+     * Get the connection timeout interval, in milliseconds, of the underlying connection to the API.
+     * A (zero) 0 value indicates a timeout of infinity
+     * @return the connection timeout, in milliseconds
+     */
+    public int getConnectionTimeout();
 }

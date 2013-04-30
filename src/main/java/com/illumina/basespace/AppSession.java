@@ -34,6 +34,18 @@ public class AppSession extends BaseSpaceEntity
         this.appSessionId = appSessionId;
     }
 
+    
+    @JsonProperty("Application")
+    private Application application;
+    public Application getApplication()
+    {
+        return application;
+    }
+    public void setApplication(Application application)
+    {
+        this.application = application;
+    }
+    
     @JsonProperty("UserCreatedBy")
     private User userCreatedBy;
     public User getUserCreatedBy()

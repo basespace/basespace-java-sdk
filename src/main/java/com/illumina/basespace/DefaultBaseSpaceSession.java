@@ -740,6 +740,8 @@ class DefaultBaseSpaceSession implements BaseSpaceSession
                 new URLConnectionClientHandler(new BaseSpaceURLConnectionFactory(this.configuration));
 
         Client client = new Client(urlConnectionClientHandler, config);
+        client.setReadTimeout(configuration.getReadTimeout());
+        client.setConnectTimeout(configuration.getConnectionTimeout());
         client.addFilter(new ClientFilter()
         {
             @Override
