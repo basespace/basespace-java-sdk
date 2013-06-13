@@ -16,20 +16,20 @@
 package com.illumina.basespace.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.illumina.basespace.entity.AppResult;
-import com.illumina.basespace.entity.AppResultCompact;
+import com.illumina.basespace.entity.Genome;
+import com.illumina.basespace.entity.GenomeCompact;
 import com.illumina.basespace.param.QueryParams;
 
-public class ListAppResultsResponse extends ApiResponse<AppResultCompact, AppResult>
+public class ListGenomesResponse extends ApiResponse<GenomeCompact, Genome>
 {
-    @JsonProperty("Response")
-    private AppResultItems itemResponse;
-
     @Override
-    public AppResultCompact[] items()
+    public GenomeCompact[] items()
     {
         return itemResponse.items;
     }
+
+    @JsonProperty("Response")
+    private GenomeItems itemResponse;
 
     @Override
     public QueryParams getMetaData()
@@ -37,10 +37,11 @@ public class ListAppResultsResponse extends ApiResponse<AppResultCompact, AppRes
         return itemResponse;
     }
 
-    public class AppResultItems extends QueryParams
+    public class GenomeItems extends QueryParams
     {
         @JsonProperty("Items")
-        private AppResultCompact[] items;
+        private GenomeCompact[] items;
     }
+
 
 }

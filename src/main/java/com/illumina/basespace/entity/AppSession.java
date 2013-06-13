@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -14,7 +14,10 @@
 */
 package com.illumina.basespace.entity;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 /**
  * An application session
@@ -23,23 +26,39 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class AppSession extends AppSessionCompact
 {
-    @JsonProperty("Id")
-    private String appSessionId;
-    public String getAppSessionId()
+    @JsonProperty("OriginatingUri")
+    private URI originatingUri;
+    public URI getOriginatingUri()
     {
-        return appSessionId;
+        return originatingUri;
     }
-    public void setAppSessionId(String appSessionId)
+    public void setOriginatingUri(URI originatingUri)
     {
-        this.appSessionId = appSessionId;
+        this.originatingUri = originatingUri;
     }
-    @Override
-    public String toString()
+    
+    
+    @JsonProperty("References")
+    private ReferenceCompact[]references;
+    public ReferenceCompact[] getReferences()
     {
-        return "AppSession [appSessionId=" + appSessionId + ", toString()=" + super.toString() + "]";
+        return references;
     }
-
-
+    public void setReferences(ReferenceCompact[] references)
+    {
+        this.references = references;
+    }
+    
+    @JsonProperty("AuthorizationCode")
+    private String authorizationCode;
+    public String getAuthorizationCode()
+    {
+        return authorizationCode;
+    }
+    public void setAuthorizationCode(String authorizationCode)
+    {
+        this.authorizationCode = authorizationCode;
+    }
     
     
 

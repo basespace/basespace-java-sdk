@@ -1,3 +1,18 @@
+/**
+* Copyright 2013 Illumina
+* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*    http://www.apache.org/licenses/LICENSE-2.0
+* 
+ *  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+*/
+
 package com.illumina.basespace.entity;
 
 import java.net.URI;
@@ -5,12 +20,14 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.illumina.basespace.infrastructure.ConversionContext;
+import com.illumina.basespace.infrastructure.CreatableResource;
+import com.sun.jersey.api.representation.Form;
 
 /**
  * An Application Result
  * @author bking
  */
-public class AppResult extends AppResultCompact
+public class AppResult extends AppResultCompact implements CreatableResource
 {
     
     @JsonProperty("Description")
@@ -47,12 +64,12 @@ public class AppResult extends AppResultCompact
     }
     
     @JsonProperty("AppSession")
-    private AppSession appSession;
-    public AppSession getAppSession()
+    private AppSessionCompact appSession;
+    public AppSessionCompact getAppSession()
     {
         return appSession;
     }
-    public void setAppSession(AppSession appSession)
+    public void setAppSession(AppSessionCompact appSession)
     {
         this.appSession = appSession;
     }
@@ -75,7 +92,7 @@ public class AppResult extends AppResultCompact
                 + super.toString() + "]";
     }
     
-    @Override
+
     public String toJson(ConversionContext context)
     {
         try
@@ -83,7 +100,7 @@ public class AppResult extends AppResultCompact
             CreateUpdateAppResult var = new CreateUpdateAppResult();
             var.setName(this.getName());
             var.setDescription(this.getDescription());
-            var.setHrefAppSession(context.getApiConfiguration().getVersion() + "/appsessions/" + getAppSession().getAppSessionId());
+            var.setHrefAppSession(context.getApiConfiguration().getVersion() + "/appsessions/" + getAppSession().getId());
             var.setStatus(this.getStatus());
             if (this.getReferences() != null && this.getReferences().length > 0)
             {
@@ -151,6 +168,12 @@ public class AppResult extends AppResultCompact
         
         
         
+    }
+
+
+    public Form toForm()
+    {
+        return null;
     }
     
     

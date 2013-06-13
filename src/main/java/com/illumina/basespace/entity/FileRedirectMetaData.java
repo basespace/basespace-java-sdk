@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 */
 
 
-package com.illumina.basespace.file;
+package com.illumina.basespace.entity;
 
 import java.util.Date;
 
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.illumina.basespace.util.DateDeserializer;
 
-public class FileMetaData
+public class FileRedirectMetaData
 {
     @JsonDeserialize(using=DateDeserializer.class)
     @JsonProperty("Expires")
@@ -73,7 +73,7 @@ public class FileMetaData
         if (this == obj) return true;
         if (obj == null) return false;
         if (getClass() != obj.getClass()) return false;
-        FileMetaData other = (FileMetaData) obj;
+        FileRedirectMetaData other = (FileRedirectMetaData) obj;
         if (expires == null)
         {
             if (other.expires != null) return false;

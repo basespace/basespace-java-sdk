@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -15,8 +15,9 @@
 
 package com.illumina.basespace.file;
 
-import java.net.URI;
 import java.util.EventObject;
+
+import com.illumina.basespace.entity.FileCompact;
 
 /**
  * Event related to a file download from BaseSpace
@@ -28,15 +29,12 @@ public class DownloadEvent extends EventObject
     private long currentBytes;
     private long totalBytes;
     private boolean canceled;
-    private URI uri;
     
-    
-    public DownloadEvent(Object source,URI uri,long currentBytes,long totalBytes)
+    public DownloadEvent(FileCompact file,long currentBytes,long totalBytes)
     {
-        super(source);
+        super(file);
         this.currentBytes = currentBytes;
         this.totalBytes = totalBytes;
-        this.uri = uri;
     }
 
     /**
@@ -49,12 +47,11 @@ public class DownloadEvent extends EventObject
     }
 
     /**
-     * Allows listeners to cancel the download
-     * @param canceled if true, will attempt to cancel a download in progress
+     * Flags an in-progress download for cancellation. 
      */
-    public void setCanceled(boolean canceled)
+    public void cancel()
     {
-        this.canceled = canceled;
+        this.canceled = true;
     }
 
     /**
@@ -75,16 +72,6 @@ public class DownloadEvent extends EventObject
         return totalBytes;
     }
 
-    /**
-     * Get the BaseSpace file that is being downloaded
-     * @return the BaseSpace file
-     */
-    public URI getURI()
-    {
-        return uri;
-    }
-    
-    
 
     
 }

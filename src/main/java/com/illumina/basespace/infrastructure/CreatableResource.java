@@ -13,21 +13,28 @@
 *  limitations under the License.
 */
 
-package com.illumina.basespace.auth;
+package com.illumina.basespace.infrastructure;
 
-import com.illumina.basespace.infrastructure.BaseSpaceException;
+import com.sun.jersey.api.representation.Form;
 
 /**
- * This exception wraps a BaseSpace Access Denied response when attempting to obtain an access token
+ * A resource that can be created and must support representing itself in an HTTP-friendly
+ * data structure
  * @author bking
  *
  */
-public class AccessDeniedException extends BaseSpaceException
+public interface CreatableResource
 {
-    @Override
-    public String getMessage()
-    {
-        return "The user was denied authorization for the application";
-    }
+    /**
+     * Convert this resource to a Form for HTTP-POST transmission
+     * @return this resource as a Form
+     */
+    public Form toForm();
     
+    /**
+     * Convert this resource to a JSON string
+     * @param context Conversion context 
+     * @return a JSON string representation of this resource
+     */
+    public String toJson(ConversionContext context);
 }

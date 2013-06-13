@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author bking
  *
  */
-public class Content extends UserOwnedResource
+public class Content extends OwnedResource
 {
     @JsonProperty("SampleId")
     private String sampleId;
@@ -55,6 +55,18 @@ public class Content extends UserOwnedResource
     {
         this.statusSummary = statusSummary;
     }
+    
+    @JsonProperty("TotalSize")
+    private long totalSize;
+    public long getTotalSize()
+    {
+        return totalSize;
+    }
+    public void setTotalSize(long totalSize)
+    {
+        this.totalSize = totalSize;
+    }
+    
     @Override
     public String toString()
     {

@@ -16,31 +16,18 @@
 package com.illumina.basespace.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.illumina.basespace.entity.AppResult;
-import com.illumina.basespace.entity.AppResultCompact;
-import com.illumina.basespace.param.QueryParams;
+import com.illumina.basespace.entity.Genome;
+import com.illumina.basespace.entity.GenomeCompact;
 
-public class ListAppResultsResponse extends ApiResponse<AppResultCompact, AppResult>
+public class GetGenomeResponse extends ApiResponse<GenomeCompact, Genome>
 {
     @JsonProperty("Response")
-    private AppResultItems itemResponse;
+    private Genome item;
 
     @Override
-    public AppResultCompact[] items()
+    public Genome get()
     {
-        return itemResponse.items;
-    }
-
-    @Override
-    public QueryParams getMetaData()
-    {
-        return itemResponse;
-    }
-
-    public class AppResultItems extends QueryParams
-    {
-        @JsonProperty("Items")
-        private AppResultCompact[] items;
+        return item;
     }
 
 }

@@ -13,21 +13,11 @@
 *  limitations under the License.
 */
 
-package com.illumina.basespace.auth;
+package com.illumina.basespace.param;
 
-import com.illumina.basespace.infrastructure.BaseSpaceException;
+import javax.ws.rs.core.MultivaluedMap;
 
-/**
- * This exception wraps a BaseSpace Access Denied response when attempting to obtain an access token
- * @author bking
- *
- */
-public class AccessDeniedException extends BaseSpaceException
+public interface Mappable
 {
-    @Override
-    public String getMessage()
-    {
-        return "The user was denied authorization for the application";
-    }
-    
+    public MultivaluedMap<String, String> toMap();
 }

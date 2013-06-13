@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package com.illumina.basespace.entity;
 
 import java.net.URI;
-import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,6 +27,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Sample extends SampleCompact
 {
+    @JsonProperty("HrefGenome")
+    private URI hrefGenome;
+    public URI getHrefGenome()
+    {
+        return hrefGenome;
+    }
+    public void setHrefGenome(URI hrefGenome)
+    {
+        this.hrefGenome = hrefGenome;
+    }
+    
     @JsonProperty("ExperimentName")
     private String experimentName;
     public String getExperimentName()
@@ -137,17 +147,8 @@ public class Sample extends SampleCompact
     {
         this.references = references;
     }
-    @Override
-    public String toString()
-    {
-        return "Sample [experimentName=" + experimentName + ", sampleNumber=" + sampleNumber + ", hrefFiles="
-                + hrefFiles + ", appSession=" + appSession + ", isPairedEnd=" + isPairedEnd + ", read1=" + read1
-                + ", read2=" + read2 + ", numberOfReadsRaw=" + numberOfReadsRaw + ", numberOfReadsPF="
-                + numberOfReadsPF + ", references=" + Arrays.toString(references) + ", toString()=" + super.toString()
-                + "]";
-    }
 
-
+    
     
     
     

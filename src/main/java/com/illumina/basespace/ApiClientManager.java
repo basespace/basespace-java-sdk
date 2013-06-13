@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import com.illumina.basespace.auth.AccessDeniedException;
 import com.illumina.basespace.auth.AccessToken;
 import com.illumina.basespace.auth.AuthVerificationCode;
 import com.illumina.basespace.infrastructure.BaseSpaceException;
-import com.illumina.basespace.infrastructure.ConnectionException;
 import com.illumina.basespace.infrastructure.DefaultClientConnectionProvider;
 import com.illumina.basespace.util.BrowserLaunch;
 import com.sun.jersey.api.client.Client;
@@ -107,7 +106,7 @@ public final class ApiClientManager
                     }
                     catch(ClientHandlerException t)
                     {
-                        throw new ConnectionException(request.getURI().toString(),t);
+                        throw new BaseSpaceException(t.getMessage(), t,request.getURI());
                     }
                     return response;
                 }
@@ -129,6 +128,11 @@ public final class ApiClientManager
             
             final ObjectMapper mapper = new ObjectMapper();
             AuthVerificationCode authCode = mapper.readValue(responseAsJSONString, AuthVerificationCode.class);
+            if (authCode.getError() != null)
+            {
+                throw new BaseSpaceException(authCode.getErrorDescription(),null,resource.getURI());
+            }
+            
             logger.finer(authCode.toString());
             
             String uri = authCode.getVerificationWithCodeUri();
@@ -169,7 +173,7 @@ public final class ApiClientManager
                         }
                         break;
                     case OK:
-                        logger.info(responseAsJSONString);
+                        logger.finer(responseAsJSONString);
                         token = mapper.readValue(responseAsJSONString, AccessToken.class);
                         accessToken = token.getAccessToken();
                 }

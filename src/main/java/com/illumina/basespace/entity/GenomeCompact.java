@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -13,33 +13,29 @@
 *  limitations under the License.
 */
 
+package com.illumina.basespace.entity;
 
-package com.illumina.basespace.infrastructure;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-
-/**
- * Exception that wraps any low-level socket exceptions that might occur when communicating with the BaseSpace API
- * @author bking
- *
- */
-public class ConnectionException extends BaseSpaceException
+public class GenomeCompact extends ApiResource
 {
-    private String uri;
-    
-    public ConnectionException(String uri,Throwable cause)
+    @JsonProperty("SpeciesName")
+    private String speciesName;
+    public String getSpeciesName()
     {
-        super(cause);
-        this.uri = uri;
+        return speciesName;
+    }
+    public void setSpeciesName(String speciesName)
+    {
+        this.speciesName = speciesName;
     }
     
-    public String getUri()
-    {
-        return uri;
-    }
-
     @Override
-    public String getMessage()
+    public String getName()
     {
-        return "BaseSpace API is not currently responding to requests. Please try again later.";
+        return getSpeciesName();
     }
+    
+    
+    
 }

@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -44,27 +44,12 @@ public class User extends UserCompact
     {
         this.email = email;
     }
+    
 
-    @JsonProperty("GravatarUrl")
-    private URI gravatarUrl;
-    
-    /**
-     * Get the gravatar URI associated with this user
-     * @return the gravatar URI
-     */
-    public URI getGravatarUrl()
-    {
-        return gravatarUrl;
-    }
-    protected void setGravatarUrl(URI gravatarUrl)
-    {
-        this.gravatarUrl = gravatarUrl;
-    }
-    
+
     @JsonDeserialize(using=DateDeserializer.class)
     @JsonProperty("DateLastActive")
     private Date dateLastActive;
-    
     /**
      * Get the date this user was last active
      * @return the last active date
@@ -124,12 +109,8 @@ public class User extends UserCompact
     {
         this.dateCreated = dateCreated;
     }
-    @Override
-    public String toString()
-    {
-        return "User [email=" + email + ", gravatarUrl=" + gravatarUrl + ", dateLastActive=" + dateLastActive
-                + ", hrefRuns=" + hrefRuns + ", hrefProjects=" + hrefProjects + ", dateCreated=" + dateCreated + "]";
-    }
+
+    
     
     
 

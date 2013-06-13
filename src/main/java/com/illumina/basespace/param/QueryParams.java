@@ -1,15 +1,39 @@
+/**
+* Copyright 2013 Illumina
+* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*    http://www.apache.org/licenses/LICENSE-2.0
+* 
+ *  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+*/
+
 package com.illumina.basespace.param;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-public class QueryParams
+/**
+ * 
+ * @author bking
+ *
+ */
+public class QueryParams implements Mappable
 {
     private static final int ALL = -999;
-    public static final String ASCENDING = "asc";
-    public static final String DESCENDING = "desc";
+    public static final String ASCENDING = "Asc";
+    public static final String DESCENDING = "Desc";
     
     public QueryParams()
     {
@@ -57,7 +81,7 @@ public class QueryParams
     }
 
     @JsonProperty("Limit")
-    private int limit;
+    private int limit = ALL;
     public int getLimit()
     {
         return limit;
@@ -89,6 +113,13 @@ public class QueryParams
         this.sortBy = sortBy;
     }   
     
+    @JsonIgnore
+    private Map<String,String>additionalParams = new HashMap<String,String>();
+    public void addParam(String key,String value)
+    {
+        additionalParams.put(key, value);
+    }
+    
     /**
      * Convert these parameters to a map
      * @return the parameters as a map
@@ -100,7 +131,19 @@ public class QueryParams
         if (getSortBy() != null) rtn.add("SortBy", getSortBy());
         rtn.add("SortDir",getSortDir());
         rtn.add("Offset",String.valueOf(getOffset()));
+        for(String key:additionalParams.keySet())
+        {
+            rtn.add(key, additionalParams.get(key));
+        }
         return rtn;
     }
 
+    @Override
+    public String toString()
+    {
+        return "QueryParams [displayedCount=" + displayedCount + ", totalCount=" + totalCount + ", offset=" + offset
+                + ", limit=" + limit + ", sortDir=" + sortDir + ", sortBy=" + sortBy + "]";
+    }
+
+    
 }

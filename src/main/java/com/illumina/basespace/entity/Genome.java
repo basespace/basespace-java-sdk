@@ -17,33 +17,46 @@ package com.illumina.basespace.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
-/**
- * A BaseSpace instrument run
- * @author bking
- *
- */
-public class Run extends RunCompact
+public class Genome extends GenomeCompact
 {
-    @JsonProperty("ExperimentName")
-    private String experimentName;
-    public String getExperimentName()
+    @JsonProperty("DisplayName")
+    private String displayName;
+    public String getDisplayName()
     {
-        return experimentName;
+        return displayName;
     }
-    protected void setExperimentName(String experimentName)
+    public void setDisplayName(String displayName)
     {
-        this.experimentName = experimentName;
+        this.displayName = displayName;
     }
+    
+    @JsonProperty("Source")
+    private String source;
+    public String getSource()
+    {
+        return source;
+    }
+    public void setSource(String source)
+    {
+        this.source = source;
+    }
+    
+    @JsonProperty("Build")
+    private String build;
+    public String getBuild()
+    {
+        return build;
+    }
+    public void setBuild(String build)
+    {
+        this.build = build;
+    }
+    
+    
     @Override
     public String getName()
     {
-        return getExperimentName();
-    }
-    @Override
-    public String toString()
-    {
-        return "Run [experimentName=" + experimentName + ", toString()=" + super.toString() + "]";
+        return getDisplayName();
     }
     
     

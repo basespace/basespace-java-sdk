@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -89,6 +89,28 @@ public class AuthVerificationCode
     public void setInterval(int interval)
     {
         this.interval = interval;
+    }
+    
+    @JsonProperty("error")
+    private String error;
+    public String getError()
+    {
+        return error;
+    }
+    public void setError(String error)
+    {
+        this.error = error;
+    }
+    
+    @JsonProperty("error_description")
+    private String errorDescription;
+    public String getErrorDescription()
+    {
+        return errorDescription;
+    }
+    public void setErrorDescription(String errorDescription)
+    {
+        this.errorDescription = errorDescription;
     }
     @Override
     public String toString()

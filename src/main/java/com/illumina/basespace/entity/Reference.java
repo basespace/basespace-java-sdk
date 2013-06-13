@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 */
 package com.illumina.basespace.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A reference point between one or more BaseSpace entities
@@ -23,37 +22,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Reference extends ReferenceCompact
 {
-    @JsonProperty("Href")
-    private String href;
-    public String getHref()
-    {
-        return href;
-    }
-    public void setHref(String href)
-    {
-        this.href = href;
-    }
-
-    
-    @JsonProperty("Content")
-    private Content content;
-    public Content getContent()
-    {
-        return content;
-    }
-    public void setContent(Content content)
-    {
-        this.content = content;
-    }
-    @Override
-    public String toString()
-    {
-        return "Reference [href=" + href + ", content=" + content + ", toString()=" + super.toString() + "]";
-    }
- 
-    
-
-    
+   
     
     
     

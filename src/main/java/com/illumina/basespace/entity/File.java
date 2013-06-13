@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -24,41 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class File extends FileCompact
 {
-    @JsonProperty("ContentType")
-    private String contentType;
-    public String getContentType()
-    {
-        return contentType;
-    }
-    protected void setContentType(String contentType)
-    {
-        this.contentType = contentType;
-    }
-
-    @JsonProperty("Size")
-    private Long size;
-    
-    public Long getSize()
-    {
-        return size;
-    }
-    protected void setSize(Long size)
-    {
-        this.size = size;
-    }
-    
-    @JsonProperty("Path")
-    private String path;
-
-    public String getPath()
-    {
-        return path;
-    }
-    protected void setPath(String path)
-    {
-        this.path = path;
-    }
-    
     @JsonProperty("OriginalScope")
     private String originalScope;
     public String getOriginalScope()
@@ -113,16 +78,16 @@ public class File extends FileCompact
     {
         this.uploadStatus = uploadStatus;
     }
-
-    
     @Override
     public String toString()
     {
-        return "File [contentType=" + contentType + ", size=" + size + ", path=" + path + ", toString()="
+        return "File [originalScope=" + originalScope + ", hrefVariants=" + hrefVariants + ", hrefCoverage="
+                + hrefCoverage + ", hrefContent=" + hrefContent + ", uploadStatus=" + uploadStatus + ", toString()="
                 + super.toString() + "]";
     }
 
-
+    
+    
     
     
     

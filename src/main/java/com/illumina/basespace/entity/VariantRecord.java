@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -16,65 +16,64 @@
 package com.illumina.basespace.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class VariantRecord implements Serializable
 {
     @JsonProperty("CHROM")
-    private String chromosome;
-    public String getChromosome()
+    private String CHROM;
+    public String getCHROM()
     {
-        return chromosome;
+        return CHROM;
     }
-    public void setChromosome(String chromosome)
+    public void setCHROM(String CHROM)
     {
-        this.chromosome = chromosome;
+        this.CHROM = CHROM;
     }
 
     @JsonProperty("POS")
-    private int position;
-    public int getPosition()
+    private int POS;
+    public int getPOS()
     {
-        return position;
+        return POS;
     }
-    public void setPosition(int position)
+    public void setPOS(int POS)
     {
-        this.position = position;
+        this.POS = POS;
     }
 
     @JsonProperty("ID")
-    private ArrayList<?> ids;
-    public ArrayList<?> getIds()
+    private String[] ids;
+    public String[] getIds()
     {
         return ids;
     }
-    public void setId(ArrayList<?> id)
+    public void setId(String[] id)
     {
         this.ids = id;
     }
 
     @JsonProperty("REF")
-    private String referenceBase;
-    public String getReferenceBase()
+    private String REF;
+    public String getREF()
     {
-        return referenceBase;
+        return REF;
     }
-    public void setReferenceBase(String referenceBase)
+    public void setREF(String REF)
     {
-        this.referenceBase = referenceBase;
+        this.REF = REF;
     }
     
     @JsonProperty("ALT")
-    private String alternate;
-    public String getAlternate()
+    private String ALT;
+    public String getALT()
     {
-        return alternate;
+        return ALT;
     }
-    public void setAlternate(String alternate)
+    public void setALT(String ALT)
     {
-        this.alternate = alternate;
+        this.ALT = ALT;
     }
 
     @JsonProperty("QUAL")
@@ -100,14 +99,14 @@ public class VariantRecord implements Serializable
     }
 
     @JsonProperty("INFO")
-    private AdditionalInfo additionalInfo;
-    public AdditionalInfo getAdditionalInfo()
+    private Info info;
+    public Info getInfo()
     {
-        return additionalInfo;
+        return info;
     }
-    public void setAdditionalInfo(AdditionalInfo additionalInfo)
+    public void setInfo(Info additionalInfo)
     {
-        this.additionalInfo = additionalInfo;
+        this.info = additionalInfo;
     }
     
     @JsonProperty("SampleFormat")
@@ -121,185 +120,161 @@ public class VariantRecord implements Serializable
         this.sampleFormat = sampleFormat;
     }
 
-    public static class AdditionalInfo implements Serializable
+    public static class Info implements Serializable
     {
-        @JsonProperty("VARTYPE_DEL")
-        private ArrayList<?> varTypeDels;
-        public ArrayList<?> getVarTypeDels()
+        @JsonProperty("SNVSB")
+        private String[]SNVSB;
+        public String[] getSNVSB()
         {
-            return varTypeDels;
+            return SNVSB;
         }
-        public void setVarTypeDels(ArrayList<?> varTypeDels)
+        public void setSNVSB(String[] SNVSB)
         {
-            this.varTypeDels = varTypeDels;
-        }
-
-        @JsonProperty("VARTYPE_SNV")
-        private ArrayList<?> varTypeSnvs;
-        public ArrayList<?> getVarTypeSnvs()
-        {
-            return varTypeSnvs;
-        }
-        public void setVarTypeSnvs(ArrayList<?> varTypeSnvs)
-        {
-            this.varTypeSnvs = varTypeSnvs;
-        }
-
-        @JsonProperty("CIGAR")
-        private ArrayList<String> cigars;
-        public ArrayList<String> getCigars()
-        {
-            return cigars;
-        }
-        public void setCigars(ArrayList<String> cigars)
-        {
-            this.cigars = cigars;
-        }
-
-        @JsonProperty("RU")
-        private ArrayList<?> rus;
-        public ArrayList<?> getRus()
-        {
-            return rus;
-        }
-        public void setRus(ArrayList<?> rus)
-        {
-            this.rus = rus;
-        }
-
-        @JsonProperty("REFREP")
-        private ArrayList<?> refReps;
-        public ArrayList<?> getRefReps()
-        {
-            return refReps;
-        }
-        public void setRefReps(ArrayList<?> refReps)
-        {
-            this.refReps = refReps;
-        }
-
-        @JsonProperty("IDREP")
-        private ArrayList<?> idReps;
-        public ArrayList<?> getIdReps()
-        {
-            return idReps;
-        }
-        public void setIdReps(ArrayList<?> idReps)
-        {
-            this.idReps = idReps;
-        }
-        @Override
-        public String toString()
-        {
-            return "AdditionalInfo [varTypeDels=" + varTypeDels + ", varTypeSnvs=" + varTypeSnvs + ", cigars=" + cigars
-                    + ", rus=" + rus + ", refReps=" + refReps + ", idReps=" + idReps + "]";
+            this.SNVSB = SNVSB;
         }
         
+        @JsonProperty("SNVHPOL")
+        private String[]SNVHPOL;
+        public String[] getSNVHPOL()
+        {
+            return SNVHPOL;
+        }
+        public void setSNVHPOL(String[] SNVHPOL)
+        {
+            this.SNVHPOL = SNVHPOL;
+        }
+        
+        
+        @JsonProperty("CIGAR")
+        private String[] CIGAR;
+        public String[] getCIGAR()
+        {
+            return CIGAR;
+        }
+        public void setCIGAR(String[] CIGAR)
+        {
+            this.CIGAR = CIGAR;
+        }
+        
+        @JsonProperty("RU")
+        private String[] RU;
+        public String[] getRU()
+        {
+            return RU;
+        }
+        public void setRU(String[] RU)
+        {
+            this.RU = RU;
+        }
+        
+        
+
+        @JsonProperty("REFREP")
+        private String[]REFREP;
+        public String[] getREFREP()
+        {
+            return REFREP;
+        }
+        public void setREFREP(String[] REFREP)
+        {
+            this.REFREP = REFREP;
+        }
+        
+        @JsonProperty("IDREP")
+        private String[]IDREP;
+        public String[] getIDREP()
+        {
+            return IDREP;
+        }
+        public void setIDREP(String[] IDREP)
+        {
+            this.IDREP = IDREP;
+        }
         
     }
 
     public static class SampleFormat implements Serializable
     {
         @JsonProperty("SAMPLE")
-        private GenotypeInfo genotypeInfo;
-        public GenotypeInfo getGenotypeInfo()
+        private SampleData sampleData;
+        public SampleData getSample()
         {
-            return genotypeInfo;
+            return sampleData;
         }
-        public void setGenotypeInfo(GenotypeInfo genotypeInfo)
+        public void setSample(SampleData sampleData)
         {
-            this.genotypeInfo = genotypeInfo;
+            this.sampleData = sampleData;
         }
-        @Override
-        public String toString()
-        {
-            return "SampleFormat [genotypeInfo=" + genotypeInfo + "]";
-        }
-        
     }
 
-    public static class GenotypeInfo implements Serializable
+    public static class SampleData implements Serializable
     {
         @JsonProperty("GT")
-        private String genotype;
-        public String getGenotype()
+        private String GT;
+        public String getGT()
         {
-            return genotype;
+            return GT;
         }
-        public void setGenotype(String genotype)
+        public void setGT(String GT)
         {
-            this.genotype = genotype;
+            this.GT = GT;
         }
 
         @JsonProperty("GQ")
-        private String genotypeQuality;
-        public String getGenotypeQuality()
+        private String GQ;
+        public String getGQ()
         {
-            return genotypeQuality;
+            return GQ;
         }
-        public void setGenotypeQuality(String genotypeQuality)
+        public void setGQ(String GQ)
         {
-            this.genotypeQuality = genotypeQuality;
+            this.GQ = GQ;
+        }
+        
+        @JsonProperty("GQX")
+        private String GQX;
+        public String getGQX()
+        {
+            return GQX;
+        }
+        public void setGQX(String gqx)
+        {
+            this.GQX = gqx;
         }
 
-        @JsonProperty("DPI")
-        private String dpi;
-        public String getDpi()
+        @JsonProperty("DP")
+        private String DP;
+        public String getDP()
         {
-            return dpi;
+            return DP;
         }
-        public void setDpi(String dpi)
+        public void setDP(String DP)
         {
-            this.dpi = dpi;
-        }
-
-        @JsonProperty("DPU")
-        private String dpu;
-        public String getDpu()
-        {
-            return dpu;
-        }
-        public void setDpu(String dpu)
-        {
-            this.dpu = dpu;
+            this.DP = DP;
         }
 
         @JsonProperty("DPF")
-        private String dpf;
-        public String getDpf()
+        private String DPF;
+        public String getDPF()
         {
-            return dpf;
+            return DPF;
         }
-        public void setDpf(String dpf)
+        public void setDPF(String DPF)
         {
-            this.dpf = dpf;
+            this.DPF = DPF;
         }
 
-        @JsonProperty("AU")
-        private String au;
-        public String getAu()
+        @JsonProperty("AD")
+        private String AD;
+        public String getAD()
         {
-            return au;
+            return AD;
         }
-        public void setAu(String au)
+        public void setAd(String AD)
         {
-            this.au = au;
+            this.AD = AD;
         }
-        @Override
-        public String toString()
-        {
-            return "GenotypeInfo [genotype=" + genotype + ", genotypeQuality=" + genotypeQuality + ", dpi=" + dpi
-                    + ", dpu=" + dpu + ", dpf=" + dpf + ", au=" + au + "]";
-        }
-    }
 
-    @Override
-    public String toString()
-    {
-        return "VariantRecord [chromosome=" + chromosome + ", position=" + position + ", ids=" + ids
-                + ", referenceBase=" + referenceBase + ", alternate=" + alternate + ", qualityScore=" + qualityScore
-                + ", filter=" + filter + ", additionalInfo=" + additionalInfo + ", sampleFormat=" + sampleFormat + "]";
     }
-    
     
 }

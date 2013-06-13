@@ -16,31 +16,16 @@
 package com.illumina.basespace.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.illumina.basespace.entity.AppResult;
-import com.illumina.basespace.entity.AppResultCompact;
-import com.illumina.basespace.param.QueryParams;
+import com.illumina.basespace.entity.FileRedirectMetaData;
 
-public class ListAppResultsResponse extends ApiResponse<AppResultCompact, AppResult>
+public class GetFileRedirectMetaDataResponse extends ApiResponse<FileRedirectMetaData, FileRedirectMetaData>
 {
     @JsonProperty("Response")
-    private AppResultItems itemResponse;
+    private FileRedirectMetaData item;
 
     @Override
-    public AppResultCompact[] items()
+    public FileRedirectMetaData get()
     {
-        return itemResponse.items;
+        return item;
     }
-
-    @Override
-    public QueryParams getMetaData()
-    {
-        return itemResponse;
-    }
-
-    public class AppResultItems extends QueryParams
-    {
-        @JsonProperty("Items")
-        private AppResultCompact[] items;
-    }
-
 }

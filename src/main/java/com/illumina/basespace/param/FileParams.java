@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -36,12 +36,12 @@ public class FileParams extends QueryParams
     
     public FileParams(String[]extensions,int limit)
     {
-        this(extensions,limit,0);
+        this(extensions,0,limit);
     }
     
-    public FileParams(String[]extensions,int limit,int offset)
+    public FileParams(String[]extensions,int offset,int limit)
     {
-        super(limit,offset);
+        super(offset,limit);
         this.extensions = Arrays.asList(extensions);
     }
     

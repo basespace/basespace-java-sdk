@@ -1,5 +1,5 @@
 /**
-* Copyright 2012 Illumina
+* Copyright 2013 Illumina
 * 
  * Licensed under the Apache License, Version 2.0 (the "License");
 *  you may not use this file except in compliance with the License.
@@ -21,22 +21,21 @@ import com.illumina.basespace.infrastructure.BaseSpaceException;
 
 /**
  * Indicates an attempt was made to retrieve a server resource without adequate permissions
- * in the context of the current session user permissions
+ * in the context of the current client user permissions
  * @author bking
  *
  */
-public class ForbiddenResourceException extends BaseSpaceException
+public class ResourceForbiddenException extends BaseSpaceException
 {
-    private URI uri;
     private String operation;
-    public ForbiddenResourceException(String operation,URI uri)
+    public ResourceForbiddenException(String operation,URI uri)
     {
-        this.uri = uri;
+        super(uri,0);
         this.operation = operation;
     }
     
     public String getMessage()
     {
-        return operation + " to " + uri.toString() + " is forbidden for current user. Please check permissions.";
+        return operation + " to " + getUri().toString() + " is forbidden for the current user. Please check permissions.";
     }
 }
