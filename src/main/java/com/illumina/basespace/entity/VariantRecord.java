@@ -274,6 +274,18 @@ public class VariantRecord implements Serializable
         {
             this.AD = AD;
         }
+        
+        @JsonProperty("DPI")
+        private String dpi;
+        public String getDpi()
+        {
+            return dpi;
+        }
+        public void setDpi(String dpi)
+        {
+            this.dpi = dpi;
+        }
+        
 
     }
     

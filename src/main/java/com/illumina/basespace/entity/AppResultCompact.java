@@ -17,6 +17,11 @@ package com.illumina.basespace.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * @author bking
+ *
+ */
 public class AppResultCompact extends OwnedResource
 {
 

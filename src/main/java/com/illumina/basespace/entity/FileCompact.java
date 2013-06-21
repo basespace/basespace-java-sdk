@@ -19,13 +19,9 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.illumina.basespace.infrastructure.ConversionContext;
-import com.illumina.basespace.infrastructure.CreatableResource;
 import com.illumina.basespace.util.DateDeserializer;
-import com.illumina.basespace.util.ValidationHelper;
-import com.sun.jersey.api.representation.Form;
 
-public class FileCompact extends ApiResource implements CreatableResource 
+public class FileCompact extends ApiResource
 {
     public FileCompact()
     {
@@ -91,19 +87,6 @@ public class FileCompact extends ApiResource implements CreatableResource
     }
     
     
-     public Form toForm()
-    {
-        ValidationHelper.assertNotNull(getName(), "File name");
-        Form rtn = new Form();
-        rtn.add("",getName());
-        return rtn;
-    }
-
-    public String toJson(ConversionContext context)
-    {
-        return null;
-    }
-
     @Override
     public String toString()
     {

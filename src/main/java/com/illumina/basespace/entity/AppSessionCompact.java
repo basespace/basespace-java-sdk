@@ -17,11 +17,14 @@ package com.illumina.basespace.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.illumina.basespace.infrastructure.ConversionContext;
-import com.illumina.basespace.infrastructure.CreatableResource;
-import com.illumina.basespace.util.ValidationHelper;
-import com.sun.jersey.api.representation.Form;
+import com.illumina.basespace.infrastructure.Jsonable;
 
-public class AppSessionCompact extends OwnedResource implements CreatableResource 
+/**
+ * 
+ * @author bking
+ *
+ */
+public class AppSessionCompact extends OwnedResource implements Jsonable 
 {
     @JsonProperty("UserCreatedBy")
     private User userCreatedBy;
@@ -64,17 +67,6 @@ public class AppSessionCompact extends OwnedResource implements CreatableResourc
         this.application = application;
     }
     
-
-    public Form toForm()
-    {
-        ValidationHelper.assertNotNull(getStatus(), "Status");
-        ValidationHelper.assertNotNull(getStatusSummary(), "Status Summary");
-        Form rtn = new Form();
-        rtn.add("status",getStatus());
-        rtn.add("statussummary",getStatusSummary());
-        return rtn;
-    }
-
     public String toJson(ConversionContext context)
     {
         return null;

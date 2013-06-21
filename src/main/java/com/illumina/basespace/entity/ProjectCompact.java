@@ -15,12 +15,8 @@
 
 package com.illumina.basespace.entity;
 
-import com.illumina.basespace.infrastructure.ConversionContext;
-import com.illumina.basespace.infrastructure.CreatableResource;
-import com.illumina.basespace.util.ValidationHelper;
-import com.sun.jersey.api.representation.Form;
 
-public class ProjectCompact extends OwnedResource implements CreatableResource 
+public class ProjectCompact extends OwnedResource
 {
 
     public ProjectCompact()
@@ -38,19 +34,6 @@ public class ProjectCompact extends OwnedResource implements CreatableResource
         super.setName(name);
     }
     
-    @Override
-    public Form toForm()
-    {
-        ValidationHelper.assertNotNull(getName(), "Project name");
-        Form rtn = new Form();
-        rtn.add("name",getName());
-        return rtn;
-    }
 
-    @Override
-    public String toJson(ConversionContext context)
-    {
-        return null;
-    }
     
 }

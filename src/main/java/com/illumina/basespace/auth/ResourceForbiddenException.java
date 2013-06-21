@@ -18,6 +18,7 @@ package com.illumina.basespace.auth;
 import java.net.URI;
 
 import com.illumina.basespace.infrastructure.BaseSpaceException;
+import com.sun.jersey.api.client.ClientResponse;
 
 /**
  * Indicates an attempt was made to retrieve a server resource without adequate permissions
@@ -34,8 +35,16 @@ public class ResourceForbiddenException extends BaseSpaceException
         this.operation = operation;
     }
     
+    public ResourceForbiddenException(String operation,String message,URI uri)
+    {
+        super(uri,message,ClientResponse.Status.FORBIDDEN.getStatusCode());
+        this.operation = operation;
+    }
+    
+    
     public String getMessage()
     {
+        if (super.getMessage() != null)return super.getMessage();
         return operation + " to " + getUri().toString() + " is forbidden for the current user. Please check permissions.";
     }
 }

@@ -41,6 +41,7 @@ public class BaseSpaceURLConnectionFactory implements HttpURLConnectionFactory
         {
             proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(InetAddress.getByName(configuration.getProxyHost()), configuration.getProxyPort()));
         }
+
         return (HttpURLConnection) (proxy != null?url.openConnection(proxy):url.openConnection());
     }
 

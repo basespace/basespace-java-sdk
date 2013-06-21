@@ -15,6 +15,7 @@
 
 package com.illumina.basespace.infrastructure;
 
+import java.io.InputStream;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,7 @@ import com.illumina.basespace.ApiConfiguration;
 import com.illumina.basespace.param.Mappable;
 import com.illumina.basespace.response.ApiResponse;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.representation.Form;
 /**
  * 
  * @author bking
@@ -31,10 +33,25 @@ public interface ClientConnectionProvider
 {
     public Client getClient();
     public ApiConfiguration getConfiguration();
+    
+    
     public <T extends ApiResponse<?,?>> T getResponse(Class<? extends ApiResponse<?,?>>clazz,
             String path,Mappable params,Map<String,String>headers);
-    public <T extends ApiResponse<?,?>> T postResource(Class<? extends ApiResponse<?,?>>clazz,
-            String path,CreatableResource resource,Map<String,String>headers,Mappable params);    
+    
+    
+    public <T extends ApiResponse<?,?>> T postForm(Class<? extends ApiResponse<?,?>>clazz,
+            String path,Map<String,String>headers,Form data);  
+    
+    public <T extends ApiResponse<?,?>> T postJson(Class<? extends ApiResponse<?,?>>clazz,
+            String path,Map<String,String>headers,Jsonable json);  
+    
+    public <T extends ApiResponse<?,?>> T putFile(Class<? extends ApiResponse<?,?>>clazz,
+            String path,Map<String,String>headers,InputStream file);  
+    
     public String getStringResponse(String path,Mappable params,Map<String,String>headers); 
+   
     public ObjectMapper getMapper();
+    
+    
+    
 }

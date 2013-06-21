@@ -48,6 +48,10 @@ public class BaseSpaceException extends RuntimeException
         this(null,null,uri,errorCode);
     }
     
+    public BaseSpaceException(URI uri,String message,int errorCode)
+    {
+        this(message,null,uri,errorCode);
+    }
     
     public BaseSpaceException(String message,Throwable cause,URI uri,int errorCode)
     {

@@ -25,7 +25,6 @@ import com.illumina.basespace.auth.AccessDeniedException;
 import com.illumina.basespace.auth.AccessToken;
 import com.illumina.basespace.auth.AuthVerificationCode;
 import com.illumina.basespace.infrastructure.BaseSpaceException;
-import com.illumina.basespace.infrastructure.DefaultClientConnectionProvider;
 import com.illumina.basespace.util.BrowserLaunch;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
@@ -178,6 +177,7 @@ public final class ApiClientManager
                         accessToken = token.getAccessToken();
                 }
             } 
+            System.out.println(accessToken);
             return accessToken;
             
         }

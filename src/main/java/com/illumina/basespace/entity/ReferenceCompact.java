@@ -15,34 +15,13 @@
 
 package com.illumina.basespace.entity;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReferenceCompact
 {
-    @JsonProperty("Content")
-    private Content content;
-    public Content getContent()
-    {
-        return content;
-    }
-    public void setContent(Content content)
-    {
-        this.content = content;
-    }
-
- 
-    
-    @JsonProperty("Href")
-    private String href;
-    public String getHref()
-    {
-        return href;
-    }
-    public void setHref(String href)
-    {
-        this.href = href;
-    }
-    
+   
     @JsonProperty("Rel")
     private String relation;
     public String getRelation()
@@ -54,6 +33,7 @@ public class ReferenceCompact
         this.relation = relation;
     }
     
+
     
     @JsonProperty("Type")
     private String type;
@@ -68,20 +48,36 @@ public class ReferenceCompact
     
 
     @JsonProperty("HrefContent")
-    private String hrefContent;
-    public String getHrefContent()
+    private URI hrefContent;
+    public URI getHrefContent()
     {
         return hrefContent;
     }
-    protected void setHrefContent(String hrefContent)
+    public void setHrefContent(URI hrefContent)
     {
         this.hrefContent = hrefContent;
     }
-    @Override
-    public String toString()
+
+    @JsonProperty("Href")
+    private URI href;
+    public URI getHref()
     {
-        return "ReferenceCompact [relation=" + relation + ", type=" + type + ", hrefContent=" + hrefContent + "]";
+        return href;
+    }
+    public void setHref(URI href)
+    {
+        this.href = href;
     }
     
+    @JsonProperty("Content")
+    private Content content;
+    public Content getContent()
+    {
+        return content;
+    }
+    public void setContent(Content content)
+    {
+        this.content = content;
+    }
     
 }

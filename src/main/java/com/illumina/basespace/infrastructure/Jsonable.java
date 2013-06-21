@@ -15,7 +15,6 @@
 
 package com.illumina.basespace.infrastructure;
 
-import com.sun.jersey.api.representation.Form;
 
 /**
  * A resource that can be created and must support representing itself in an HTTP-friendly
@@ -23,14 +22,8 @@ import com.sun.jersey.api.representation.Form;
  * @author bking
  *
  */
-public interface CreatableResource
+public interface Jsonable
 {
-    /**
-     * Convert this resource to a Form for HTTP-POST transmission
-     * @return this resource as a Form
-     */
-    public Form toForm();
-    
     /**
      * Convert this resource to a JSON string
      * @param context Conversion context 

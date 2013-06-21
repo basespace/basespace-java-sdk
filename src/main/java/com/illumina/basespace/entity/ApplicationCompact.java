@@ -22,6 +22,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.illumina.basespace.util.DateDeserializer;
 
+/**
+ * 
+ * @author bking
+ *
+ */
 public class ApplicationCompact extends ApiResource
 {
     
@@ -73,5 +78,17 @@ public class ApplicationCompact extends ApiResource
     {
         this.dateCreated = dateCreated;
     }
+    
+    @JsonProperty("CompanyName")
+    private String companyName;
+    public String getCompanyName()
+    {
+        return companyName;
+    }
+    public void setCompanyName(String companyName)
+    {
+        this.companyName = companyName;
+    }
+    
     
 }

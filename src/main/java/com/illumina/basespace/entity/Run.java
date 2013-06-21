@@ -15,7 +15,13 @@
 
 package com.illumina.basespace.entity;
 
+import java.net.URI;
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.illumina.basespace.util.DateDeserializer;
+
 
 
 /**
@@ -25,25 +31,72 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class Run extends RunCompact
 {
-    @JsonProperty("ExperimentName")
-    private String experimentName;
-    public String getExperimentName()
+    @JsonProperty("HrefFiles")
+    private URI hrefFiles;
+    public URI getHrefFiles()
     {
-        return experimentName;
+        return hrefFiles;
     }
-    protected void setExperimentName(String experimentName)
+    public void setHrefFiles(URI hrefFiles)
     {
-        this.experimentName = experimentName;
+        this.hrefFiles = hrefFiles;
     }
-    @Override
-    public String getName()
+
+    @JsonProperty("HrefSamples")
+    private URI hrefSamples;
+    public URI getHrefSamples()
     {
-        return getExperimentName();
+        return hrefSamples;
     }
-    @Override
-    public String toString()
+    public void setHrefSamples(URI hrefSamples)
     {
-        return "Run [experimentName=" + experimentName + ", toString()=" + super.toString() + "]";
+        this.hrefSamples = hrefSamples;
+    }
+    
+    @JsonProperty("UserUploadedBy")
+    private UserCompact uploadedBy;
+    public UserCompact getUploadedBy()
+    {
+        return uploadedBy;
+    }
+    public void setUploadedBy(UserCompact uploadedBy)
+    {
+        this.uploadedBy = uploadedBy;
+    }
+    
+    @JsonDeserialize(using=DateDeserializer.class)
+    @JsonProperty("DateUploadCompleted")
+    private Date dateUploadCompleted;
+    public Date getDateUploadCompleted()
+    {
+        return dateUploadCompleted;
+    }
+    public void setDateUploadCompleted(Date dateUploadCompleted)
+    {
+        this.dateUploadCompleted = dateUploadCompleted;
+    }
+    
+    @JsonDeserialize(using=DateDeserializer.class)
+    @JsonProperty("DateUploadStarted")
+    private Date dateUploadStarted;
+    public Date getDateUploadStarted()
+    {
+        return dateUploadStarted;
+    }
+    public void setDateUploadStarted(Date dateUploadStarted)
+    {
+        this.dateUploadStarted = dateUploadStarted;
+    }
+    
+    @JsonProperty("HrefBaseSpaceUI")
+    private URI hrefBaseSpaceUI;
+    public URI getHrefBaseSpaceUI()
+    {
+        return hrefBaseSpaceUI;
+    }
+    public void setHrefBaseSpaceUI(URI hrefBaseSpaceUI)
+    {
+        this.hrefBaseSpaceUI = hrefBaseSpaceUI;
     }
     
     

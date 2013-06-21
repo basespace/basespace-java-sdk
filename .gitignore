@@ -8,3 +8,5 @@
 *.classpath
 /.settings
 /target
+bin/
+src/test/*

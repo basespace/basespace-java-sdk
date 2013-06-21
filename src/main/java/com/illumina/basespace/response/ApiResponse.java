@@ -26,7 +26,7 @@ import com.illumina.basespace.param.QueryParams;
  * @param <C>
  * @param <F>
  */
-public abstract class ApiResponse<C, F>
+public class ApiResponse<C, F>
 {
     public F get()
     {
@@ -44,16 +44,16 @@ public abstract class ApiResponse<C, F>
     }
 
     @JsonProperty("ResponseStatus")
-    private ResponseStatus message;
+    private ResponseStatus responseStatus;
 
-    public ResponseStatus getMessage()
+    public ResponseStatus getResponseStatus()
     {
-        return message;
+        return responseStatus;
     }
 
-    public void setMessage(ResponseStatus message)
+    public void setResponseStatus(ResponseStatus message)
     {
-        this.message = message;
+        this.responseStatus = message;
     }
 
     @JsonProperty("Notifications")

@@ -15,6 +15,8 @@
 
 package com.illumina.basespace.entity;
 
+import java.net.URI;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -36,38 +38,49 @@ public class File extends FileCompact
     }
     
     @JsonProperty("HrefVariants")
-    private String hrefVariants;
-    public String getHrefVariants()
+    private URI hrefVariants;
+    public URI getHrefVariants()
     {
         return hrefVariants;
     }
-    protected void setHrefVariants(String hrefVariants)
+    protected void setHrefVariants(URI hrefVariants)
     {
         this.hrefVariants = hrefVariants;
     }
     
     @JsonProperty("HrefCoverage")
-    private String hrefCoverage;
-    public String getHrefCoverage()
+    private URI hrefCoverage;
+    public URI getHrefCoverage()
     {
         return hrefCoverage;
     }
-    public void setHrefCoverage(String hrefCoverage)
+    public void setHrefCoverage(URI hrefCoverage)
     {
         this.hrefCoverage = hrefCoverage;
     }
 
     @JsonProperty("HrefContent")
-    private String hrefContent;
-    public String getHrefContent()
+    private URI hrefContent;
+    public URI getHrefContent()
     {
         return hrefContent;
     }
-    protected void setHrefContent(String hrefContent)
+    protected void setHrefContent(URI hrefContent)
     {
         this.hrefContent = hrefContent;
     }
     
+    @JsonProperty("HrefParts")
+    private URI hrefParts;
+    public URI getHrefParts()
+    {
+        return hrefParts;
+    }
+    public void setHrefParts(URI hrefParts)
+    {
+        this.hrefParts = hrefParts;
+    }
+
     @JsonProperty("UploadStatus")
     private String uploadStatus;
     public String getUploadStatus()

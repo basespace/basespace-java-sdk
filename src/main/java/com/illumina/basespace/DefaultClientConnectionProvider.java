@@ -13,14 +13,16 @@
 *  limitations under the License.
 */
 
-package com.illumina.basespace.infrastructure;
+package com.illumina.basespace;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.UriBuilder;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,9 +30,14 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-import com.illumina.basespace.ApiConfiguration;
 import com.illumina.basespace.auth.ResourceForbiddenException;
 import com.illumina.basespace.auth.UnauthorizedException;
+import com.illumina.basespace.infrastructure.BaseSpaceException;
+import com.illumina.basespace.infrastructure.BaseSpaceURLConnectionFactory;
+import com.illumina.basespace.infrastructure.ClientConnectionProvider;
+import com.illumina.basespace.infrastructure.ConversionContext;
+import com.illumina.basespace.infrastructure.Jsonable;
+import com.illumina.basespace.infrastructure.ResourceNotFoundException;
 import com.illumina.basespace.param.Mappable;
 import com.illumina.basespace.response.ApiResponse;
 import com.sun.jersey.api.client.Client;
@@ -41,17 +48,24 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.ClientFilter;
+import com.sun.jersey.api.representation.Form;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 
-public class DefaultClientConnectionProvider implements ClientConnectionProvider
+/**
+ * 
+ * @author bking
+ *
+ */
+class DefaultClientConnectionProvider implements ClientConnectionProvider
 {
     private Logger logger = Logger.getLogger(DefaultClientConnectionProvider.class.getPackage().getName());
     private ApiConfiguration configuration;
     private String accessToken;
     private final ObjectMapper mapper = new ObjectMapper();
+    private ConversionContext context;
     
-    public DefaultClientConnectionProvider(ApiConfiguration configuration,String accessToken)
+    public DefaultClientConnectionProvider(final ApiConfiguration configuration,String accessToken)
     {
         this.configuration = configuration;
         this.accessToken = accessToken;
@@ -67,6 +81,22 @@ public class DefaultClientConnectionProvider implements ClientConnectionProvider
                 return false;
             }
         });
+   
+        context = new ConversionContext()
+        {
+
+            @Override
+            public ApiConfiguration getApiConfiguration()
+            {
+                return configuration;
+            }
+
+            @Override
+            public ObjectMapper getMapper()
+            {
+                return mapper;
+            }
+        };
     }
     
     private Client client;
@@ -98,19 +128,29 @@ public class DefaultClientConnectionProvider implements ClientConnectionProvider
                 try
                 {
                     response = getNext().handle(request);
-                    if (response.getStatus() > 400)
+                    if (response.getStatus() >= 400)
                     {
+                        String message =response.getClientResponseStatus().toString();
+                        if (response.getType().toString().indexOf(MediaType.APPLICATION_JSON) > -1)
+                        {
+                            try
+                            {
+                                ApiResponse<?,?> status = ( ApiResponse<?,?>) mapper.readValue(response.getEntity(String.class) ,ApiResponse.class);
+                                message = status.getResponseStatus().getMessage();
+                            }
+                            catch (Throwable e){}
+                        }
                         switch (response.getClientResponseStatus())
                         {
                             //Wrap more commonly encountered response status codes in a higher level exception
                             case NOT_FOUND:
                                 throw new ResourceNotFoundException(request.getURI());
                             case FORBIDDEN:
-                                throw new ResourceForbiddenException(request.getMethod(),request.getURI());
+                                throw new ResourceForbiddenException(request.getMethod(),message,request.getURI());
                             case UNAUTHORIZED:
                                 throw new UnauthorizedException();
                             default:
-                                throw new BaseSpaceException(request.getURI(),response.getStatus());
+                                throw new BaseSpaceException(request.getURI(),message,response.getStatus());
                         }   
                     }
                
@@ -188,39 +228,39 @@ public class DefaultClientConnectionProvider implements ClientConnectionProvider
             throw new RuntimeException(t);
         }
     }
-    @SuppressWarnings("unchecked")
     @Override
-    public <T extends ApiResponse<?, ?>> T postResource(Class<? extends ApiResponse<?, ?>> clazz, String path,
-            CreatableResource resource,Map<String,String>headers,Mappable params)
+    public <T extends ApiResponse<?, ?>> T postForm(Class<? extends ApiResponse<?, ?>> clazz, String path,
+           Map<String,String>headers,Form formData)
+    {
+        return postInternal(clazz,path,headers,formData,MediaType.APPLICATION_FORM_URLENCODED);
+    }
+    
+    @Override
+    public <T extends ApiResponse<?, ?>> T postJson(Class<? extends ApiResponse<?, ?>> clazz, String path,
+            Map<String, String> headers, Jsonable json)
+    {
+        return postInternal(clazz,path,headers,json.toJson(context),MediaType.APPLICATION_JSON);
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected <T extends ApiResponse<?, ?>> T postInternal(Class<? extends ApiResponse<?, ?>> clazz, String path,
+            Map<String, String> headers, Object data,String mediaType)
     {
         try
         {
-            ConversionContext ctx = new ConversionContext()
-            {
-                @Override
-                public ApiConfiguration getApiConfiguration()
-                {
-                    return configuration;
-                }
-                @Override
-                public ObjectMapper getMapper()
-                {
-                    return mapper;
-                }
-            };
-            if (resource == null)throw new IllegalArgumentException("Null resource to create/update");
             WebResource webResource = getClient().resource(
                     configuration.getApiRootUri())
                     .path(configuration.getVersion())
                     .path(path);
             WebResource.Builder builder = webResource.getRequestBuilder();
+            builder = builder.header("Content-Type", mediaType);
             if (headers != null)
             {
                 for(String key:headers.keySet()){builder = builder.header(key, headers.get(key));}
-            }                
-            String response = webResource
-                    .accept(MediaType.APPLICATION_JSON)
-                    .post(String.class,resource.toForm() != null?resource.toForm():resource.toJson(ctx));
+            }               
+            String response = builder
+                    .accept(mediaType)
+                    .post(String.class,data);
             logger.fine(response);
             return (T) mapper.readValue(response,clazz);
         }
@@ -230,14 +270,58 @@ public class DefaultClientConnectionProvider implements ClientConnectionProvider
         }
         catch (Throwable t)
         {
+            t.printStackTrace();
             throw new RuntimeException(t);
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends ApiResponse<?, ?>> T putFile(Class<? extends ApiResponse<?, ?>> clazz, String path,
+            Map<String, String> headers, InputStream file)
+    {
+        try
+        {
+            WebResource resource = getClient()
+                    .resource(UriBuilder.fromUri(getConfiguration().getApiRootUri())
+                            .path(getConfiguration().getVersion())
+                            .path(path).build());
+            
+            WebResource.Builder builder = resource.getRequestBuilder();
+            if (headers != null)
+            {
+                for(String key:headers.keySet()){builder = builder.header(key, headers.get(key));}
+            }         
+            builder = builder
+                    .type(MediaType.APPLICATION_OCTET_STREAM)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .entity(file);
+            
+            String response = builder.put(String.class);
+            logger.fine(response);
+            return (T) mapper.readValue(response,clazz);
+        }
+        catch (BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch (RuntimeException t)
+        {
+            throw t;
+        }
+        catch (Throwable t)
+        {
+            throw new RuntimeException(t);
+        }
+    }
+    
+    
     @Override
     public ObjectMapper getMapper()
     {
         return mapper;
     }
+ 
  
     
     

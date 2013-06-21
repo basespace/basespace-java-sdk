@@ -27,6 +27,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+/**
+ * 
+ * @author bking
+ *
+ */
 public class DateDeserializer extends JsonDeserializer<Date> 
 {
     private final DateFormat dateFormat =  new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");

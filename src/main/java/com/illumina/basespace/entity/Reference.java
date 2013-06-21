@@ -14,16 +14,27 @@
 */
 package com.illumina.basespace.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 /**
  * A reference point between one or more BaseSpace entities
  * @author bking
  *
  */
+
 public class Reference extends ReferenceCompact
 {
-   
-    
-    
-    
+    @JsonProperty("Content")
+    private Content content;
+    public Content getContent()
+    {
+        return content;
+    }
+    public void setContent(Content content)
+    {
+        this.content = content;
+    }
+
+
 }

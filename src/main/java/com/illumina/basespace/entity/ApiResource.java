@@ -20,6 +20,11 @@ import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * 
+ * @author bking
+ *
+ */
 public abstract class ApiResource implements Serializable
 {
     public ApiResource(String id)
