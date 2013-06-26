@@ -21,6 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.illumina.basespace.util.DateDeserializer;
 
+/**
+ * A File in BaseSpace is what one would expect - a collection of attributes (date created, size, etc) and a data stream. The BaseSpace API lets an app read any file it have access to. In addition, certain files (VCF and BAM files) have additional information available
+ * @author bking
+ *
+ */
 public class FileCompact extends ApiResource
 {
     public FileCompact()
@@ -35,6 +40,10 @@ public class FileCompact extends ApiResource
     
     @JsonProperty("ContentType")
     private String contentType;
+    /**
+     * The type of content contained within this file
+     * @return
+     */
     public String getContentType()
     {
         return contentType;
@@ -47,7 +56,10 @@ public class FileCompact extends ApiResource
 
     @JsonProperty("Size")
     private Long size;
-    
+    /**
+     * The size, in bytes, of this file
+     * @return
+     */
     public Long getSize()
     {
         return size;
@@ -59,7 +71,10 @@ public class FileCompact extends ApiResource
     
     @JsonProperty("Path")
     private String path;
-
+    /**
+     * The path to this file in the BaseSpace UI
+     * @return
+     */
     public String getPath()
     {
         return path;

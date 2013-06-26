@@ -20,7 +20,7 @@ import java.net.URI;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * A BaseSpace data file.
+ * A File in BaseSpace is what one would expect - a collection of attributes (date created, size, etc) and a data stream. The BaseSpace API lets an app read any file it have access to. In addition, certain files (VCF and BAM files) have additional information available
  * @author bking
  *
  */
@@ -28,6 +28,10 @@ public class File extends FileCompact
 {
     @JsonProperty("OriginalScope")
     private String originalScope;
+    /**
+     * A field that shows information about sample merging, generally populated with info about the origin of this file from sample merging. It gives a logical way to group these merged files together to show where exactly they came from
+     * @return
+     */
     public String getOriginalScope()
     {
         return originalScope;
@@ -39,6 +43,10 @@ public class File extends FileCompact
     
     @JsonProperty("HrefVariants")
     private URI hrefVariants;
+    /**
+     * The location in the API of the variants for this file
+     * @return
+     */
     public URI getHrefVariants()
     {
         return hrefVariants;
@@ -50,6 +58,10 @@ public class File extends FileCompact
     
     @JsonProperty("HrefCoverage")
     private URI hrefCoverage;
+    /**
+     * The location in the API of the coverage for this file
+     * @return
+     */
     public URI getHrefCoverage()
     {
         return hrefCoverage;
@@ -61,6 +73,10 @@ public class File extends FileCompact
 
     @JsonProperty("HrefContent")
     private URI hrefContent;
+    /**
+     * Where in the API the content of the file is located
+     * @return
+     */
     public URI getHrefContent()
     {
         return hrefContent;
@@ -83,6 +99,10 @@ public class File extends FileCompact
 
     @JsonProperty("UploadStatus")
     private String uploadStatus;
+    /**
+     * The status of the upload of this file
+     * @return
+     */
     public String getUploadStatus()
     {
         return uploadStatus;

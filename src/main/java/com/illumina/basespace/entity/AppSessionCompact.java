@@ -20,7 +20,7 @@ import com.illumina.basespace.infrastructure.ConversionContext;
 import com.illumina.basespace.infrastructure.Jsonable;
 
 /**
- * 
+ * The instance of an application running on a set of Samples, Runs, Files, Appresults, or Projects. This resource gives information about the status of an application, which will be working on one of the above resource types. The id of a particular app session may be found within an AppResult or Sample, or will be assigned upon triggering an application. If an application has access to a given Sample or AppResult, it also has access to the associated AppSession which provides additional metadata. The app will see a reference to an AppSession for each Sample and AppResult in the API.
  * @author bking
  *
  */
@@ -36,6 +36,10 @@ public class AppSessionCompact extends OwnedResource implements Jsonable
     
     @JsonProperty("Status")
     private String status;
+    /**
+     * Status of the AppSession, the Samples or AppResults created by it will inherit this property
+     * @return
+     */
     public String getStatus()
     {
         return status;
@@ -47,6 +51,10 @@ public class AppSessionCompact extends OwnedResource implements Jsonable
     
     @JsonProperty("StatusSummary")
     private String statusSummary;
+    /**
+     *  A summary of the status of the appsession
+     * @return
+     */
     public String getStatusSummary()
     {
         return statusSummary;
@@ -58,6 +66,10 @@ public class AppSessionCompact extends OwnedResource implements Jsonable
     
     @JsonProperty("Application")
     private ApplicationCompact application;
+    /**
+     * The application that created this appsession, includes information about the application
+     * @return
+     */
     public ApplicationCompact getApplication()
     {
         return application;

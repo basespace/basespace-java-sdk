@@ -36,6 +36,10 @@ public class RunCompact extends OwnedResource
 
     @JsonProperty("ExperimentName")
     private String experimentName;
+    /**
+     * The name of the experiment, set by the user who uploads the run
+     * @return
+     */
     public String getExperimentName()
     {
         return experimentName;
@@ -52,6 +56,10 @@ public class RunCompact extends OwnedResource
     
     @JsonProperty("Status")
     private String status;
+    /**
+     * The status of the Run
+     * @return
+     */
     public String getStatus()
     {
         return status;

@@ -19,16 +19,18 @@ import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
- * A BaseSpace project
+ * Projects are the fundamental unit of organization in BaseSpace. Users may create projects, place items into projects, and share projects (and their contents) with other users
  * @author bking
- *
  */
 public class Project extends ProjectCompact
 {
     @JsonProperty("HrefSamples")
     private URI hrefSamples;
+    /**
+     * The samples inside of this project
+     * @return
+     */
     public URI getSamplesHref()
     {
         return hrefSamples;
@@ -40,6 +42,10 @@ public class Project extends ProjectCompact
     
     @JsonProperty("HrefAppResults")
     private URI hrefAppResults;
+    /**
+     * The appresults in this project
+     * @return
+     */
     public URI getAppResultsHref()
     {
         return hrefAppResults;

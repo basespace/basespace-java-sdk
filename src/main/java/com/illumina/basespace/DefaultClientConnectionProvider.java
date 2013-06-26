@@ -170,15 +170,21 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
         return configuration;
     }
     
-    
-    @SuppressWarnings("unchecked")
     @Override
     public <T extends ApiResponse<?, ?>> T getResponse(Class<? extends ApiResponse<?, ?>> clazz, String path,
             Mappable params,Map<String,String>headers)
     {
+        return getResponse(clazz,configuration.getApiRootUri(),path,params,headers);
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends ApiResponse<?, ?>> T getResponse(Class<? extends ApiResponse<?, ?>> clazz, 
+            String root,String path, Mappable params,Map<String,String>headers)
+    {
         try
         {
-            return (T) mapper.readValue(getStringResponse(path,params,headers),clazz);
+            return (T) mapper.readValue(getStringResponse(root,path,params,headers),clazz);
         }
         catch (BaseSpaceException bs)
         {
@@ -197,13 +203,19 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
     @Override
     public String getStringResponse(String path, Mappable params,Map<String,String>headers)
     {
+        return getStringResponse(configuration.getApiRootUri(),path,params,headers);
+    }
+    
+    @Override
+    public String getStringResponse(String root,String path,Mappable params,Map<String,String>headers)
+    {
         try
         {
             int idx = path.indexOf(configuration.getVersion());
             if (idx > -1) path = path.substring(idx + configuration.getVersion().length());
             MultivaluedMap<String, String> queryParams = params == null ? new MultivaluedMapImpl() : params.toMap();
             WebResource resource = getClient().resource(
-                    configuration.getApiRootUri())
+                     root)
                     .path(configuration.getVersion())
                     .path(path)
                     .queryParams(queryParams);
@@ -232,24 +244,44 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
     public <T extends ApiResponse<?, ?>> T postForm(Class<? extends ApiResponse<?, ?>> clazz, String path,
            Map<String,String>headers,Form formData)
     {
-        return postInternal(clazz,path,headers,formData,MediaType.APPLICATION_FORM_URLENCODED);
+        return postForm(clazz,configuration.getApiRootUri(),path,headers,formData);
+    }
+    
+    @Override
+    public <T extends ApiResponse<?, ?>> T postForm(Class<? extends ApiResponse<?, ?>> clazz, String root,String path,
+           Map<String,String>headers,Form formData)
+    {
+        return postInternal(clazz,root,path,headers,formData,MediaType.APPLICATION_FORM_URLENCODED);
     }
     
     @Override
     public <T extends ApiResponse<?, ?>> T postJson(Class<? extends ApiResponse<?, ?>> clazz, String path,
             Map<String, String> headers, Jsonable json)
     {
-        return postInternal(clazz,path,headers,json.toJson(context),MediaType.APPLICATION_JSON);
+        return postJson(clazz,configuration.getApiRootUri(),path,headers,json);
+    }
+    
+    @Override
+    public <T extends ApiResponse<?, ?>> T postJson(Class<? extends ApiResponse<?, ?>> clazz, String root,String path,
+            Map<String, String> headers, Jsonable json)
+    {
+        return postInternal(clazz,root,path,headers,json.toJson(context),MediaType.APPLICATION_JSON);
+    }
+    
+    protected <T extends ApiResponse<?, ?>> T postInternal(Class<? extends ApiResponse<?, ?>> clazz, String path,
+            Map<String, String> headers, Object data,String mediaType)
+    {
+        return postInternal(clazz,configuration.getApiRootUri(),path,headers,data,mediaType);
     }
     
     @SuppressWarnings("unchecked")
-    protected <T extends ApiResponse<?, ?>> T postInternal(Class<? extends ApiResponse<?, ?>> clazz, String path,
+    protected <T extends ApiResponse<?, ?>> T postInternal(Class<? extends ApiResponse<?, ?>> clazz, String root,String path,
             Map<String, String> headers, Object data,String mediaType)
     {
         try
         {
             WebResource webResource = getClient().resource(
-                    configuration.getApiRootUri())
+                    root)
                     .path(configuration.getVersion())
                     .path(path);
             WebResource.Builder builder = webResource.getRequestBuilder();

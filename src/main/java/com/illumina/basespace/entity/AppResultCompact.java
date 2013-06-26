@@ -18,7 +18,7 @@ package com.illumina.basespace.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * 
+ * AppResults is a general term for any result that is produced from an application in BaseSpace. For example, if an app performed a resequencing workflow, the corresponding AppResult would be a collection of aligned reads (stored as BAM files) and variants (stored as VCF files). 
  * @author bking
  *
  */

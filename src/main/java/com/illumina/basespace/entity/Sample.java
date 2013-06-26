@@ -19,9 +19,8 @@ import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
- * A BaseSpace sample
+ * Samples are the result of demultiplexing the output of a sequencing instrument flow cell run. A Sample in BaseSpace contains metadata about how it was produced (i.e. from the sample sheet) and a collection of Files representing all the reads in compressed FASTQ format.
  * @author bking
  *
  */
@@ -29,6 +28,10 @@ public class Sample extends SampleCompact
 {
     @JsonProperty("HrefGenome")
     private URI hrefGenome;
+    /**
+     * The genome to which this sample was referenced, this field is optional and if it is empty it will not be exposed
+     * @return
+     */
     public URI getHrefGenome()
     {
         return hrefGenome;
@@ -40,6 +43,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("ExperimentName")
     private String experimentName;
+    /**
+     * The name of the run from which this sample was taken
+     * @return
+     */
     public String getExperimentName()
     {
         return experimentName;
@@ -51,6 +58,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("SampleNumber")
     private int sampleNumber;
+    /**
+     * The sample number of this sample within the project
+     * @return
+     */
     public int getSampleNumber()
     {
         return sampleNumber;
@@ -62,6 +73,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("HrefFiles")
     private URI hrefFiles;
+    /**
+     * The location of the files for this sample
+     * @return
+     */
     public URI getHrefFiles()
     {
         return hrefFiles;
@@ -73,6 +88,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("AppSession")
     private AppSessionCompact appSession;
+    /**
+     * Information about the appsession that created this sample
+     * @return
+     */
     public AppSessionCompact getAppSession()
     {
         return appSession;
@@ -84,6 +103,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("IsPairedEnd")
     private boolean isPairedEnd;
+    /**
+     * Designates whether or not the read is a paired end read
+     * @return
+     */
     public boolean isPairedEnd()
     {
         return isPairedEnd;
@@ -95,6 +118,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("Read1")
     private int read1;
+    /**
+     * The length of the first Read, the number of bases
+     * @return
+     */
     public int getRead1()
     {
         return read1;
@@ -106,6 +133,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("Read2")
     private int read2;
+    /**
+     * The length of the second Read, the number of bases
+     * @return
+     */
     public int getRead2()
     {
         return read2;
@@ -117,6 +148,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("NumReadsRaw")
     private int numberOfReadsRaw;
+    /**
+     * The number of Reads for this Sample
+     * @return
+     */
     public int getNumberOfReadsRaw()
     {
         return numberOfReadsRaw;
@@ -128,6 +163,10 @@ public class Sample extends SampleCompact
     
     @JsonProperty("NumReadsPF")
     private int numberOfReadsPF;
+    /**
+     * The number of Reads that have passed filters
+     * @return
+     */
     public int getNumberOfReadsPF()
     {
         return numberOfReadsPF;
@@ -139,6 +178,10 @@ public class Sample extends SampleCompact
 
     @JsonProperty("References")
     private Reference[] references;
+    /**
+     * The Reference field shows this Sample's relation to other Samples or AppResults in BaseSpace
+     * @return
+     */
     public Reference[] getReferences()
     {
         return references;

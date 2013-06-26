@@ -33,9 +33,11 @@ import com.illumina.basespace.entity.AppResultCompact;
 import com.illumina.basespace.entity.AppSessionCompact;
 import com.illumina.basespace.entity.AppSessionStatus;
 import com.illumina.basespace.entity.CreateAppResult;
+import com.illumina.basespace.entity.CreatePurchase;
 import com.illumina.basespace.entity.File;
 import com.illumina.basespace.entity.FileCompact;
 import com.illumina.basespace.entity.FileRedirectMetaData;
+import com.illumina.basespace.entity.ProductCompact;
 import com.illumina.basespace.entity.ProjectCompact;
 import com.illumina.basespace.entity.ReferenceCompact;
 import com.illumina.basespace.entity.RunCompact;
@@ -51,6 +53,7 @@ import com.illumina.basespace.param.FileParams;
 import com.illumina.basespace.param.Mappable;
 import com.illumina.basespace.param.PositionalQueryParams;
 import com.illumina.basespace.param.QueryParams;
+import com.illumina.basespace.response.CreatePurchaseResponse;
 import com.illumina.basespace.response.GetAppResultResponse;
 import com.illumina.basespace.response.GetAppSessionResponse;
 import com.illumina.basespace.response.GetCoverageMetadataResponse;
@@ -61,9 +64,11 @@ import com.illumina.basespace.response.GetFileUploadResponse;
 import com.illumina.basespace.response.GetGenomeResponse;
 import com.illumina.basespace.response.GetProjectResponse;
 import com.illumina.basespace.response.GetPurchaseResponse;
+import com.illumina.basespace.response.GetRefundResponse;
 import com.illumina.basespace.response.GetRunResponse;
 import com.illumina.basespace.response.GetSampleResponse;
 import com.illumina.basespace.response.GetUserResponse;
+import com.illumina.basespace.response.GetVariantSetResponse;
 import com.illumina.basespace.response.ListAppResultsResponse;
 import com.illumina.basespace.response.ListAppSessionsResponse;
 import com.illumina.basespace.response.ListFilesResponse;
@@ -158,10 +163,15 @@ class DefaultApiClient implements ApiClient
     @Override
     public ListAppResultsResponse getAppResults(ProjectCompact project, QueryParams params)
     {
-
         return getConnectionProvider().getResponse(ListAppResultsResponse.class,
                 "projects/" + project.getId() + "/appresults", params, null);
-
+    }
+    
+    @Override
+    public ListAppResultsResponse getAppResults(AppSessionCompact appSession, QueryParams params)
+    {
+        return getConnectionProvider().getResponse(ListAppResultsResponse.class,
+                "appsession/" + appSession.getId() + "/appresults", params, null);
     }
 
     @Override
@@ -171,8 +181,11 @@ class DefaultApiClient implements ApiClient
     }
     
     @Override
-    public ListAppSessionsResponse getAppSessions(QueryParams params)
+    public ListAppSessionsResponse getAppSessions(String appId,String status,QueryParams params)
     {
+        if (params == null)params = new QueryParams();
+        params.addParam("AppId", appId);
+        params.addParam("Status", status);
         return getConnectionProvider().getResponse(ListAppSessionsResponse.class, "users/current/appsessions", params, null);
         
     }
@@ -249,7 +262,7 @@ class DefaultApiClient implements ApiClient
     }
 
     @Override
-    public void download(final com.illumina.basespace.entity.File file, java.io.File localFolder,
+    public void download(final com.illumina.basespace.entity.File file, java.io.File target,
             DownloadListener listener)
     {
         FileOutputStream fos = null;
@@ -258,18 +271,18 @@ class DefaultApiClient implements ApiClient
         long progress = 0;
         try
         {
-            if (localFolder.isDirectory())
+            if (target.isDirectory())
             {
-                if (!localFolder.exists() && !localFolder.mkdirs())
+                if (!target.exists() && !target.mkdirs())
                 {
-                    throw new IllegalArgumentException("Unable to create local folder " + localFolder.toString());
+                    throw new IllegalArgumentException("Unable to create local folder " + target.toString());
                 }
-                localFolder = new java.io.File(localFolder, file.getName());
+                target = new java.io.File(target, file.getName());
             }
 
             final int CHUNK_SIZE = 4096;
             in = getFileInputStream(file);
-            fos = new FileOutputStream(localFolder);
+            fos = new FileOutputStream(target);
 
             byte[] outputByte = new byte[CHUNK_SIZE];
             int bytesRead = 0;
@@ -316,9 +329,9 @@ class DefaultApiClient implements ApiClient
             }
             if (canceled)
             {
-                if (localFolder != null)
+                if (target != null)
                 {
-                    localFolder.delete();
+                    target.delete();
                     if (listener != null) listener.canceled(new DownloadEvent(file, progress, file.getSize()));
                 }
             }
@@ -357,6 +370,14 @@ class DefaultApiClient implements ApiClient
     }
 
     @Override
+    public GetVariantSetResponse getVariantSet(File file)
+    {
+        return getConnectionProvider().getResponse(GetVariantSetResponse.class,
+                "/variantset/" + file.getId(), null, null);
+    }
+    
+    
+    @Override
     public ListVariantsResponse getVariants(File file, String chromosome, PositionalQueryParams params)
     {
         params.addParam("Format", "json");
@@ -389,19 +410,6 @@ class DefaultApiClient implements ApiClient
     private Client getClient()
     {
         return connectionProvider.getClient();
-    }
-
-    @Override
-    public URI getRootURI()
-    {
-        try
-        {
-            return new URI(connectionProvider.getConfiguration().getApiRootUri());
-        }
-        catch (Throwable t)
-        {
-            throw new RuntimeException(t);
-        }
     }
 
     public ClientConnectionProvider getConnectionProvider()
@@ -459,39 +467,43 @@ class DefaultApiClient implements ApiClient
     }
 
     @Override
-    public ListProductsResponse getProducts(QueryParams params)
+    public ListProductsResponse getProducts(String[]tags,String[]productIds,QueryParams params)
     {
-        return getConnectionProvider().getResponse(ListProductsResponse.class, "users/current/products", params, null);
-
+        if (params == null)params = new QueryParams();
+        params.addParam("Tags", tags,",");
+        params.addParam("ProductId", productIds,",");
+        return getConnectionProvider().getResponse(ListProductsResponse.class, connectionProvider.getConfiguration().getStoreRootUri(),
+                "users/current/products", params, null);
     }
 
-    /*
     @Override
     public CreatePurchaseResponse createPurchase(AppSessionCompact appSession,ProductCompact[]products)
     {
         CreatePurchase purchase = new CreatePurchase();
         purchase.setProducts(products);
         purchase.setAppSessionId(appSession.getId());
-        return getConnectionProvider().postJson(CreatePurchaseResponse.class, "purchases", null, purchase);
-    }*/
+        return getConnectionProvider().postJson(CreatePurchaseResponse.class, connectionProvider.getConfiguration().getStoreRootUri(),
+                "purchases", null, purchase);
+    }
 
     @Override
     public GetPurchaseResponse getPurchase(String id) throws ResourceNotFoundException, ResourceForbiddenException
     {
-        return getConnectionProvider().getResponse(GetPurchaseResponse.class, "purchases/" + id, null, null);
+        return getConnectionProvider().getResponse(GetPurchaseResponse.class, 
+                connectionProvider.getConfiguration().getStoreRootUri(),"purchases/" + id, null, null);
 
     }
 
-    /*
     @Override
     public GetRefundResponse createRefund(String purchaseId, String refundSecret, String comment)
     {
         Form form = new Form();
         form.add("RefundSecret", refundSecret);
         form.add("Comment", comment);
-        return getConnectionProvider().postForm(GetRefundResponse.class, "purchases/" + purchaseId + "/refund", null,
+        return getConnectionProvider().postForm(GetRefundResponse.class, connectionProvider.getConfiguration().getStoreRootUri(),
+                "purchases/" + purchaseId + "/refund", null,
                 form);
-    }*/
+    }
 
     @Override
     public GetFileUploadResponse uploadFilePart(FileCompact file, int partNumber, String MD5Hash, InputStream part)
@@ -550,6 +562,28 @@ class DefaultApiClient implements ApiClient
             downloadMetaDataCache.put(file.getId(), metaData);
         }
         return metaData;
+    }
+    
+    protected Mappable merge(Mappable mappable,Map<String,String>more)
+    {
+        final MultivaluedMap<String, String> map = new MultivaluedMapImpl();
+        if (mappable != null)map.putAll(mappable.toMap());
+        if (more != null)
+        {
+            for(String key:more.keySet())
+            {
+                map.putSingle(key, more.get(key));
+            }
+        }
+        Mappable newMappable = new Mappable()
+        {
+            @Override
+            public MultivaluedMap<String, String> toMap()
+            {
+                return map;
+            }
+        };
+        return newMappable;
     }
 
 }

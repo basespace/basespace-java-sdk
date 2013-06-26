@@ -21,8 +21,9 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * An Application Result
+ * AppResults is a general term for any result that is produced from an application in BaseSpace. For example, if an app performed a resequencing workflow, the corresponding AppResult would be a collection of aligned reads (stored as BAM files) and variants (stored as VCF files). 
  * @author bking
+ *
  */
 public class AppResult extends AppResultCompact
 {
@@ -40,6 +41,10 @@ public class AppResult extends AppResultCompact
     
     @JsonProperty("HrefFiles")
     private URI hrefFiles;
+    /**
+     * The location of the files for this appresult
+     * @return
+     */
     public URI getHrefFiles()
     {
         return hrefFiles;
@@ -51,6 +56,10 @@ public class AppResult extends AppResultCompact
     
     @JsonProperty("HrefGenome")
     private URI hrefGenome;
+    /**
+     * The genome to which this appresult was referenced, this field is optional and if it is empty it will not be exposed
+     * @return
+     */
     public URI getHrefGenome()
     {
         return hrefGenome;
@@ -62,6 +71,10 @@ public class AppResult extends AppResultCompact
     
     @JsonProperty("AppSession")
     private AppSessionCompact appSession;
+    /**
+     * Information about the appsession that created this appresult
+     * @return
+     */
     public AppSessionCompact getAppSession()
     {
         return appSession;
@@ -73,6 +86,10 @@ public class AppResult extends AppResultCompact
     
     @JsonProperty("References")
     private Reference[] references;
+    /**
+     * Shows how and where this AppResult is referenced
+     * @return
+     */
     public Reference[] getReferences()
     {
         return references;

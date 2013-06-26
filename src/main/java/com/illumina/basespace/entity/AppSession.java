@@ -15,12 +15,12 @@
 package com.illumina.basespace.entity;
 
 import java.net.URI;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
 /**
- * An application session
+ * The instance of an application running on a set of Samples, Runs, Files, Appresults, or Projects. This resource gives information about the status of an application, which will be working on one of the above resource types. The id of a particular app session may be found within an AppResult or Sample, or will be assigned upon triggering an application. If an application has access to a given Sample or AppResult, it also has access to the associated AppSession which provides additional metadata. The app will see a reference to an AppSession for each Sample and AppResult in the API.
  * @author bking
  *
  */
@@ -40,6 +40,10 @@ public class AppSession extends AppSessionCompact
     
     @JsonProperty("References")
     private ReferenceCompact[]references;
+    /**
+     * The resources that are referenced by the appsession 
+     * @return
+     */
     public ReferenceCompact[] getReferences()
     {
         return references;
@@ -58,6 +62,12 @@ public class AppSession extends AppSessionCompact
     public void setAuthorizationCode(String authorizationCode)
     {
         this.authorizationCode = authorizationCode;
+    }
+    @Override
+    public String toString()
+    {
+        return "AppSession [originatingUri=" + originatingUri + ", references=" + Arrays.toString(references)
+                + ", authorizationCode=" + authorizationCode + ", toString()=" + super.toString() + "]";
     }
     
     

@@ -15,8 +15,6 @@
 
 package com.illumina.basespace.response;
 
-import java.net.URI;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.illumina.basespace.entity.Purchase;
 import com.illumina.basespace.entity.PurchaseCompact;
@@ -34,25 +32,16 @@ public class CreatePurchaseResponse extends ApiResponse<PurchaseCompact, Purchas
 
     public class PurchaseResult extends Purchase
     {
-        @JsonProperty("HrefPurchaseDialog")
-        private URI hrefPurchaseDialog;
-        public URI getHrefPurchaseDialog()
-        {
-            return hrefPurchaseDialog;
-        }
-        public void setHrefPurchaseDialog(URI hrefPurchaseDialog)
-        {
-            this.hrefPurchaseDialog = hrefPurchaseDialog;
-        }
-        
+        @JsonProperty("RefundSecret")
         private String refundSecret;
         public String getRefundSecret()
         {
             return refundSecret;
         }
-        public void setRefundSecret(String refundSecret)
+        @Override
+        public String toString()
         {
-            this.refundSecret = refundSecret;
+            return "PurchaseResult [refundSecret=" + refundSecret + ", toString()=" + super.toString() + "]";
         }
     }
 }

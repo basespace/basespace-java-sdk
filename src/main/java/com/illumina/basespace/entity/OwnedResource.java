@@ -34,6 +34,10 @@ public abstract class OwnedResource extends ApiResource
 
     @JsonProperty("UserOwnedBy")
     private UserCompact userOwnedBy;
+    /**
+     * Information about the User who owns this resource
+     * @return
+     */
     public UserCompact getUserOwnedBy()
     {
         return userOwnedBy;
@@ -48,8 +52,8 @@ public abstract class OwnedResource extends ApiResource
     private Date dateCreated;
 
     /**
-     * Get the date this entity was created
-     * @return the create date
+     * When this resource was created
+     * @return
      */
     public Date getDateCreated()
     {

@@ -97,5 +97,9 @@ public interface ApiConfiguration
      */
     public int getConnectionTimeout();
     
-    public boolean shouldThrowExceptionOnHttpError();
+    /**
+     * Get the root URI for the BaseSpace Store
+     * @return the store root URI
+     */
+    public String getStoreRootUri();
 }

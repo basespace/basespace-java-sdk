@@ -22,6 +22,12 @@ public class CoverageParams extends PositionalQueryParams
     public CoverageParams()
     {
     }
+    /**
+     * Create new coverage parameters
+     * @param startPosition The starting position in the chromosome to search for the variant, can be any number within the range of the chromosome. No default value, must be specified and must be an integer.
+     * @param endPosition The ending position in the chromosome to search for the variant, can be any number within the range of the chromosome. No default value, must be specified and must be an integer
+     * @param zoomLevel granularity per bin
+     */
     public CoverageParams(int startPosition, int endPosition,int zoomLevel)
     {
         super(startPosition,endPosition);

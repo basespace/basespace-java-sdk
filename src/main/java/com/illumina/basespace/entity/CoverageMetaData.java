@@ -30,21 +30,17 @@ public class CoverageMetaData
         this.maxCoverage = maxCoverage;
     }
     
-    @JsonProperty("ZoomLevel")
-    private int zoomLevel;
-    public int getZoomLevel()
+    @JsonProperty("CoverageGranularity")
+    private int coverageGranularity;
+    public int getCoverageGranularity()
     {
-        return zoomLevel;
+        return coverageGranularity;
     }
-    public void setZoomLevel(int zoomLevel)
+    public void setCoverageGranularity(int coverageGranularity)
     {
-        this.zoomLevel = zoomLevel;
+        this.coverageGranularity = coverageGranularity;
     }
-    @Override
-    public String toString()
-    {
-        return "CoverageMetaData [maxCoverage=" + maxCoverage + ", zoomLevel=" + zoomLevel + "]";
-    }
+    
     
     
     

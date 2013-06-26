@@ -24,6 +24,10 @@ public class ReferenceCompact
    
     @JsonProperty("Rel")
     private String relation;
+    /**
+     * A UsedBy value for this field means that this Sample was used by an application to produce an AppResult
+     * @return
+     */
     public String getRelation()
     {
         return relation;
@@ -37,6 +41,10 @@ public class ReferenceCompact
     
     @JsonProperty("Type")
     private String type;
+    /**
+     * The type of resource that was output from using this Sample as an input to an application, generally AppResult
+     * @return
+     */
     public String getType()
     {
         return type;

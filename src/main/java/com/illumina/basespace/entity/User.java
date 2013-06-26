@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.illumina.basespace.util.DateDeserializer;
 
 /**
- * A BaseSpace user
+ * The User resource is provided so that an app can get basic information about the user that is using the application
  * @author bking
  *
  */
@@ -33,7 +33,7 @@ public class User extends UserCompact
     private String email;
 
     /**
-     * Get the email associated with this user
+     * Current user's email address
      * @return the email
      */
     public String getEmail()
@@ -66,7 +66,7 @@ public class User extends UserCompact
     @JsonProperty("HrefRuns")
     private URI hrefRuns;
     /**
-     * Get the runs URI for this user
+     * The runs that the user owns or has access to
      * @return the runs URI
      */
     public URI getHrefRuns()
@@ -81,7 +81,7 @@ public class User extends UserCompact
     @JsonProperty("HrefProjects")
     private URI hrefProjects;
     /**
-     * Get the projects URI for this user
+     *  The projects that the user owns or has access to
      * @return the projects URI
      */
     public URI getHrefProjects()

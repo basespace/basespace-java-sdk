@@ -17,10 +17,19 @@ package com.illumina.basespace.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Samples are the result of demultiplexing the output of a sequencing instrument flow cell run. A Sample in BaseSpace contains metadata about how it was produced (i.e. from the sample sheet) and a collection of Files representing all the reads in compressed FASTQ format.
+ * @author bking
+ *
+ */
 public class SampleCompact extends OwnedResource
 {
     @JsonProperty("SampleId")
     protected String sampleId;
+    /**
+     * The Id of the Sample from the samplesheet, this is specified by the user at the flow cell level
+     * @return
+     */
     public String getSampleId()
     {
         return sampleId;

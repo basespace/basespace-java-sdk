@@ -22,10 +22,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.illumina.basespace.util.DateDeserializer;
 
-
-
 /**
- * A BaseSpace instrument run
+ * Processing a flow cell on a sequencing instrument produces a variety of files, collectively referred to as a Run. A Run contains logfiles, instrument health data, and run metrics as well as the base call and other information used in secondary analysis
  * @author bking
  *
  */
@@ -33,6 +31,10 @@ public class Run extends RunCompact
 {
     @JsonProperty("HrefFiles")
     private URI hrefFiles;
+    /**
+     * The location of the run's files in the API
+     * @return
+     */
     public URI getHrefFiles()
     {
         return hrefFiles;
@@ -44,6 +46,10 @@ public class Run extends RunCompact
 
     @JsonProperty("HrefSamples")
     private URI hrefSamples;
+    /**
+     * The location of the run's samples in the API
+     * @return
+     */
     public URI getHrefSamples()
     {
         return hrefSamples;
@@ -55,6 +61,10 @@ public class Run extends RunCompact
     
     @JsonProperty("UserUploadedBy")
     private UserCompact uploadedBy;
+    /**
+     * Information about the user who uploaded the run
+     * @return
+     */
     public UserCompact getUploadedBy()
     {
         return uploadedBy;
@@ -67,6 +77,10 @@ public class Run extends RunCompact
     @JsonDeserialize(using=DateDeserializer.class)
     @JsonProperty("DateUploadCompleted")
     private Date dateUploadCompleted;
+    /**
+     * The date when the upload was completed
+     * @return
+     */
     public Date getDateUploadCompleted()
     {
         return dateUploadCompleted;
@@ -79,6 +93,10 @@ public class Run extends RunCompact
     @JsonDeserialize(using=DateDeserializer.class)
     @JsonProperty("DateUploadStarted")
     private Date dateUploadStarted;
+    /**
+     * The date when the upload was started
+     * @return
+     */
     public Date getDateUploadStarted()
     {
         return dateUploadStarted;

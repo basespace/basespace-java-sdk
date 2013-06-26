@@ -120,6 +120,21 @@ public class QueryParams implements Mappable
         additionalParams.put(key, value);
     }
     
+    @JsonIgnore
+    public void addParam(String key,String[] values,String delimiter)
+    {
+        if (values == null || values.length == 0)return;
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
+        for(String val:values)
+        {
+            if (!first)sb.append(",");
+            sb.append(val);
+            first = false;
+        }
+        additionalParams.put(key, sb.toString());
+    }
+    
     /**
      * Convert these parameters to a map
      * @return the parameters as a map

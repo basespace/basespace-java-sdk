@@ -15,7 +15,10 @@
 
 package com.illumina.basespace.entity;
 
-
+/**
+ * Projects are the fundamental unit of organization in BaseSpace. Users may create projects, place items into projects, and share projects (and their contents) with other users
+ * @author bking
+ */
 public class ProjectCompact extends OwnedResource
 {
 

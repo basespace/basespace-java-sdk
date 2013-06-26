@@ -27,6 +27,10 @@ public class Reference extends ReferenceCompact
 {
     @JsonProperty("Content")
     private Content content;
+   
+    /**
+     * Gives detailed information about the AppResult(s) which used this Sample data
+     */
     public Content getContent()
     {
         return content;

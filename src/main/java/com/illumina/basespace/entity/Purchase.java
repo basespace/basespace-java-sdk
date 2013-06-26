@@ -1,167 +1,41 @@
+/**
+* Copyright 2013 Illumina
+* 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+*  you may not use this file except in compliance with the License.
+*  You may obtain a copy of the License at
+*    http://www.apache.org/licenses/LICENSE-2.0
+* 
+ *  Unless required by applicable law or agreed to in writing, software
+*  distributed under the License is distributed on an "AS IS" BASIS,
+*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*  See the License for the specific language governing permissions and
+*  limitations under the License.
+*/
+
 package com.illumina.basespace.entity;
 
-import java.math.BigDecimal;
-import java.util.Date;
+import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.illumina.basespace.util.BigDecimalDeserializer;
-import com.illumina.basespace.util.DateDeserializer;
 
 
-public class Purchase extends ApiResource
+public class Purchase extends ApplicationTransaction
 {
-    @JsonProperty("Status")
-    private String status;
-    public String getStatus()
+    @JsonProperty("HrefPurchaseDialog")
+    private URI hrefPurchaseDialog;
+    public URI getHrefPurchaseDialog()
     {
-        return status;
+        return hrefPurchaseDialog;
     }
-    public void setStatus(String status)
+    @Override
+    public String toString()
     {
-        this.status = status;
-    }
-    
-    @JsonProperty("RefundStatus")
-    private String refundStatus;
-    public String getRefundStatus()
-    {
-        return refundStatus;
-    }
-    public void setRefundStatus(String refundStatus)
-    {
-        this.refundStatus = refundStatus;
+        return "Purchase [hrefPurchaseDialog=" + hrefPurchaseDialog + ", toString()=" + super.toString() + "]";
     }
     
     
-    @JsonDeserialize(using=DateDeserializer.class)
-    @JsonProperty("DateCreated")
-    private Date dateCreated;
-    public Date getDateCreated()
-    {
-        return dateCreated;
-    }
-    public void setDateCreated(Date dateCreated)
-    {
-        this.dateCreated = dateCreated;
-    }
-    
-    @JsonDeserialize(using=DateDeserializer.class)
-    @JsonProperty("DateUpdated")
-    private Date dateUpdated;
-    public Date getDateUpdated()
-    {
-        return dateUpdated;
-    }
-    public void setDateUpdated(Date dateUpdated)
-    {
-        this.dateUpdated = dateUpdated;
-    }
-    
-    @JsonProperty("InvoiceNumber")
-    private String invoiceNumber;
-    public String getInvoiceNumber()
-    {
-        return invoiceNumber;
-    }
-    public void setInvoiceNumber(String invoiceNumber)
-    {
-        this.invoiceNumber = invoiceNumber;
-    }
     
     
-    @JsonProperty("Amount")
-    @JsonDeserialize(using=BigDecimalDeserializer.class)
-    private BigDecimal amount;
-    public BigDecimal getAmount()
-    {
-        return amount;
-    }
-    public void setAmount(BigDecimal amount)
-    {
-        this.amount = amount;
-    }
-    
-    @JsonProperty("AmountOfTax")
-    @JsonDeserialize(using=BigDecimalDeserializer.class)
-    private BigDecimal amountOfTax;
-    public BigDecimal getAmountOfTax()
-    {
-        return amountOfTax;
-    }
-    public void setAmountOfTax(BigDecimal amountOfTax)
-    {
-        this.amountOfTax = amountOfTax;
-    }
-    
-    
-    @JsonProperty("AmountTotal")
-    @JsonDeserialize(using=BigDecimalDeserializer.class)
-    private BigDecimal amountOfTotal;
-    public BigDecimal getAmountOfTotal()
-    {
-        return amountOfTotal;
-    }
-    public void setAmountOfTotal(BigDecimal amountOfTotal)
-    {
-        this.amountOfTotal = amountOfTotal;
-    }
-
-    @JsonProperty("Products")
-    private Product[]products;
-    public Product[] getProducts()
-    {
-        return products;
-    }
-    public void setProducts(Product[] products)
-    {
-        this.products = products;
-    }
-    
-    @JsonProperty("PurchaseType")
-    private String purchaseType;
-    public String getPurchaseType()
-    {
-        return purchaseType;
-    }
-    public void setPurchaseType(String purchaseType)
-    {
-        this.purchaseType = purchaseType;
-    }
-    
-    @JsonProperty("AppSession")
-    private AppSessionCompact appSession;
-    public AppSessionCompact getAppSession()
-    {
-        return appSession;
-    }
-    public void setAppSession(AppSessionCompact appSession)
-    {
-        this.appSession = appSession;
-    }
-    
-    @JsonProperty("User")
-    private UserCompact user;
-    public UserCompact getUser()
-    {
-        return user;
-    }
-    public void setUser(UserCompact user)
-    {
-        this.user = user;
-    }
-    
-    @JsonProperty("Application")
-    private Application application;
-    public Application getApplication()
-    {
-        return application;
-    }
-    public void setApplication(Application application)
-    {
-        this.application = application;
-    }
-    
-
     
 }

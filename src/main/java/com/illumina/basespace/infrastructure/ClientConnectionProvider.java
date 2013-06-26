@@ -34,22 +34,31 @@ public interface ClientConnectionProvider
     public Client getClient();
     public ApiConfiguration getConfiguration();
     
-    
     public <T extends ApiResponse<?,?>> T getResponse(Class<? extends ApiResponse<?,?>>clazz,
             String path,Mappable params,Map<String,String>headers);
     
+    public <T extends ApiResponse<?,?>> T getResponse(Class<? extends ApiResponse<?,?>>clazz,
+            String root,String path,Mappable params,Map<String,String>headers);
     
     public <T extends ApiResponse<?,?>> T postForm(Class<? extends ApiResponse<?,?>>clazz,
             String path,Map<String,String>headers,Form data);  
     
+    public <T extends ApiResponse<?,?>> T postForm(Class<? extends ApiResponse<?,?>>clazz,
+            String root,String path,Map<String,String>headers,Form data);  
+    
     public <T extends ApiResponse<?,?>> T postJson(Class<? extends ApiResponse<?,?>>clazz,
             String path,Map<String,String>headers,Jsonable json);  
+    
+    public <T extends ApiResponse<?,?>> T postJson(Class<? extends ApiResponse<?,?>>clazz,
+            String root,String path,Map<String,String>headers,Jsonable json);  
     
     public <T extends ApiResponse<?,?>> T putFile(Class<? extends ApiResponse<?,?>>clazz,
             String path,Map<String,String>headers,InputStream file);  
     
     public String getStringResponse(String path,Mappable params,Map<String,String>headers); 
    
+    public String getStringResponse(String root,String path,Mappable params,Map<String,String>headers); 
+    
     public ObjectMapper getMapper();
     
     

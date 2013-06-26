@@ -17,6 +17,11 @@ package com.illumina.basespace.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The Genomes resource gives access to any genomes archived in BaseSpace
+ * @author bking
+ *
+ */
 public class Genome extends GenomeCompact
 {
     @JsonProperty("DisplayName")
@@ -32,6 +37,10 @@ public class Genome extends GenomeCompact
     
     @JsonProperty("Source")
     private String source;
+    /**
+     * The source from which this genome was uploaded
+     * @return
+     */
     public String getSource()
     {
         return source;
@@ -43,6 +52,10 @@ public class Genome extends GenomeCompact
     
     @JsonProperty("Build")
     private String build;
+    /**
+     * Tracks the version or build of the genome
+     * @return
+     */
     public String getBuild()
     {
         return build;

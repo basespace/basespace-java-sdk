@@ -41,8 +41,8 @@ public abstract class ApiResource implements Serializable
     @JsonProperty("Id")
     private String id;
     /**
-     * Get the unique id associated with this entity
-     * @return the id
+     * Id of the resource
+     * @return
      */
     public String getId()
     {
@@ -56,8 +56,8 @@ public abstract class ApiResource implements Serializable
     @JsonProperty("Href")
     private URI href;
     /**
-     * Get the Href associated with this entity
-     * @return the Href
+     * Location of the resource in the API
+     * @return
      */
     public URI getHref()
     {
@@ -71,8 +71,8 @@ public abstract class ApiResource implements Serializable
     @JsonProperty("Name")
     private String name;
     /**
-     * Get the name associated with this entity
-     * @return the name
+     * Name of the selected resource
+     * @return
      */
     public String getName()
     {

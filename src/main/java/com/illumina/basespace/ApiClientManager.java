@@ -44,7 +44,6 @@ public final class ApiClientManager
 {
     private static Logger logger = Logger.getLogger(ApiClientManager.class.getPackage().getName());
     private static ApiClientManager singletonObject;
-    private static final String ACCESS_DENIED = "access_denied";
     
     private ApiClientManager()
     {
@@ -161,20 +160,17 @@ public final class ApiClientManager
                         .post(ClientResponse.class,form);
                
                 responseAsJSONString = response.getEntity(String.class); 
-                switch(response.getClientResponseStatus())
+                logger.finer(responseAsJSONString);
+                if(response.getClientResponseStatus().getStatusCode() > 400)
                 {
-                    case BAD_REQUEST:
-
-                        AccessToken token = mapper.readValue(responseAsJSONString, AccessToken.class);
-                        if (token.getError().equalsIgnoreCase(ACCESS_DENIED))
-                        {
-                            throw new AccessDeniedException();
-                        }
-                        break;
-                    case OK:
-                        logger.finer(responseAsJSONString);
-                        token = mapper.readValue(responseAsJSONString, AccessToken.class);
-                        accessToken = token.getAccessToken();
+                    AccessToken error =  mapper.readValue(responseAsJSONString, AccessToken.class);
+                    throw new BaseSpaceException(resource.getURI(),error.getErrorDescription(),response.getClientResponseStatus().getStatusCode());
+                }
+                if(response.getClientResponseStatus().getStatusCode() == 200)
+                {
+                  
+                    AccessToken token = mapper.readValue(responseAsJSONString, AccessToken.class);
+                    accessToken = token.getAccessToken();
                 }
             } 
             System.out.println(accessToken);

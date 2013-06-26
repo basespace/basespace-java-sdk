@@ -24,6 +24,7 @@ import com.illumina.basespace.entity.AppSessionCompact;
 import com.illumina.basespace.entity.AppSessionStatus;
 import com.illumina.basespace.entity.File;
 import com.illumina.basespace.entity.FileCompact;
+import com.illumina.basespace.entity.ProductCompact;
 import com.illumina.basespace.entity.ProjectCompact;
 import com.illumina.basespace.entity.ReferenceCompact;
 import com.illumina.basespace.entity.RunCompact;
@@ -35,6 +36,7 @@ import com.illumina.basespace.param.CoverageParams;
 import com.illumina.basespace.param.FileParams;
 import com.illumina.basespace.param.PositionalQueryParams;
 import com.illumina.basespace.param.QueryParams;
+import com.illumina.basespace.response.CreatePurchaseResponse;
 import com.illumina.basespace.response.GetAppResultResponse;
 import com.illumina.basespace.response.GetAppSessionResponse;
 import com.illumina.basespace.response.GetCoverageMetadataResponse;
@@ -45,9 +47,11 @@ import com.illumina.basespace.response.GetFileUploadResponse;
 import com.illumina.basespace.response.GetGenomeResponse;
 import com.illumina.basespace.response.GetProjectResponse;
 import com.illumina.basespace.response.GetPurchaseResponse;
+import com.illumina.basespace.response.GetRefundResponse;
 import com.illumina.basespace.response.GetRunResponse;
 import com.illumina.basespace.response.GetSampleResponse;
 import com.illumina.basespace.response.GetUserResponse;
+import com.illumina.basespace.response.GetVariantSetResponse;
 import com.illumina.basespace.response.ListAppResultsResponse;
 import com.illumina.basespace.response.ListAppSessionsResponse;
 import com.illumina.basespace.response.ListFilesResponse;
@@ -66,182 +70,215 @@ import com.illumina.basespace.response.ListVariantsResponse;
 public interface ApiClient
 {
     /**
-     * Gets the current user of the access token used to create client
-     * @return the single item response
+     * Gets the current user
+     * @return the user single item response
      */
     public GetUserResponse getCurrentUser();
 
-
     /**
-     * Get a project by id
+     * To retrieve a specific project by its Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the project
      * @param id project id
-     * @return the single item response
+     * @return the project single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetProjectResponse getProject(String id) throws ResourceNotFoundException,ResourceForbiddenException;
     
     /**
-     * Get a list of projects accessible to current user
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a list of projects that the user owns or has been invited to
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the project for it to be visible in this listing
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the project list response
      */
     public ListProjectsResponse getProjects(QueryParams params);
     
     /**
-     * @param project
-     * @return the single response
+     * Create a project for the current user
+     * <br><br><span class="strong">Permissions:</span> CREATE PROJECTS access to the user's data
+     * @param projectName The name of the project
+     * @return the project single item response
      */
     public GetProjectResponse createProject(String projectName);
     
     /**
-     * Get a sample by id
+     * Retrieve a specific sample by its Id
      * @param id sample id
-     * @return the single item response
+     * @return the sample single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetSampleResponse getSample(String id)throws ResourceNotFoundException,ResourceForbiddenException;
     
     /**
-     * Get a list of samples for a project
-     * @param project
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a collection of samples inside of a given project
+     * @param project project for which samples will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the sample list response
      */
     public ListSamplesResponse getSamples(ProjectCompact project,QueryParams params);
 
     /**
      * Get a list of samples for a run
-     * @param run
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * @param run run for which samples will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the sample list response
      */
     public ListSamplesResponse getSamples(RunCompact run,QueryParams params);
     
     /**
-     * Get a list of app results for a project
-     * @param project
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a list of AppResults within a specific project Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the Project
+     * @param project project for which appresults will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the appresult list response
      */
     public ListAppResultsResponse getAppResults(ProjectCompact project,QueryParams params);
     
     /**
-     * Get an app result by id
-     * @param id app result id
-     * @return the single response
+     * Returns a list of the AppResults that were created by an AppSession
+     * <br><br><span class="strong">Permissions:</span> A valid access token for the user
+     * @param appSession appSession for which appresults will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the appresult list response
+     */
+    public ListAppResultsResponse getAppResults(AppSessionCompact appSession,QueryParams params);
+    
+    /**
+     * Retrieve a specific AppResult by its Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the AppResult either directly or via access to a project containing the AppResult
+     * @param id appresult id
+     * @return the appresult single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetAppResultResponse getAppResult(String id)throws ResourceNotFoundException,ResourceForbiddenException;
 
     /**
-     * Create an app result
-     * @param project
-     * @param appResult
-     * @return
+     * To create or change an AppResult within a specific project. A new appresult is created within this project
+     * <br><br><span class="strong">Permissions:</span> WRITE access to the project within which the AppResult is, or will be, contained
+     * @param project project which will contain the appresult
+     * @param name Name of the AppResult (required)
+     * @param description Brief decription of the AppResult
+     * @param hrefAppSession  Specifies a location for the AppSession for the new AppResult. This field may only be set if the status parameter of this AppSession is neither complete nor aborted, and also the application field must match.
+     * @param references The Reference field shows this AppResult's inputs or relationship to other resources in BaseSpace
+     * @return the appresult single item response
      */
     public GetAppResultResponse createAppResult(ProjectCompact project,String name,String description,URI hrefAppSession,
             ReferenceCompact[]references);
         
     /**
-     * Get an app session by id
-     * @param id app session id
-     * @return the single response
+     * Retrieve an appsession by its Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to any containing AppResults gives visibility to appsession, the clientid and clientsecret must match the appsession's application 
+     * @param id appsession id
+     * @return the appsession single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetAppSessionResponse getAppSession(String id)throws ResourceNotFoundException,ResourceForbiddenException;
     
-    
-    public ListAppSessionsResponse getAppSessions(QueryParams params);
+    /**
+     * A list of the current user's AppSessions
+     * @param appId The Id of the Application that created this AppSession
+     * @param status To Filter the list by Status of the AppSession, this query parameter can be used
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the appsession list response
+     */
+    public ListAppSessionsResponse getAppSessions(String appId,String status,QueryParams params);
     
     /**
-     * Update an app session
-     * @param appSession
-     * @return
+     * Change the current status of the AppSession by its Id
+     * <br><br><span class="strong">Permissions:</span> WRITE access to the referenced AppResults through its parent Project
+     * @param appsession appsession which will be updated
+     * @param status Status of the AppSession, the Samples or AppResults created will inherit this value. This parameter is REQUIRED otherwise an error will be thrown
+     * @param statusSummary A brief summary of what is currently happening with the AppResult or Sample that will be displayed for the user next to the status. This may be updated multiple times. This field has a limit of 128 characters
+     * @return the appsession single item response
      */
     public GetAppSessionResponse updateAppSession(AppSessionCompact appsession,AppSessionStatus status,String statusSummary);
   
     /**
-     * Get a run by id
+     * Retrieve a specific run by its Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the Run
      * @param id run id
-     * @return the single response
+     * @return the run single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetRunResponse getRun(String id)throws ResourceNotFoundException,ResourceForbiddenException;
     
     /**
-     * Get runs for the current user
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a list of runs accessible by the user current user
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the runs the current user has access to
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the run list response
      */
     public ListRunsResponse getRuns(QueryParams params);
    
     /**
-     * Get a list of files for a sample
-     * @param sample
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a collection of files belonging to a given sample Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the Sample to which the files belong
+     * @param sample the sample for which files will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the file list response
      */
     public ListFilesResponse getFiles(SampleCompact sample,FileParams params);
     
     /**
-     * Get a list of files for an app result
-     * @param appResult
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a list of files within a given AppResult by its Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the AppResult  to which the files belong
+     * @param appResult the appResult for which files will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the file list response
      */
     public ListFilesResponse getFiles(AppResultCompact appResult,FileParams params);
     
     /**
-     * Get a list of files for a run
-     * @param run
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a collection of files belonging to a given run Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the Run to which the files belong
+     * @param run the run for which files will be retrieved
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the file list response
      */
     public ListFilesResponse getFiles(RunCompact run,FileParams params);
     
     /**
-     * A get file by id
+     * Retrieve information about a given file by its Id
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the Run, Sample, or AppResult to which the file belongs
      * @param id file id
-     * @return the single response
+     * @return the file single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetFileResponse getFile(String id)throws ResourceNotFoundException,ResourceForbiddenException;
     
     /**
-     * Start a multipart upload for an appresult. Requires WRITE access to the AppResult to which the file belongs
-     * @param appresult AppResult to which the file belongs
+     * Change or create files within a particular AppResult
+     * <br><br><span class="strong">Permissions:</span> WRITE access to the AppResult to which the file belongs
+     * @param appresult appresult which will contain the file
      * @param fileName The name of the file as it will be in the AppResult
-     * @param contentType  the content type of the file being uploaded. This header is required. When downloading this file, the same Content-Type will be returned
-     * @param directory Use if the data has a directory structure. This will create a directory within the AppResult to place this file
-     * @return the single response
+     * @param contentType  the content type of the file being uploaded. This header is required. When downloading this file, the same Content-Type will be returned.
+     * @param directory Use if the data has a directory structure. This will create a directory within the AppResult to place this file.
+     * @return the file single item response
      */
     public GetFileResponse startMultipartUpload(AppResultCompact appresult,String fileName,String contentType,String directory);
     
     /**
-     * To upload file parts to the particular file Id. Parts may be uploaded in parallel and, 
-     * in the event that the connection fails, the upload for each part may be retried. 
-     * The parts will be sorted in ascending order regardless of the order of upload 
-     * (i.e. part 5 can be uploaded before part 4, but will still be sorted normally once fully uploaded). 
-     * Requires WRITE access to a particular file
-     * @param file File for which a part will be uploaded
+     * To upload file parts to the particular file Id. Parts may be uploaded in parallel and, in the event that the connection fails, the upload for each part may be retried. The parts will be sorted in ascending order regardless of the order of upload (i.e. part 5 can be uploaded before part 4, but will still be sorted normally once fully uploaded). 
+     * <br><br><span class="strong">Permissions:</span> WRITE access to the particular file
+     * @param file file for which part will be uploaded
      * @param partNumber Each part must be numbered from 1 to 10000, when uploaded the file's parts will be sorted in ascending order.
-     * @param MD5Hash (Optional, can be null) A base64 encoded 128bit MD5 checksum may be provided prior to the upload, which will be checked by the server. By providing a computed value, an app can ensure that the checksum is matched after upload. If the server-calculated value does not match the provided value, the upload will be rejected. Although it is optional, it is highly recommended to ensure data integrity after upload
-     * @param part stream for the file part
-     * @return the single response
+     * @param MD5Hash A base64 encoded 128bit MD5 checksum may be provided prior to the upload, which will be checked by the server. By providing a computed value, an app can ensure that the checksum is matched after upload. If the server-calculated value does not match the provided value, the upload will be rejected. Although it is optional, it is highly recommended to ensure data integrity after upload
+     * @param part stream for the part
+     * @return the file upload single item response
      */
     public GetFileUploadResponse uploadFilePart(FileCompact file,int partNumber,String MD5Hash,InputStream part);
     
     /**
-     * Change the upload status for a multi-part file upload
-     * @param file File for which status will be changed
+     * This method is used to change the upload status for a multi-part file upload
+     * <br><br><span class="strong">Permissions:</span> WRITE access to the particular file that will be changed
+     * @param file file for which status will be changed
      * @param status The status of the upload
-     * @return the single response
+     * @return the file single item response
      */
     public GetFileResponse setMultipartUploadStatus(FileCompact file,UploadStatus status);
     
@@ -254,19 +291,14 @@ public interface ApiClient
     public GetFileRedirectMetaDataResponse getFileRedirectMetaData(FileCompact file);
     
     /**
-     * Download a file to the local file system
-     * @param basespace file to download
-     * @param local folder as download target location
-     * @param optional download listener to be notified of download events
+     * Download the contents of a file
+     * <br><br><span class="strong">Permissions:</span> READ access to the Run, Sample, or AppResult to which the file belongs
+     * @param file the which will be downloaded
+     * @param targetFolder local path which is the target of the download. If target is a file, the source contents will be copied to that file. If target is a directory, a file with the same name as the source file will be created in the target folder and its contents copied
+     * @param listener optional (can be null)listener to be notified of download events
      */
-    public void download(com.illumina.basespace.entity.File file,java.io.File targetFolder,
+    public void download(com.illumina.basespace.entity.File file,java.io.File target,
             DownloadListener listener);
-    
-    /**
-     * Get the URI for API operations
-     * @return the root URI
-     */
-    public URI getRootURI();
     
     /**
      * Get the download URI for a file
@@ -284,6 +316,7 @@ public interface ApiClient
     
     /**
      * Get a byte range input stream for a file
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the file
      * @param file
      * @param start start of range
      * @param end end of range
@@ -292,51 +325,63 @@ public interface ApiClient
     public InputStream getFileInputStream(FileCompact file,long start,long end);
     
     /**
-     * Get a list of variants from a vcf file
-     * @param vcf file
-     * @param chromosome
-     * @param params
-     * @return the list response
+     * Retrieve a variant set
+     * <br><br><span class="strong">Permissions:</span> BROWSE access to the file
+     * @param file the vcf file on which to query
+     * @return the variantset single item response
+     */
+    public GetVariantSetResponse getVariantSet(File file);
+    
+    /**
+     * Retrieve variants in a specific chromosome
+     * <br><br><span class="strong">Permissions:</span> READ access to the AppResult to which the source file belongs
+     * @param file the vcf file on which to perform query
+     * @param chromosome The chromosome within which the variantset will be analyzed.
+     * @param params positional query for the variant
+     * @return the variant list response
      */
     public ListVariantsResponse getVariants(File file,String chromosome,PositionalQueryParams params);
     
     /**
-     * Get raw record data from a vcf file
-     * @param file vcf file
-     * @param chromosome
-     * @param params
-     * @return a string containing one or more variant records, or an empty string
+     * Retrieve variants in a specific chromosome
+     * <br><br><span class="strong">Permissions:</span> READ access to the AppResult to which the source file belongs
+     * @param file the vcf file on which to perform query
+     * @param chromosome The chromosome within which the variantset will be analyzed.
+     * @param params positional query for the variant
+     * @return a string containing 0..n records from the vcf file delimited according to the vcf specification
      */
     public String getVariantRawRecord(FileCompact file,String chromosome,PositionalQueryParams params);
     
     /**
-     * Get coverage data for a bam file
-     * @param file bam file
-     * @param chromosome
-     * @param params
-     * @return the single response
+     * Retrieve coverage data in a specific chromosome
+     * <br><br><span class="strong">Permissions:</span> READ access to the sample to which the source file belongs
+     * @param file the bam file on which to perform query
+     * @param chromosome The chromosome within which the coverage will be analyzed
+     * @param params coverage parameters
+     * @return the coverage single item response
      */
     public GetCoverageResponse getCoverage(File file,String chromosome,CoverageParams params);
     
     /**
-     * Get coverage metadata for a bam file
-     * @param file bam file
-     * @param chromosome
-     * @return the single response
+     * Retrieve metadata about the coverage in a chromosome
+     * <br><br><span class="strong">Permissions:</span> READ access to the sample to which the source file belongs
+     * @param file the bam file on which to perform query
+     * @param chromosome The chromosome within which the coverage will be analyzed
+     * @return the coverage metadata single item response
      */
     public GetCoverageMetadataResponse getCoverageMetaData(File file,String chromosome);
     
     /**
-     * Get a list of genomes
-     * @param params optional query parameters to limit the result scope
-     * @return the list response
+     * Retrieve a list of all genomes available in BaseSpace
+     * @param params optional (can be null) parameters to limit the scope of results
+     * @return the genome list response
      */
     public ListGenomesResponse getGenomes(QueryParams params);
     
     /**
-     * Get a gene by id
+     * Retrieve a specific genome by its Id
      * @param id genome id
-     * @return the single response
+     * @return the genome single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
@@ -347,20 +392,31 @@ public interface ApiClient
      * @param params optional query parameters to limit the result scope
      * @return the list response
      */
-    public ListProductsResponse getProducts(QueryParams params);
+    public ListProductsResponse getProducts(String[]tags,String[]productIds,QueryParams params);
 
     /**
-     * Get a purchase by id
-     * @param id
-     * @return the single response
+     * Retrieve a specific purchase by its Id. You will only receive a response if you are the app owner or the user of the purchase
+     * @param id purchase id
+     * @return the purchase single item response
      * @throws ResourceNotFoundException
      * @throws ResourceForbiddenException
      */
     public GetPurchaseResponse getPurchase(String id) throws ResourceNotFoundException,ResourceForbiddenException;
     
+    /**
+     * Initiate a purchase for the user. Use this method to begin the process of charging a user for the application. When creating a purchase, keep your access_token and RefundSecret for your records, your app will need these in order to issue a Refund on a Purchase
+     * @param appsession The AppSession that this Purchase is associated with
+     * @param products An array of the Products that are part of this Purchase
+     * @return the create purchase single item response
+     */
+    public CreatePurchaseResponse createPurchase(AppSessionCompact appsession,ProductCompact[]products);
     
-    //public CreatePurchaseResponse createPurchase(AppSessionCompact appsession,ProductCompact[]products);
-    
-    
-   // public GetRefundResponse createRefund(String purchaseId,String refundSecret,String comment);
+    /**
+     * To refund this purchase and give the user their iCredits back
+     * @param purchaseId Id of the purchase that will be refunded
+     * @param refundSecret The RefundSecret provided in the Response from the POST: purchases request
+     * @param comment An optional comment can be added for this refund
+     * @return the create refund single item response
+     */
+    public GetRefundResponse createRefund(String purchaseId,String refundSecret,String comment);
 }

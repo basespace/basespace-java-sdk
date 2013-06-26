@@ -19,6 +19,12 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The Variantset resource is provided so that an app can access variants within a vcf file. It is useful for querying the variance of a particular chromosomal region and for different genome broswers to find the variance in a particular location.
+ * Variants are extracted from VCF files and stored in a document database to enable fast range-based queries. There are two parts: the "variant set", which contains the information in the VCF file header, and the "variants", or the data lines in the VCF file.
+ * @author bking
+ *
+ */
 public class VariantRecord implements Serializable
 {
     @JsonProperty("CHROM")

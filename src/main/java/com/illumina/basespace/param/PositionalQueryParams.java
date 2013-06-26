@@ -43,6 +43,10 @@ public class PositionalQueryParams extends QueryParams
     {
         return startPosition;
     }
+    /**
+     * The starting position in the chromosome to search for the variant, can be any number within the range of the chromosome. No default value, must be specified and must be an integer.
+     * @param startPosition
+     */
     public void setStartPosition(int startPosition)
     {
         this.startPosition = startPosition;
@@ -53,6 +57,10 @@ public class PositionalQueryParams extends QueryParams
     {
         return endPosition;
     }
+    /**
+     * The ending position in the chromosome to search for the variant, can be any number within the range of the chromosome. No default value, must be specified and must be an integer.
+     * @param endPosition
+     */
     public void setEndPosition(int endPosition)
     {
         this.endPosition = endPosition;

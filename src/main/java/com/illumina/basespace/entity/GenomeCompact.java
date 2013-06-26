@@ -17,10 +17,19 @@ package com.illumina.basespace.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * The Genomes resource gives access to any genomes archived in BaseSpace
+ * @author bking
+ *
+ */
 public class GenomeCompact extends ApiResource
 {
     @JsonProperty("SpeciesName")
     private String speciesName;
+    /**
+     * The name of the species whos genome this is
+     * @return
+     */
     public String getSpeciesName()
     {
         return speciesName;
