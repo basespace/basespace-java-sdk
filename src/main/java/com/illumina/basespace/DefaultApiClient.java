@@ -557,7 +557,7 @@ class DefaultApiClient implements ApiClient
         FileRedirectMetaData metaData = downloadMetaDataCache.get(file.getId());
         if (metaData == null || new Date().after(metaData.getExpires()))
         {
-            logger.warning("Redirect metaData for " + file.getName() + " does not exist or expired...fetching...");
+            logger.warning("Redirect metaData for file id#" + file.getId() + "(" + file.getName() + ") does not exist or expired...fetching...");
             metaData = getFileRedirectMetaData(file).get();
             downloadMetaDataCache.put(file.getId(), metaData);
         }

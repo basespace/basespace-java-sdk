@@ -78,7 +78,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
             {
                 logger.warning("Ignoring unknown property '" + propertyName + "' when attempting to deserialize JSON to "
                        + beanOrClass.getClass().getName());
-                return false;
+                return true;
             }
         });
    
