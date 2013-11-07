@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.net.URI;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.illumina.basespace.property.Property;
+import com.illumina.basespace.property.PropertyItems;
 
 /**
  * 
@@ -84,20 +86,17 @@ public abstract class ApiResource implements Serializable
     }
     
     @JsonProperty("Properties")
-    private Properties properties;
-    public Properties getProperties()
+    private PropertyItems propertyItems;
+    public Property<?>[] properties()
     {
-        return properties;
+        return propertyItems.items();
     }
-    public void setProperties(Properties properties)
-    {
-        this.properties = properties;
-    }
-
+    
     @Override
     public String toString()
     {
         return "ApiResource [Id=" + id + ", href=" + href + ", name=" + name + "]";
     }
+
     
 }

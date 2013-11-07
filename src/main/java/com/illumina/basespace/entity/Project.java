@@ -65,13 +65,14 @@ public class Project extends ProjectCompact
     {
         this.hrefBaseSpaceUI = hrefBaseSpaceUI;
     }
+    
+
+    
     @Override
     public String toString()
     {
         return "Project [hrefSamples=" + hrefSamples + ", hrefAppResults=" + hrefAppResults + ", hrefBaseSpaceUI="
                 + hrefBaseSpaceUI + ", toString()=" + super.toString() + "]";
     }
-
-    
     
 }

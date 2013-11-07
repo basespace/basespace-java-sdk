@@ -15,8 +15,8 @@
 
 package com.illumina.basespace;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -24,14 +24,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.illumina.basespace.auth.ResourceForbiddenException;
 import com.illumina.basespace.auth.UnauthorizedException;
+import com.illumina.basespace.entity.ApiResource;
+import com.illumina.basespace.entity.Project;
 import com.illumina.basespace.infrastructure.BaseSpaceException;
 import com.illumina.basespace.infrastructure.BaseSpaceURLConnectionFactory;
 import com.illumina.basespace.infrastructure.ClientConnectionProvider;
@@ -40,6 +38,7 @@ import com.illumina.basespace.infrastructure.Jsonable;
 import com.illumina.basespace.infrastructure.ResourceNotFoundException;
 import com.illumina.basespace.param.Mappable;
 import com.illumina.basespace.response.ApiResponse;
+import com.illumina.basespace.util.TypeHelper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
@@ -62,26 +61,12 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
     private Logger logger = Logger.getLogger(DefaultClientConnectionProvider.class.getPackage().getName());
     private ApiConfiguration configuration;
     private String accessToken;
-    private final ObjectMapper mapper = new ObjectMapper();
     private ConversionContext context;
     
     public DefaultClientConnectionProvider(final ApiConfiguration configuration,String accessToken)
     {
         this.configuration = configuration;
         this.accessToken = accessToken;
-        this.mapper.addHandler(new DeserializationProblemHandler()
-        {
-            @Override
-                public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser jp,
-                                 JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException,
-                                                                           JsonProcessingException
-            {
-                logger.warning("Ignoring unknown property '" + propertyName + "' when attempting to deserialize JSON to "
-                       + beanOrClass.getClass().getName());
-                return true;
-            }
-        });
-   
         context = new ConversionContext()
         {
 
@@ -94,7 +79,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
             @Override
             public ObjectMapper getMapper()
             {
-                return mapper;
+                return TypeHelper.INSTANCE.getObjectMapper();
             }
         };
     }
@@ -135,7 +120,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
                         {
                             try
                             {
-                                ApiResponse<?,?> status = ( ApiResponse<?,?>) mapper.readValue(response.getEntity(String.class) ,ApiResponse.class);
+                                ApiResponse<?,?> status = ( ApiResponse<?,?>) TypeHelper.INSTANCE.getObjectMapper().readValue(response.getEntity(String.class) ,ApiResponse.class);
                                 message = status.getResponseStatus().getMessage();
                             }
                             catch (Throwable e){}
@@ -184,7 +169,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
     {
         try
         {
-            return (T) mapper.readValue(getStringResponse(root,path,params,headers),clazz);
+            return (T) TypeHelper.INSTANCE.getObjectMapper().readValue(getStringResponse(root,path,params,headers),clazz);
         }
         catch (BaseSpaceException bs)
         {
@@ -268,10 +253,49 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
         return postInternal(clazz,root,path,headers,json.toJson(context),MediaType.APPLICATION_JSON);
     }
     
+    @Override
+    public void delete(String root, String path, Map<String, String> headers)
+    {
+        deleteInternal(root,path,headers);
+    }
+    
+    @Override
+    public void delete(String path, Map<String, String> headers)
+    {
+        delete(configuration.getApiRootUri(),path,headers);
+    }
+    
     protected <T extends ApiResponse<?, ?>> T postInternal(Class<? extends ApiResponse<?, ?>> clazz, String path,
             Map<String, String> headers, Object data,String mediaType)
     {
         return postInternal(clazz,configuration.getApiRootUri(),path,headers,data,mediaType);
+    }
+    
+    protected void deleteInternal(String root,String path,Map<String, String> headers)
+    {
+        try
+        {
+            WebResource webResource = getClient().resource(
+                    root)
+                    .path(configuration.getVersion())
+                    .path(path);
+            WebResource.Builder builder = webResource.getRequestBuilder();
+            if (headers != null)
+            {
+                for(String key:headers.keySet()){builder = builder.header(key, headers.get(key));}
+            }               
+            String response = builder.delete(String.class);
+            logger.fine(response);
+        }
+        catch (BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -290,11 +314,12 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
             {
                 for(String key:headers.keySet()){builder = builder.header(key, headers.get(key));}
             }               
+            logger.fine(data.toString());
             String response = builder
                     .accept(mediaType)
                     .post(String.class,data);
             logger.fine(response);
-            return (T) mapper.readValue(response,clazz);
+            return (T) TypeHelper.INSTANCE.getObjectMapper().readValue(response,clazz);
         }
         catch (BaseSpaceException bs)
         {
@@ -331,7 +356,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
             
             String response = builder.put(String.class);
             logger.fine(response);
-            return (T) mapper.readValue(response,clazz);
+            return (T) TypeHelper.INSTANCE.getObjectMapper().readValue(response,clazz);
         }
         catch (BaseSpaceException bs)
         {
@@ -351,8 +376,9 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
     @Override
     public ObjectMapper getMapper()
     {
-        return mapper;
+        return TypeHelper.INSTANCE.getObjectMapper();
     }
+  
  
  
     

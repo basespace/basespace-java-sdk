@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.URI;
 
 import com.illumina.basespace.auth.ResourceForbiddenException;
+import com.illumina.basespace.entity.ApiResource;
 import com.illumina.basespace.entity.AppResultCompact;
 import com.illumina.basespace.entity.AppSessionCompact;
 import com.illumina.basespace.entity.AppSessionStatus;
@@ -36,6 +37,7 @@ import com.illumina.basespace.param.CoverageParams;
 import com.illumina.basespace.param.FileParams;
 import com.illumina.basespace.param.PositionalQueryParams;
 import com.illumina.basespace.param.QueryParams;
+import com.illumina.basespace.property.Property;
 import com.illumina.basespace.response.CreatePurchaseResponse;
 import com.illumina.basespace.response.GetAppResultResponse;
 import com.illumina.basespace.response.GetAppSessionResponse;
@@ -46,6 +48,7 @@ import com.illumina.basespace.response.GetFileResponse;
 import com.illumina.basespace.response.GetFileUploadResponse;
 import com.illumina.basespace.response.GetGenomeResponse;
 import com.illumina.basespace.response.GetProjectResponse;
+import com.illumina.basespace.response.GetPropertyResponse;
 import com.illumina.basespace.response.GetPurchaseResponse;
 import com.illumina.basespace.response.GetRefundResponse;
 import com.illumina.basespace.response.GetRunResponse;
@@ -58,6 +61,7 @@ import com.illumina.basespace.response.ListFilesResponse;
 import com.illumina.basespace.response.ListGenomesResponse;
 import com.illumina.basespace.response.ListProductsResponse;
 import com.illumina.basespace.response.ListProjectsResponse;
+import com.illumina.basespace.response.ListPropertiesResponse;
 import com.illumina.basespace.response.ListRunsResponse;
 import com.illumina.basespace.response.ListSamplesResponse;
 import com.illumina.basespace.response.ListVariantsResponse;
@@ -419,4 +423,12 @@ public interface ApiClient
      * @return the create refund single item response
      */
     public GetRefundResponse createRefund(String purchaseId,String refundSecret,String comment);
+
+    public ListPropertiesResponse getProperties(ApiResource resource);
+    
+    public GetPropertyResponse getProperty(ApiResource resource,String propertyName);
+   
+    public ListPropertiesResponse putProperties(ApiResource resource,Property[]properties);
+    
+    public void deleteProperty(ApiResource resource,String propertyName);
 }

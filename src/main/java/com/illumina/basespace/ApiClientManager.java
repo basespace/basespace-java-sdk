@@ -173,7 +173,6 @@ public final class ApiClientManager
                     accessToken = token.getAccessToken();
                 }
             } 
-            System.out.println(accessToken);
             return accessToken;
             
         }

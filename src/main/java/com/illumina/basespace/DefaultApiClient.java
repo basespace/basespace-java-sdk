@@ -28,7 +28,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.illumina.basespace.auth.ResourceForbiddenException;
+import com.illumina.basespace.entity.ApiResource;
 import com.illumina.basespace.entity.AppResultCompact;
 import com.illumina.basespace.entity.AppSessionCompact;
 import com.illumina.basespace.entity.AppSessionStatus;
@@ -47,12 +49,15 @@ import com.illumina.basespace.file.DownloadEvent;
 import com.illumina.basespace.file.DownloadListener;
 import com.illumina.basespace.infrastructure.BaseSpaceException;
 import com.illumina.basespace.infrastructure.ClientConnectionProvider;
+import com.illumina.basespace.infrastructure.ConversionContext;
 import com.illumina.basespace.infrastructure.ResourceNotFoundException;
 import com.illumina.basespace.param.CoverageParams;
 import com.illumina.basespace.param.FileParams;
 import com.illumina.basespace.param.Mappable;
 import com.illumina.basespace.param.PositionalQueryParams;
 import com.illumina.basespace.param.QueryParams;
+import com.illumina.basespace.property.CreatePropertiesHolder;
+import com.illumina.basespace.property.Property;
 import com.illumina.basespace.response.CreatePurchaseResponse;
 import com.illumina.basespace.response.GetAppResultResponse;
 import com.illumina.basespace.response.GetAppSessionResponse;
@@ -63,6 +68,7 @@ import com.illumina.basespace.response.GetFileResponse;
 import com.illumina.basespace.response.GetFileUploadResponse;
 import com.illumina.basespace.response.GetGenomeResponse;
 import com.illumina.basespace.response.GetProjectResponse;
+import com.illumina.basespace.response.GetPropertyResponse;
 import com.illumina.basespace.response.GetPurchaseResponse;
 import com.illumina.basespace.response.GetRefundResponse;
 import com.illumina.basespace.response.GetRunResponse;
@@ -75,9 +81,11 @@ import com.illumina.basespace.response.ListFilesResponse;
 import com.illumina.basespace.response.ListGenomesResponse;
 import com.illumina.basespace.response.ListProductsResponse;
 import com.illumina.basespace.response.ListProjectsResponse;
+import com.illumina.basespace.response.ListPropertiesResponse;
 import com.illumina.basespace.response.ListRunsResponse;
 import com.illumina.basespace.response.ListSamplesResponse;
 import com.illumina.basespace.response.ListVariantsResponse;
+import com.illumina.basespace.util.TypeHelper;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.representation.Form;
@@ -93,7 +101,8 @@ class DefaultApiClient implements ApiClient
     private final Logger logger = Logger.getLogger(DefaultApiClient.class.getPackage().getName());
     private ClientConnectionProvider connectionProvider;
     private Map<String, FileRedirectMetaData> downloadMetaDataCache = new Hashtable<String, FileRedirectMetaData>();
-
+    
+    
     /**
      * Create a BaseSpace session
      * 
@@ -584,6 +593,37 @@ class DefaultApiClient implements ApiClient
             }
         };
         return newMappable;
+    }
+
+    @Override
+    public ListPropertiesResponse putProperties(ApiResource resource, Property[] properties)
+    {
+        CreatePropertiesHolder props = new CreatePropertiesHolder(properties);
+        return getConnectionProvider().postJson(ListPropertiesResponse.class,
+                 TypeHelper.INSTANCE.getResourcePath(resource.getClass(), true) + "/"  
+                 + resource.getId() + "/properties",null, props); 
+                  
+    }
+
+    @Override
+    public ListPropertiesResponse getProperties(ApiResource resource)
+    {
+        return getConnectionProvider().getResponse(ListPropertiesResponse.class,  TypeHelper.INSTANCE.getResourcePath(resource.getClass(), true) 
+                + "/"   + resource.getId() + "/properties", null, null);
+    }
+
+    @Override
+    public GetPropertyResponse getProperty(ApiResource resource, String propertyName)
+    {
+        return getConnectionProvider().getResponse(GetPropertyResponse.class,  TypeHelper.INSTANCE.getResourcePath(resource.getClass(), true) 
+                + "/"   + resource.getId() + "/properties/" + propertyName + "/items", null, null);
+    }
+
+    @Override
+    public void deleteProperty(ApiResource resource, String propertyName)
+    {
+        getConnectionProvider().delete( TypeHelper.INSTANCE.getResourcePath(resource.getClass(), true) 
+                + "/" + resource.getId() + "/properties/" + propertyName, null);
     }
 
 }

@@ -52,6 +52,10 @@ public interface ClientConnectionProvider
     public <T extends ApiResponse<?,?>> T postJson(Class<? extends ApiResponse<?,?>>clazz,
             String root,String path,Map<String,String>headers,Jsonable json);  
     
+    public void delete(String root,String path,Map<String,String>headers); 
+    
+    public void delete(String path,Map<String,String>headers); 
+    
     public <T extends ApiResponse<?,?>> T putFile(Class<? extends ApiResponse<?,?>>clazz,
             String path,Map<String,String>headers,InputStream file);  
     

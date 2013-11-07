@@ -32,12 +32,11 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
  */
 public class BigDecimalDeserializer extends JsonDeserializer<BigDecimal> 
 {
-    protected Logger logger = Logger.getLogger(BigDecimalDeserializer.class.getPackage().getName());
+    protected static Logger logger = Logger.getLogger(BigDecimalDeserializer.class.getPackage().getName());
     
     @Override
     public BigDecimal deserialize(JsonParser parser, DeserializationContext context) throws IOException, JsonProcessingException
     {
-        //   /Date(2012-05-01T17:37:53.0000000)/
         try
         {
             return new BigDecimal(parser.getText());
