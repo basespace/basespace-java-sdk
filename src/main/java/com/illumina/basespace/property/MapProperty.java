@@ -30,6 +30,7 @@ public class MapProperty extends Property<Map<String,String[]>>
         super(name, description);
     }
     
+    //TODO: Use MapEntry for this?
     @JsonProperty("ContentMap")
     @JsonSerialize(using=MapPropertySerializer.class)
     private Map<String,String[]> content;

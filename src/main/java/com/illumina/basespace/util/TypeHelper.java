@@ -73,7 +73,7 @@ public class TypeHelper
         propertyToTypeMap.put(PROPERTY_STRING, StringProperty.class);
         propertyToTypeMap.put(PROPERTY_STRING_ARRAY, StringProperty.class);
         propertyToTypeMap.put(PROPERTY_MAP, MapProperty.class);
-        propertyToTypeMap.put(PROPERTY_MAP_ARRAY, MapProperty.class);
+        propertyToTypeMap.put(PROPERTY_MAP_ARRAY, MapArrayProperty.class);
         propertyToTypeMap.put(PROPERTY_APPRESULT, AppResultReference.class);
         propertyToTypeMap.put(PROPERTY_APPRESULT_ARRAY, AppResultReference.class);
         propertyToTypeMap.put(PROPERTY_SAMPLE, SampleReference.class);

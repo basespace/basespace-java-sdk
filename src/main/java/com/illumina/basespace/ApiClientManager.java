@@ -43,7 +43,7 @@ import com.sun.jersey.api.representation.Form;
 public final class ApiClientManager
 {
     private static Logger logger = Logger.getLogger(ApiClientManager.class.getPackage().getName());
-    private static ApiClientManager singletonObject;
+    private static final ApiClientManager singletonObject = new ApiClientManager();
     
     private ApiClientManager()
     {
@@ -52,8 +52,6 @@ public final class ApiClientManager
     }
     public static synchronized ApiClientManager instance()
     {
-        if (singletonObject == null)
-            singletonObject = new ApiClientManager();
         return singletonObject;
     }
 
