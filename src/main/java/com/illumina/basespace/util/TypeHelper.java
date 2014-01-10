@@ -47,6 +47,8 @@ public class TypeHelper
     public static final String PROPERTY_APPSESSION_ARRAY = "appsession[]";
     public static final String PROPERTY_PROJECT = "project";
     public static final String PROPERTY_PROJECT_ARRAY = "project[]";
+    public static final String PROPERTY_FILE = "file";
+    public static final String PROPERTY_FILE_ARRAY = "file[]";
     
     private final String[] PROPERTY_TYPES = {PROPERTY_STRING,PROPERTY_STRING_ARRAY,PROPERTY_MAP,PROPERTY_MAP_ARRAY,
         PROPERTY_SAMPLE,PROPERTY_SAMPLE_ARRAY,PROPERTY_APPRESULT,PROPERTY_APPRESULT_ARRAY,PROPERTY_RUN,PROPERTY_RUN_ARRAY,
@@ -84,7 +86,8 @@ public class TypeHelper
         propertyToTypeMap.put(PROPERTY_APPSESSION_ARRAY, AppSessionReference.class);
         propertyToTypeMap.put(PROPERTY_PROJECT, ProjectReference.class);
         propertyToTypeMap.put(PROPERTY_PROJECT_ARRAY, ProjectReference.class);
-        
+        propertyToTypeMap.put(PROPERTY_FILE, FileReference.class);
+        propertyToTypeMap.put(PROPERTY_FILE_ARRAY, FileReference.class);
         multiValuepropertyToTypeMap.put(PROPERTY_STRING_ARRAY, StringMultiValueProperty.class);
         
     }
