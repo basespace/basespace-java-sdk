@@ -15,8 +15,6 @@
 
 package com.illumina.basespace;
 
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -24,12 +22,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.illumina.basespace.auth.ResourceForbiddenException;
 import com.illumina.basespace.auth.UnauthorizedException;
-import com.illumina.basespace.entity.ApiResource;
-import com.illumina.basespace.entity.Project;
 import com.illumina.basespace.infrastructure.BaseSpaceException;
 import com.illumina.basespace.infrastructure.BaseSpaceURLConnectionFactory;
 import com.illumina.basespace.infrastructure.ClientConnectionProvider;
@@ -116,7 +111,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
                     if (response.getStatus() >= 400)
                     {
                         String message =response.getClientResponseStatus().toString();
-                        if (response.getType().toString().indexOf(MediaType.APPLICATION_JSON) > -1)
+                        if (response.getType() != null && response.getType().toString().indexOf(MediaType.APPLICATION_JSON) > -1)
                         {
                             try
                             {
@@ -335,7 +330,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ApiResponse<?, ?>> T putFile(Class<? extends ApiResponse<?, ?>> clazz, String path,
-            Map<String, String> headers, InputStream file)
+            Map<String, String> headers, Object content)
     {
         try
         {
@@ -352,8 +347,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
             builder = builder
                     .type(MediaType.APPLICATION_OCTET_STREAM)
                     .accept(MediaType.APPLICATION_JSON)
-                    .entity(file);
-            
+                    .entity(content);
             String response = builder.put(String.class);
             logger.fine(response);
             return (T) TypeHelper.INSTANCE.getObjectMapper().readValue(response,clazz);
@@ -371,6 +365,7 @@ class DefaultClientConnectionProvider implements ClientConnectionProvider
             throw new RuntimeException(t);
         }
     }
+
     
     
     @Override

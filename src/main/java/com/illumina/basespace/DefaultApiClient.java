@@ -526,6 +526,19 @@ class DefaultApiClient implements ApiClient
         return getConnectionProvider().putFile(GetFileUploadResponse.class,
                 "files/" + file.getId() + "/parts/" + String.valueOf(partNumber), headers, part);
     }
+    
+    @Override
+    public GetFileUploadResponse uploadFilePart(FileCompact file, int partNumber, String MD5Hash, byte[] part)
+    {
+        Map<String, String> headers = null;
+        if (MD5Hash != null)
+        {
+            headers = new HashMap<String, String>();
+            headers.put("Content-MD5", MD5Hash);
+        }
+        return getConnectionProvider().putFile(GetFileUploadResponse.class,
+                "files/" + file.getId() + "/parts/" + String.valueOf(partNumber), headers, part);
+    }
 
     @Override
     public GetFileResponse setMultipartUploadStatus(FileCompact file,UploadStatus status)

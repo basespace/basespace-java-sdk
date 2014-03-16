@@ -275,7 +275,10 @@ public interface ApiClient
      * @param part stream for the part
      * @return the file upload single item response
      */
+    @Deprecated
     public GetFileUploadResponse uploadFilePart(FileCompact file,int partNumber,String MD5Hash,InputStream part);
+    
+    public GetFileUploadResponse uploadFilePart(FileCompact file,int partNumber,String MD5Hash,byte[] part);
     
     /**
      * This method is used to change the upload status for a multi-part file upload

@@ -57,7 +57,7 @@ public interface ClientConnectionProvider
     public void delete(String path,Map<String,String>headers); 
     
     public <T extends ApiResponse<?,?>> T putFile(Class<? extends ApiResponse<?,?>>clazz,
-            String path,Map<String,String>headers,InputStream file);  
+            String path,Map<String,String>headers,Object content);  
     
     public String getStringResponse(String path,Mappable params,Map<String,String>headers); 
    
