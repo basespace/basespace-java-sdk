@@ -176,11 +176,14 @@ class DefaultApiClient implements ApiClient
                 "projects/" + project.getId() + "/appresults", params, null);
     }
     
+    /**
+     * Updated API call to use appsessionS/... instead of appsession/
+     */
     @Override
     public ListAppResultsResponse getAppResults(AppSessionCompact appSession, QueryParams params)
     {
         return getConnectionProvider().getResponse(ListAppResultsResponse.class,
-                "appsession/" + appSession.getId() + "/appresults", params, null);
+                "appsessions/" + appSession.getId() + "/appresults", params, null);
     }
 
     @Override
@@ -637,6 +640,18 @@ class DefaultApiClient implements ApiClient
     {
         getConnectionProvider().delete( TypeHelper.INSTANCE.getResourcePath(resource.getClass(), true) 
                 + "/" + resource.getId() + "/properties/" + propertyName, null);
+    }
+    
+    /**
+     * GET: users/current/appsessions?OutputProjects={1}
+     */
+    @Override
+    public ListAppSessionsResponse getAppSessions(String projectId, QueryParams params)
+    {
+        if (params == null)params = new QueryParams();
+        params.addParam("OutputProjects", projectId);
+        return getConnectionProvider().getResponse(ListAppSessionsResponse.class, "users/current/appsessions", params, null);
+        
     }
 
 }

@@ -434,4 +434,11 @@ public interface ApiClient
     public ListPropertiesResponse putProperties(ApiResource resource,Property[]properties);
     
     public void deleteProperty(ApiResource resource,String propertyName);
+
+	/**
+	 * @param projectId
+	 * @param params
+	 * @return appsessions for the current user and selected project
+	 */
+	public ListAppSessionsResponse getAppSessions(String projectId, QueryParams params);
 }
