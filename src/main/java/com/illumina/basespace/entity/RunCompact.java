@@ -92,6 +92,17 @@ public class RunCompact extends OwnedResource
         this.flowcellBarcode = flowcellBarcode;
     }
     
+    @JsonProperty("InstrumentName")
+    private String instrumentName;
+    public String getInstrumentName()
+    {
+        return instrumentName;
+    }
+    public void setInstrumentName(String instrumentName)
+    {
+        this.instrumentName = instrumentName;
+    }
+    
     @JsonDeserialize(using=DateDeserializer.class)
     @JsonProperty("DateModified")
     private Date dateModified;
