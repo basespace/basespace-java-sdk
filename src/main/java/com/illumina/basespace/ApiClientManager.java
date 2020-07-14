@@ -199,16 +199,16 @@ public final class ApiClientManager
      * This API corresponds to the following step in the authentication flow:
      * https://developer.basespace.illumina.com/docs/content/documentation/authentication/obtaining-access-tokens#Gettingtheaccesstokenfornonweb-basedapps
      *
-     * @param authCode verification code received from the previous step {@link this#getAuthVerificationCode}
+     * @param deviceCode device code received from the previous step {@link this#getAuthVerificationCode}
      * @param configuration configuration for the session
      * @return an access token or null if the user has not yet approved the access request
      * @throws AccessDeniedException if an auth verification token could not be obtained from BaseSpace
      */
-    public String getAccessToken(AuthVerificationCode authCode, ApiConfiguration configuration) throws BaseSpaceException {
+    public String getAccessToken(String deviceCode, ApiConfiguration configuration) throws BaseSpaceException {
         Form form = new Form();
         form.add("client_id", configuration.getClientId());
         form.add("client_secret",configuration.getClientSecret());
-        form.add("code",authCode.getDeviceCode());
+        form.add("code",deviceCode);
         form.add("grant_type","device");
 
         Client client = getHttpClient();
