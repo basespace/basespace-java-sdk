@@ -86,12 +86,12 @@ public final class ApiClientManager
                 return configuration.getAccessToken();
             }
 
-            AuthVerificationCode authCode = requestAuthVerificationCode(configuration);
+            AuthVerificationCode authCode = getAuthVerificationCode(configuration);
 
             String uri = authCode.getVerificationWithCodeUri();
             BrowserLaunch.openURL(uri);
 
-            return requestAccessTokenByAuthCode(authCode, configuration);
+            return startAccessTokenPolling(authCode, configuration);
         }
         catch(BaseSpaceException bs)
         {
@@ -104,7 +104,17 @@ public final class ApiClientManager
         }
     }
 
-    public AuthVerificationCode requestAuthVerificationCode(ApiConfiguration configuration) throws AccessDeniedException {
+    /**
+     * Get the verification code and device code
+     *
+     * This API corresponds to the following step in the authentication flow:
+     * https://developer.basespace.illumina.com/docs/content/documentation/authentication/obtaining-access-tokens#Gettingtheverificationcodeanddevicecode
+     *
+     * @param configuration configuration for the session
+     * @return an auth verification code
+     * @throws AccessDeniedException if an auth verification token could not be obtained from BaseSpace
+     */
+    public AuthVerificationCode getAuthVerificationCode(ApiConfiguration configuration) throws AccessDeniedException {
         try
         {
             Form form = new Form();
@@ -148,7 +158,7 @@ public final class ApiClientManager
         }
     }
 
-    public String requestAccessTokenByAuthCode(AuthVerificationCode authCode, ApiConfiguration configuration){
+    protected String startAccessTokenPolling(AuthVerificationCode authCode, ApiConfiguration configuration){
         try {
             //Poll for approval
             Form form = new Form();
@@ -169,7 +179,7 @@ public final class ApiClientManager
             {
                 long interval = authCode.getInterval() * 1000;
                 Thread.sleep(interval);
-                accessToken = pollForAccessToken(resource, form);
+                accessToken = getAccessToken(resource, form);
             }
             return accessToken;
         }  catch(BaseSpaceException bs)
@@ -183,7 +193,18 @@ public final class ApiClientManager
         }
     }
 
-    public String pollForAccessToken(AuthVerificationCode authCode, ApiConfiguration configuration) throws BaseSpaceException {
+    /**
+     * Perform a single polling attempt to get access token. This function should be called periodically while awaiting user authorization.
+     *
+     * This API corresponds to the following step in the authentication flow:
+     * https://developer.basespace.illumina.com/docs/content/documentation/authentication/obtaining-access-tokens#Gettingtheaccesstokenfornonweb-basedapps
+     *
+     * @param authCode verification code received from the previous step {@link this#getAuthVerificationCode}
+     * @param configuration configuration for the session
+     * @return an access token or null if the user has not yet approved the access request
+     * @throws AccessDeniedException if an auth verification token could not be obtained from BaseSpace
+     */
+    public String getAccessToken(AuthVerificationCode authCode, ApiConfiguration configuration) throws BaseSpaceException {
         Form form = new Form();
         form.add("client_id", configuration.getClientId());
         form.add("client_secret",configuration.getClientSecret());
@@ -195,10 +216,10 @@ public final class ApiClientManager
                 .path(configuration.getVersion())
                 .path(configuration.getAccessTokenUriFragment())
                 .build());
-        return pollForAccessToken(resource, form);
+        return getAccessToken(resource, form);
     }
 
-    private String pollForAccessToken(WebResource resource, Form form) throws BaseSpaceException {
+    private String getAccessToken(WebResource resource, Form form) throws BaseSpaceException {
         try {
             ClientResponse response = resource.accept(
                     MediaType.APPLICATION_XHTML_XML,
