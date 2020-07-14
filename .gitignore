@@ -6,7 +6,9 @@
 *.ear
 *.project
 *.classpath
+.idea
 /.settings
 /target
 bin/
 src/test/*
+*.iml
