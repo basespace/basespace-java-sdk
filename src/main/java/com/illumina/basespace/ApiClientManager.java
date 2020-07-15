@@ -48,7 +48,8 @@ public final class ApiClientManager
     private static final ApiClientManager singletonObject = new ApiClientManager();
 
     private static Client httpClient = createHttpClient();
-    
+    private static final String AUTHORIZATION_PENDING_ERROR_TYPE = "authorization_pending";
+
     private ApiClientManager()
     {
 
@@ -230,9 +231,11 @@ public final class ApiClientManager
             String responseAsJSONString = response.getEntity(String.class);
             logger.finer(responseAsJSONString);
             String accessToken = null;
-            if (response.getClientResponseStatus().getStatusCode() > 400) {
+            if (response.getClientResponseStatus().getStatusCode() >= 400) {
                 AccessToken error = mapper.readValue(responseAsJSONString, AccessToken.class);
-                throw new BaseSpaceException(resource.getURI(), error.getErrorDescription(), response.getClientResponseStatus().getStatusCode());
+                if(!error.getError().equals(AUTHORIZATION_PENDING_ERROR_TYPE)){
+                    throw new BaseSpaceException(resource.getURI(), error.getErrorDescription(), error.getError(), response.getClientResponseStatus().getStatusCode());
+                }
             }
             if (response.getClientResponseStatus().getStatusCode() == 200) {
 
