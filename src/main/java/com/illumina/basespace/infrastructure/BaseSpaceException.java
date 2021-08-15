@@ -27,6 +27,7 @@ public class BaseSpaceException extends RuntimeException
 {
     private URI uri;
     private int errorCode;
+    private String errorType;
     
     public BaseSpaceException(String message)
     {
@@ -51,6 +52,11 @@ public class BaseSpaceException extends RuntimeException
     public BaseSpaceException(URI uri,String message,int errorCode)
     {
         this(message,null,uri,errorCode);
+    }
+
+    public BaseSpaceException(URI uri, String message, String errorType, int errorCode){
+        this(uri, message, errorCode);
+        this.errorType = errorType;
     }
     
     public BaseSpaceException(String message,Throwable cause,URI uri,int errorCode)
@@ -79,6 +85,10 @@ public class BaseSpaceException extends RuntimeException
     public int getErrorCode()
     {
         return errorCode;
+    }
+
+    public String getErrorType(){
+        return errorType;
     }
 
     @Override

@@ -43,11 +43,15 @@ import com.sun.jersey.api.representation.Form;
 public final class ApiClientManager
 {
     private static Logger logger = Logger.getLogger(ApiClientManager.class.getPackage().getName());
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     private static final ApiClientManager singletonObject = new ApiClientManager();
-    
+
+    private static Client httpClient = createHttpClient();
+    private static final String AUTHORIZATION_PENDING_ERROR_TYPE = "authorization_pending";
+
     private ApiClientManager()
     {
-     
 
     }
     public static synchronized ApiClientManager instance()
@@ -82,97 +86,13 @@ public final class ApiClientManager
             {
                 return configuration.getAccessToken();
             }
-                
-            Form form = new Form();
-            form.add("client_id", configuration.getClientId());
-            form.add("scope",  configuration.getAuthorizationScope());
-            form.add("response_type", "device_code");
 
-            Client client = Client.create(new DefaultClientConfig());
-            client.addFilter(new ClientFilter()
-            {
-                @Override
-                public ClientResponse handle(ClientRequest request) throws ClientHandlerException
-                {
-                    logger.fine(request.getMethod() + " to " + request.getURI().toString());
-                    ClientResponse response = null;
-                    try
-                    {
-                        response = getNext().handle(request);
-                    }
-                    catch(ClientHandlerException t)
-                    {
-                        throw new BaseSpaceException(t.getMessage(), t,request.getURI());
-                    }
-                    return response;
-                }
-            });
-            
-            WebResource resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
-                    .path(configuration.getVersion())
-                    .path(configuration.getAuthorizationUriFragment())
-                    .build());
-            logger.finer(resource.toString());
-        
-            ClientResponse response = resource.accept(
-                    MediaType.APPLICATION_XHTML_XML,
-                    MediaType.APPLICATION_FORM_URLENCODED,
-                    MediaType.APPLICATION_JSON)
-                    .post(ClientResponse.class,form);
-            String responseAsJSONString = response.getEntity(String.class);
-            logger.finer(responseAsJSONString);
-            
-            final ObjectMapper mapper = new ObjectMapper();
-            AuthVerificationCode authCode = mapper.readValue(responseAsJSONString, AuthVerificationCode.class);
-            if (authCode.getError() != null)
-            {
-                throw new BaseSpaceException(authCode.getErrorDescription(),null,resource.getURI());
-            }
-            
-            logger.finer(authCode.toString());
-            
+            AuthVerificationCode authCode = getAuthVerificationCode(configuration);
+
             String uri = authCode.getVerificationWithCodeUri();
             BrowserLaunch.openURL(uri);
-            
-            //Poll for approval
-            form = new Form();
-            form.add("client_id", configuration.getClientId());
-            form.add("client_secret",configuration.getClientSecret());
-            form.add("code",authCode.getDeviceCode());
-            form.add("grant_type","device");
-           
-            resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
-                    .path(configuration.getVersion())
-                    .path(configuration.getAccessTokenUriFragment())
-                    .build());
-            
-            String accessToken = null;
-            while(accessToken == null)
-            {
-                long interval = authCode.getInterval() * 1000;
-                Thread.sleep(interval);
-                response = resource.accept(
-                        MediaType.APPLICATION_XHTML_XML,
-                        MediaType.APPLICATION_FORM_URLENCODED,
-                        MediaType.APPLICATION_JSON)
-                        .post(ClientResponse.class,form);
-               
-                responseAsJSONString = response.getEntity(String.class); 
-                logger.finer(responseAsJSONString);
-                if(response.getClientResponseStatus().getStatusCode() > 400)
-                {
-                    AccessToken error =  mapper.readValue(responseAsJSONString, AccessToken.class);
-                    throw new BaseSpaceException(resource.getURI(),error.getErrorDescription(),response.getClientResponseStatus().getStatusCode());
-                }
-                if(response.getClientResponseStatus().getStatusCode() == 200)
-                {
-                  
-                    AccessToken token = mapper.readValue(responseAsJSONString, AccessToken.class);
-                    accessToken = token.getAccessToken();
-                }
-            } 
-            return accessToken;
-            
+
+            return startAccessTokenPolling(authCode, configuration);
         }
         catch(BaseSpaceException bs)
         {
@@ -183,6 +103,187 @@ public final class ApiClientManager
             t.printStackTrace();
             throw new RuntimeException("Error requesting access token from BaseSpace: " + t.getMessage());
         }
+    }
+
+    /**
+     * Get the verification code and device code
+     *
+     * This API corresponds to the following step in the authentication flow:
+     * https://developer.basespace.illumina.com/docs/content/documentation/authentication/obtaining-access-tokens#Gettingtheverificationcodeanddevicecode
+     *
+     * @param configuration configuration for the session
+     * @return an auth verification code
+     * @throws AccessDeniedException if an auth verification token could not be obtained from BaseSpace
+     */
+    public AuthVerificationCode getAuthVerificationCode(ApiConfiguration configuration) throws AccessDeniedException {
+        try
+        {
+            Form form = new Form();
+            form.add("client_id", configuration.getClientId());
+            form.add("scope",  configuration.getAuthorizationScope());
+            form.add("response_type", "device_code");
+
+            Client client = getHttpClient();
+
+            WebResource resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(configuration.getVersion())
+                    .path(configuration.getAuthorizationUriFragment())
+                    .build());
+            logger.finer(resource.toString());
+
+            ClientResponse response = resource.accept(
+                    MediaType.APPLICATION_XHTML_XML,
+                    MediaType.APPLICATION_FORM_URLENCODED,
+                    MediaType.APPLICATION_JSON)
+                    .post(ClientResponse.class,form);
+            String responseAsJSONString = response.getEntity(String.class);
+            logger.finer(responseAsJSONString);
+
+            AuthVerificationCode authCode = mapper.readValue(responseAsJSONString, AuthVerificationCode.class);
+            if (authCode.getError() != null)
+            {
+                throw new BaseSpaceException(authCode.getErrorDescription(),null,resource.getURI());
+            }
+
+            logger.finer(authCode.toString());
+            return authCode;
+        }
+        catch(BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch(Throwable t)
+        {
+            t.printStackTrace();
+            throw new RuntimeException("Error requesting auth verification code from BaseSpace: " + t.getMessage());
+        }
+    }
+
+    protected String startAccessTokenPolling(AuthVerificationCode authCode, ApiConfiguration configuration){
+        try {
+            //Poll for approval
+            Form form = new Form();
+            form.add("client_id", configuration.getClientId());
+            form.add("client_secret",configuration.getClientSecret());
+            form.add("code",authCode.getDeviceCode());
+            form.add("grant_type","device");
+
+            Client client = getHttpClient();
+
+            WebResource resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                    .path(configuration.getVersion())
+                    .path(configuration.getAccessTokenUriFragment())
+                    .build());
+
+            String accessToken = null;
+            while(accessToken == null)
+            {
+                long interval = authCode.getInterval() * 1000;
+                Thread.sleep(interval);
+                accessToken = getAccessToken(resource, form);
+            }
+            return accessToken;
+        }  catch(BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch(Throwable t)
+        {
+            t.printStackTrace();
+            throw new RuntimeException("Error requesting access token from BaseSpace: " + t.getMessage());
+        }
+    }
+
+    /**
+     * Perform a single polling attempt to get access token. This function should be called periodically while awaiting user authorization.
+     *
+     * This API corresponds to the following step in the authentication flow:
+     * https://developer.basespace.illumina.com/docs/content/documentation/authentication/obtaining-access-tokens#Gettingtheaccesstokenfornonweb-basedapps
+     *
+     * @param deviceCode device code received from the previous step {@link this#getAuthVerificationCode}
+     * @param configuration configuration for the session
+     * @return an access token or null if the user has not yet approved the access request
+     * @throws AccessDeniedException if an auth verification token could not be obtained from BaseSpace
+     */
+    public String getAccessToken(String deviceCode, ApiConfiguration configuration) throws BaseSpaceException {
+        Form form = new Form();
+        form.add("client_id", configuration.getClientId());
+        form.add("client_secret",configuration.getClientSecret());
+        form.add("code",deviceCode);
+        form.add("grant_type","device");
+
+        Client client = getHttpClient();
+        WebResource resource = client.resource(UriBuilder.fromUri(configuration.getApiRootUri())
+                .path(configuration.getVersion())
+                .path(configuration.getAccessTokenUriFragment())
+                .build());
+        return getAccessToken(resource, form);
+    }
+
+    private String getAccessToken(WebResource resource, Form form) throws BaseSpaceException {
+        try {
+            ClientResponse response = resource.accept(
+                    MediaType.APPLICATION_XHTML_XML,
+                    MediaType.APPLICATION_FORM_URLENCODED,
+                    MediaType.APPLICATION_JSON)
+                    .post(ClientResponse.class, form);
+
+            String responseAsJSONString = response.getEntity(String.class);
+            logger.finer(responseAsJSONString);
+            String accessToken = null;
+            if (response.getClientResponseStatus().getStatusCode() >= 400) {
+                AccessToken error = mapper.readValue(responseAsJSONString, AccessToken.class);
+                if(!error.getError().equals(AUTHORIZATION_PENDING_ERROR_TYPE)){
+                    throw new BaseSpaceException(resource.getURI(), error.getErrorDescription(), error.getError(), response.getClientResponseStatus().getStatusCode());
+                }
+            }
+            if (response.getClientResponseStatus().getStatusCode() == 200) {
+
+                AccessToken token = mapper.readValue(responseAsJSONString, AccessToken.class);
+                accessToken = token.getAccessToken();
+            }
+            return accessToken;
+        } catch(BaseSpaceException bs)
+        {
+            throw bs;
+        }
+        catch(Throwable t)
+        {
+            t.printStackTrace();
+            throw new RuntimeException("Error polling for access token from BaseSpace: " + t.getMessage());
+        }
+    }
+
+    private static Client createHttpClient(){
+        try {
+            Client client = Client.create(new DefaultClientConfig());
+            client.addFilter(new ClientFilter() {
+                @Override
+                public ClientResponse handle(ClientRequest request) throws ClientHandlerException {
+                    logger.fine(request.getMethod() + " to " + request.getURI().toString());
+                    ClientResponse response = null;
+                    try {
+                        response = getNext().handle(request);
+                    } catch (ClientHandlerException t) {
+                        throw new BaseSpaceException(t.getMessage(), t, request.getURI());
+                    }
+                    return response;
+                }
+            });
+            return client;
+        } catch(Throwable t){
+            return null;
+        }
+    }
+
+    private Client getHttpClient() {
+        if (httpClient == null) {
+            httpClient = createHttpClient();
+            if (httpClient == null) {
+                throw new RuntimeException("Error creating Web Client");
+            }
+        }
+        return httpClient;
     }
     
 }
